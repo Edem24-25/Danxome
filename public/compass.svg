@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="48" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  <polygon points="50,15 45,50 50,45 55,50" fill="#e74c3c"/>
+  <polygon points="50,85 45,50 50,55 55,50" fill="#ffffff"/>
+  <text x="50" y="12" text-anchor="middle" fill="#e74c3c" font-size="12" font-weight="bold">N</text>
+  <text x="50" y="95" text-anchor="middle" fill="#ffffff" font-size="10">S</text>
+  <text x="5" y="53" text-anchor="middle" fill="#ffffff" font-size="10">O</text>
+  <text x="95" y="53" text-anchor="middle" fill="#ffffff" font-size="10">E</text>
+</svg>
