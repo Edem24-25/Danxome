@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -36,14 +36,14 @@ const faq = [
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "Questions fréquentes — Dãhomè" },
+      { title: "Questions fréquentes — DanXomè" },
       {
         name: "description",
         content:
           "Visites 360°, boutique artisanale, paiements Mobile Money et livraisons : toutes les réponses.",
       },
-      { property: "og:title", content: "Questions fréquentes — Dãhomè" },
-      { property: "og:description", content: "Aide et réponses sur la plateforme Dãhomè." },
+      { property: "og:title", content: "Questions fréquentes — DanXomè" },
+      { property: "og:description", content: "Aide et réponses sur la plateforme DanXomè." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

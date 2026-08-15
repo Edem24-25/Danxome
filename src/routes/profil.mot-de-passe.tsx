@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { KeyRound, Lock } from "lucide-react";
@@ -11,8 +11,8 @@ import { useAuth } from "@/contexts/auth";
 export const Route = createFileRoute("/profil/mot-de-passe")({
   head: () => ({
     meta: [
-      { title: "Mot de passe — Dãhomè" },
-      { name: "description", content: "Changez votre mot de passe sur Dãhomè." },
+      { title: "Mot de passe — DanXomè" },
+      { name: "description", content: "Changez votre mot de passe sur DanXomè." },
       { name: "robots", content: "noindex" },
     ],
   }),

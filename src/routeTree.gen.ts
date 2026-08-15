@@ -16,6 +16,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as ArtIndexRouteImport } from './routes/art.index'
 import { Route as ArtBoutiqueRouteImport } from './routes/art.boutique'
 import { Route as ArtCheckoutRouteImport } from './routes/art.checkout'
@@ -39,6 +40,7 @@ import { Route as ProfilFavorisRouteImport } from './routes/profil.favoris'
 import { Route as ProfilMotDePasseRouteImport } from './routes/profil.mot-de-passe'
 import { Route as TourismeIndexRouteImport } from './routes/tourisme.index'
 import { Route as TourismeCarteRouteImport } from './routes/tourisme.carte'
+import { Route as TourismeGastronomieRouteImport } from './routes/tourisme.gastronomie'
 import { Route as TourismeReservationRouteImport } from './routes/tourisme.reservation'
 import { Route as VisiteSlugRouteImport } from './routes/visite.$slug'
 import { Route as ArtArtistesSlugRouteImport } from './routes/art.artistes.$slug'
@@ -47,6 +49,8 @@ import { Route as ArtCommandeSuccesRouteImport } from './routes/art.commande.suc
 import { Route as ArtOeuvresSlugRouteImport } from './routes/art.oeuvres.$slug'
 import { Route as CultureMuseesSlugRouteImport } from './routes/culture.musees.$slug'
 import { Route as CultureRoyaumesSlugRouteImport } from './routes/culture.royaumes.$slug'
+import { Route as TourismeGastronomieIndexRouteImport } from './routes/tourisme.gastronomie.index'
+import { Route as TourismeGastronomieSlugRouteImport } from './routes/tourisme.gastronomie.$slug'
 import { Route as TourismeSitesSlugRouteImport } from './routes/tourisme.sites.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -82,6 +86,11 @@ const LegalRoute = LegalRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminModerationRoute = AdminModerationRouteImport.update({
+  id: '/admin/moderation',
+  path: '/admin/moderation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtIndexRoute = ArtIndexRouteImport.update({
@@ -199,6 +208,11 @@ const TourismeCarteRoute = TourismeCarteRouteImport.update({
   path: '/tourisme/carte',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TourismeGastronomieRoute = TourismeGastronomieRouteImport.update({
+  id: '/tourisme/gastronomie',
+  path: '/tourisme/gastronomie',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TourismeReservationRoute = TourismeReservationRouteImport.update({
   id: '/tourisme/reservation',
   path: '/tourisme/reservation',
@@ -239,6 +253,17 @@ const CultureRoyaumesSlugRoute = CultureRoyaumesSlugRouteImport.update({
   path: '/culture/royaumes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TourismeGastronomieIndexRoute =
+  TourismeGastronomieIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => TourismeGastronomieRoute,
+  } as any)
+const TourismeGastronomieSlugRoute = TourismeGastronomieSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => TourismeGastronomieRoute,
+} as any)
 const TourismeSitesSlugRoute = TourismeSitesSlugRouteImport.update({
   id: '/tourisme/sites/$slug',
   path: '/tourisme/sites/$slug',
@@ -252,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/legal': typeof LegalRoute
+  '/admin/moderation': typeof AdminModerationRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
@@ -269,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/profil/favoris': typeof ProfilFavorisRoute
   '/profil/mot-de-passe': typeof ProfilMotDePasseRoute
   '/tourisme/carte': typeof TourismeCarteRoute
+  '/tourisme/gastronomie': typeof TourismeGastronomieRouteWithChildren
   '/tourisme/reservation': typeof TourismeReservationRoute
   '/visite/$slug': typeof VisiteSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -284,7 +311,9 @@ export interface FileRoutesByFullPath {
   '/art/oeuvres/$slug': typeof ArtOeuvresSlugRoute
   '/culture/musees/$slug': typeof CultureMuseesSlugRoute
   '/culture/royaumes/$slug': typeof CultureRoyaumesSlugRoute
+  '/tourisme/gastronomie/$slug': typeof TourismeGastronomieSlugRoute
   '/tourisme/sites/$slug': typeof TourismeSitesSlugRoute
+  '/tourisme/gastronomie/': typeof TourismeGastronomieIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -293,6 +322,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/legal': typeof LegalRoute
+  '/admin/moderation': typeof AdminModerationRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
@@ -325,7 +355,9 @@ export interface FileRoutesByTo {
   '/art/oeuvres/$slug': typeof ArtOeuvresSlugRoute
   '/culture/musees/$slug': typeof CultureMuseesSlugRoute
   '/culture/royaumes/$slug': typeof CultureRoyaumesSlugRoute
+  '/tourisme/gastronomie/$slug': typeof TourismeGastronomieSlugRoute
   '/tourisme/sites/$slug': typeof TourismeSitesSlugRoute
+  '/tourisme/gastronomie': typeof TourismeGastronomieIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -335,6 +367,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/legal': typeof LegalRoute
+  '/admin/moderation': typeof AdminModerationRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
@@ -352,6 +385,7 @@ export interface FileRoutesById {
   '/profil/favoris': typeof ProfilFavorisRoute
   '/profil/mot-de-passe': typeof ProfilMotDePasseRoute
   '/tourisme/carte': typeof TourismeCarteRoute
+  '/tourisme/gastronomie': typeof TourismeGastronomieRouteWithChildren
   '/tourisme/reservation': typeof TourismeReservationRoute
   '/visite/$slug': typeof VisiteSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -367,7 +401,9 @@ export interface FileRoutesById {
   '/art/oeuvres/$slug': typeof ArtOeuvresSlugRoute
   '/culture/musees/$slug': typeof CultureMuseesSlugRoute
   '/culture/royaumes/$slug': typeof CultureRoyaumesSlugRoute
+  '/tourisme/gastronomie/$slug': typeof TourismeGastronomieSlugRoute
   '/tourisme/sites/$slug': typeof TourismeSitesSlugRoute
+  '/tourisme/gastronomie/': typeof TourismeGastronomieIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -378,6 +414,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/legal'
+    | '/admin/moderation'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
@@ -395,6 +432,7 @@ export interface FileRouteTypes {
     | '/profil/favoris'
     | '/profil/mot-de-passe'
     | '/tourisme/carte'
+    | '/tourisme/gastronomie'
     | '/tourisme/reservation'
     | '/visite/$slug'
     | '/admin/'
@@ -410,7 +448,9 @@ export interface FileRouteTypes {
     | '/art/oeuvres/$slug'
     | '/culture/musees/$slug'
     | '/culture/royaumes/$slug'
+    | '/tourisme/gastronomie/$slug'
     | '/tourisme/sites/$slug'
+    | '/tourisme/gastronomie/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -419,6 +459,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/legal'
+    | '/admin/moderation'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
@@ -451,7 +492,9 @@ export interface FileRouteTypes {
     | '/art/oeuvres/$slug'
     | '/culture/musees/$slug'
     | '/culture/royaumes/$slug'
+    | '/tourisme/gastronomie/$slug'
     | '/tourisme/sites/$slug'
+    | '/tourisme/gastronomie'
   id:
     | '__root__'
     | '/'
@@ -460,6 +503,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/legal'
+    | '/admin/moderation'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
@@ -477,6 +521,7 @@ export interface FileRouteTypes {
     | '/profil/favoris'
     | '/profil/mot-de-passe'
     | '/tourisme/carte'
+    | '/tourisme/gastronomie'
     | '/tourisme/reservation'
     | '/visite/$slug'
     | '/admin/'
@@ -492,7 +537,9 @@ export interface FileRouteTypes {
     | '/art/oeuvres/$slug'
     | '/culture/musees/$slug'
     | '/culture/royaumes/$slug'
+    | '/tourisme/gastronomie/$slug'
     | '/tourisme/sites/$slug'
+    | '/tourisme/gastronomie/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -502,6 +549,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   LegalRoute: typeof LegalRoute
+  AdminModerationRoute: typeof AdminModerationRoute
   ArtBoutiqueRoute: typeof ArtBoutiqueRoute
   ArtCheckoutRoute: typeof ArtCheckoutRoute
   ArtPanierRoute: typeof ArtPanierRoute
@@ -519,6 +567,7 @@ export interface RootRouteChildren {
   ProfilFavorisRoute: typeof ProfilFavorisRoute
   ProfilMotDePasseRoute: typeof ProfilMotDePasseRoute
   TourismeCarteRoute: typeof TourismeCarteRoute
+  TourismeGastronomieRoute: typeof TourismeGastronomieRouteWithChildren
   TourismeReservationRoute: typeof TourismeReservationRoute
   VisiteSlugRoute: typeof VisiteSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -586,6 +635,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/moderation': {
+      id: '/admin/moderation'
+      path: '/admin/moderation'
+      fullPath: '/admin/moderation'
+      preLoaderRoute: typeof AdminModerationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/art/': {
@@ -749,6 +805,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TourismeCarteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tourisme/gastronomie': {
+      id: '/tourisme/gastronomie'
+      path: '/tourisme/gastronomie'
+      fullPath: '/tourisme/gastronomie'
+      preLoaderRoute: typeof TourismeGastronomieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tourisme/reservation': {
       id: '/tourisme/reservation'
       path: '/tourisme/reservation'
@@ -805,6 +868,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CultureRoyaumesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tourisme/gastronomie/': {
+      id: '/tourisme/gastronomie/'
+      path: '/'
+      fullPath: '/tourisme/gastronomie/'
+      preLoaderRoute: typeof TourismeGastronomieIndexRouteImport
+      parentRoute: typeof TourismeGastronomieRoute
+    }
+    '/tourisme/gastronomie/$slug': {
+      id: '/tourisme/gastronomie/$slug'
+      path: '/$slug'
+      fullPath: '/tourisme/gastronomie/$slug'
+      preLoaderRoute: typeof TourismeGastronomieSlugRouteImport
+      parentRoute: typeof TourismeGastronomieRoute
+    }
     '/tourisme/sites/$slug': {
       id: '/tourisme/sites/$slug'
       path: '/tourisme/sites/$slug'
@@ -815,6 +892,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface TourismeGastronomieRouteChildren {
+  TourismeGastronomieSlugRoute: typeof TourismeGastronomieSlugRoute
+  TourismeGastronomieIndexRoute: typeof TourismeGastronomieIndexRoute
+}
+
+const TourismeGastronomieRouteChildren: TourismeGastronomieRouteChildren = {
+  TourismeGastronomieSlugRoute: TourismeGastronomieSlugRoute,
+  TourismeGastronomieIndexRoute: TourismeGastronomieIndexRoute,
+}
+
+const TourismeGastronomieRouteWithChildren =
+  TourismeGastronomieRoute._addFileChildren(TourismeGastronomieRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
@@ -822,6 +912,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   LegalRoute: LegalRoute,
+  AdminModerationRoute: AdminModerationRoute,
   ArtBoutiqueRoute: ArtBoutiqueRoute,
   ArtCheckoutRoute: ArtCheckoutRoute,
   ArtPanierRoute: ArtPanierRoute,
@@ -839,6 +930,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilFavorisRoute: ProfilFavorisRoute,
   ProfilMotDePasseRoute: ProfilMotDePasseRoute,
   TourismeCarteRoute: TourismeCarteRoute,
+  TourismeGastronomieRoute: TourismeGastronomieRouteWithChildren,
   TourismeReservationRoute: TourismeReservationRoute,
   VisiteSlugRoute: VisiteSlugRoute,
   AdminIndexRoute: AdminIndexRoute,

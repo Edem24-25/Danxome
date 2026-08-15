@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CalendarDays, Compass, Play, Search } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -8,18 +9,18 @@ import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Rule, SectionTitle } from "@/components/site/Bits";
 import { BeninMap } from "@/components/site/BeninMap";
-import { artistes, evenements, images, musees, sites } from "@/lib/data";
+import { artistes, evenements, images, musees, oeuvres, plats, royaumes, sites } from "@/lib/data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dãhomè — Le patrimoine vivant du Bénin" },
+      { title: "DanXomè — Le patrimoine vivant du Bénin" },
       {
         name: "description",
         content:
           "Explorez les royaumes, musées, sites classés et artisans du Bénin : visites virtuelles 360°, carte interactive et agenda culturel.",
       },
-      { property: "og:title", content: "Dãhomè — Le patrimoine vivant du Bénin" },
+      { property: "og:title", content: "DanXomè — Le patrimoine vivant du Bénin" },
       {
         property: "og:description",
         content:
@@ -31,6 +32,43 @@ export const Route = createFileRoute("/")({
 });
 
 function Accueil() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim().toLowerCase();
+    if (!q) return;
+
+    const match =
+      sites.find((s) => `${s.nom} ${s.region} ${s.type} ${s.resume}`.toLowerCase().includes(q)) ||
+      artistes.find((a) => `${a.nom} ${a.metier} ${a.ville} ${a.bio}`.toLowerCase().includes(q)) ||
+      evenements.find((e) => `${e.titre} ${e.lieu} ${e.categorie} ${e.resume}`.toLowerCase().includes(q)) ||
+      musees.find((m) => `${m.nom} ${m.ville} ${m.resume}`.toLowerCase().includes(q)) ||
+      royaumes.find((r) => `${r.nom} ${r.resume}`.toLowerCase().includes(q)) ||
+      plats.find((p) => `${p.nom} ${p.region} ${p.resume}`.toLowerCase().includes(q)) ||
+      oeuvres.find((o) => `${o.titre} ${o.artiste} ${o.categorie} ${o.description}`.toLowerCase().includes(q));
+
+    if (match && "slug" in match) {
+      const m = match as { slug: string };
+      if (sites.includes(match as (typeof sites)[0])) {
+        navigate({ to: "/tourisme/sites/$slug", params: { slug: m.slug } });
+      } else if (artistes.includes(match as (typeof artistes)[0])) {
+        navigate({ to: "/art/artistes/$slug", params: { slug: m.slug } });
+      } else if (evenements.includes(match as (typeof evenements)[0])) {
+        navigate({ to: "/evenements/$slug", params: { slug: m.slug } });
+      } else if (musees.includes(match as (typeof musees)[0])) {
+        navigate({ to: "/culture/musees/$slug", params: { slug: m.slug } });
+      } else if (royaumes.includes(match as (typeof royaumes)[0])) {
+        navigate({ to: "/culture/royaumes/$slug", params: { slug: m.slug } });
+      } else if (plats.includes(match as (typeof plats)[0])) {
+        navigate({ to: "/tourisme/gastronomie/$slug", params: { slug: m.slug } });
+      } else if (oeuvres.includes(match as (typeof oeuvres)[0])) {
+        navigate({ to: "/art/oeuvres/$slug", params: { slug: m.slug } });
+      }
+    }
+  };
+
   return (
     <SiteShell>
       {/* ═══ HERO ═══ */}
@@ -59,7 +97,7 @@ function Accueil() {
 
           <Reveal variant="up" delay={250}>
             <h1 className="mx-auto mt-8 max-w-4xl font-display text-5xl leading-[0.96] text-ivory sm:text-6xl lg:text-7xl">
-              Le royaume du Dãhomè
+              Le royaume du DanXomè
               <br />
               <span className="text-gradient-gold">n'a jamais cessé de parler.</span>
             </h1>
@@ -74,16 +112,18 @@ function Accueil() {
 
           <Reveal variant="up" delay={550}>
             <form
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSearch}
               className="mx-auto mt-10 flex max-w-2xl flex-col gap-2 rounded-full border border-ivory/20 bg-ivory/10 p-2 backdrop-blur-xl sm:flex-row"
               role="search"
             >
               <div className="flex min-w-0 flex-1 items-center gap-2 px-4">
                 <Search className="size-4 shrink-0 text-accent" />
                 <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
                   placeholder="Un site, un royaume, un artisan, une fête…"
                   className="border-0 bg-transparent text-ivory shadow-none placeholder:text-ivory/50 focus-visible:ring-0"
-                  aria-label="Rechercher sur Dãhomè"
+                  aria-label="Rechercher sur DanXomè"
                 />
               </div>
               <Button variant="gold" size="lg" type="submit" className="rounded-full">
@@ -161,8 +201,7 @@ function Accueil() {
         <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {sites
             .filter((s) => s.virtuel)
-            .concat(sites.filter((s) => s.virtuel))
-            .slice(0, 6)
+            .slice(0, 3)
             .map((s, i) => (
               <Reveal key={s.slug + i} variant="up" delay={i * 100}>
                 <Link

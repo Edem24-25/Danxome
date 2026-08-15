@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -26,7 +26,7 @@ function NotFoundComponent() {
         <div className="overflow-hidden rounded-lg border border-border">
           <img
             src={illustration404}
-            alt="Voyageuse à la lanterne, tenture appliquée du Dãhomè"
+            alt="Voyageuse à la lanterne, tenture appliquée du DanXomè"
             width={1024}
             height={1024}
             className="media-warm w-full"
@@ -107,14 +107,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "x-content-type-options", content: "nosniff" },
       { name: "x-frame-options", content: "DENY" },
       { name: "x-xss-protection", content: "1; mode=block" },
-      { title: "Dãhomè — Patrimoine, art et tourisme du Bénin" },
+      { title: "DanXomè — Patrimoine, art et tourisme du Bénin" },
       {
         name: "description",
         content:
           "Plateforme immersive du patrimoine béninois : royaumes, musées, visites virtuelles, artisans et agenda culturel.",
       },
-      { name: "author", content: "Dãhomè" },
-      { property: "og:title", content: "Dãhomè — Patrimoine, art et tourisme du Bénin" },
+      { name: "author", content: "DanXomè" },
+      { property: "og:title", content: "DanXomè — Patrimoine, art et tourisme du Bénin" },
       {
         property: "og:description",
         content: "Royaumes, musées, visites virtuelles, artisans et agenda culturel du Bénin.",
@@ -124,7 +124,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/logo.png", type: "image/png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ChevronRight, PackageCheck, ShoppingBag } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
@@ -11,12 +11,12 @@ export const Route = createFileRoute("/art/commande/succes")({
     typeof search["ref"] === "string" ? { ref: search["ref"] } : {},
   head: () => ({
     meta: [
-      { title: "Paiement réussi — Dãhomè" },
+      { title: "Paiement réussi — DanXomè" },
       {
         name: "description",
         content: "Votre commande a bien été enregistrée. Les ateliers sont notifiés.",
       },
-      { property: "og:title", content: "Paiement réussi — Dãhomè" },
+      { property: "og:title", content: "Paiement réussi — DanXomè" },
       { name: "robots", content: "noindex" },
     ],
   }),

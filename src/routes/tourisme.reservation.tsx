@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, CreditCard, Minus, Plus, ShieldCheck, Ticket } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -17,13 +17,13 @@ export const Route = createFileRoute("/tourisme/reservation")({
     typeof search["site"] === "string" ? { site: search["site"] } : {},
   head: () => ({
     meta: [
-      { title: "Réserver une visite guidée au Bénin — Dãhomè" },
+      { title: "Réserver une visite guidée au Bénin — DanXomè" },
       {
         name: "description",
         content:
           "Choisissez un site, une date et un nombre de visiteurs : réservation en trois étapes avec guide francophone et annulation gratuite.",
       },
-      { property: "og:title", content: "Réserver une visite guidée — Dãhomè" },
+      { property: "og:title", content: "Réserver une visite guidée — DanXomè" },
       {
         property: "og:description",
         content: "Réservation en trois étapes, guide inclus, annulation gratuite.",
@@ -57,7 +57,7 @@ function Reservation() {
         <PageHead
           eyebrow="Réservation"
           title="Votre demande est enregistrée"
-          intro="Un guide du réseau Dãhomè vous confirme le créneau par e-mail sous 24 heures. Aucun paiement n'a été débité à cette étape."
+          intro="Un guide du réseau DanXomè vous confirme le créneau par e-mail sous 24 heures. Aucun paiement n'a été débité à cette étape."
           crumbs={[{ label: "Tourisme", to: "/tourisme" }, { label: "Réservation" }]}
         />
         <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">

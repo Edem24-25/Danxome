@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead, Rule, SectionTitle } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
@@ -8,13 +8,13 @@ import { images } from "@/lib/data";
 export const Route = createFileRoute("/a-propos")({
   head: () => ({
     meta: [
-      { title: "À propos de la plateforme Dãhomè" },
+      { title: "À propos de la plateforme DanXomè" },
       {
         name: "description",
         content:
-          "Dãhomè valorise le patrimoine culturel, artistique et touristique du Bénin avec les institutions et les artisans.",
+          "DanXomè valorise le patrimoine culturel, artistique et touristique du Bénin avec les institutions et les artisans.",
       },
-      { property: "og:title", content: "À propos de la plateforme Dãhomè" },
+      { property: "og:title", content: "À propos de la plateforme DanXomè" },
       {
         property: "og:description",
         content: "Notre mission : transmettre et faire vivre le patrimoine béninois.",
@@ -55,7 +55,7 @@ function APropos() {
       <PageHead
         eyebrow="Institution"
         title="Une maison numérique pour le patrimoine béninois"
-        intro="Dãhomè est une plateforme publique-privée qui rassemble musées, sites classés, communautés et artisans autour d'un même récit."
+        intro="DanXomè est une plateforme publique-privée qui rassemble musées, sites classés, communautés et artisans autour d'un même récit."
         crumbs={[{ label: "À propos" }]}
       />
 

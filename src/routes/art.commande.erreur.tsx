@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, RefreshCw, ShoppingBag, X, XCircle } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
@@ -18,12 +18,12 @@ export const Route = createFileRoute("/art/commande/erreur")({
     typeof search["motif"] === "string" ? { motif: search["motif"] } : {},
   head: () => ({
     meta: [
-      { title: "Paiement échoué — Dãhomè" },
+      { title: "Paiement échoué — DanXomè" },
       {
         name: "description",
         content: "Le paiement n'a pas abouti. Vérifiez vos informations et réessayez.",
       },
-      { property: "og:title", content: "Paiement échoué — Dãhomè" },
+      { property: "og:title", content: "Paiement échoué — DanXomè" },
       { name: "robots", content: "noindex" },
     ],
   }),

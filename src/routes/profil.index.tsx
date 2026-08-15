@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
   ArrowRight,
@@ -22,13 +22,13 @@ import { lireAchats } from "@/lib/achats";
 export const Route = createFileRoute("/profil/")({
   head: () => ({
     meta: [
-      { title: "Mon profil — Dãhomè" },
+      { title: "Mon profil — DanXomè" },
       {
         name: "description",
-        content: "Vos informations personnelles, commandes et favoris sur Dãhomè.",
+        content: "Vos informations personnelles, commandes et favoris sur DanXomè.",
       },
-      { property: "og:title", content: "Mon profil — Dãhomè" },
-      { property: "og:description", content: "Votre espace personnel Dãhomè." },
+      { property: "og:title", content: "Mon profil — DanXomè" },
+      { property: "og:description", content: "Votre espace personnel DanXomè." },
     ],
   }),
   component: Profil,
@@ -136,16 +136,20 @@ function Profil() {
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard
-          label="Commandes passées"
-          value={String(achats.length)}
-          icon={<ShoppingBag className="size-4" />}
-        />
-        <StatCard
-          label="Favoris"
-          value={String(favoris.length)}
-          icon={<Heart className="size-4" />}
-        />
+        {profile.profil !== "admin" && (
+          <>
+            <StatCard
+              label="Commandes passées"
+              value={String(achats.length)}
+              icon={<ShoppingBag className="size-4" />}
+            />
+            <StatCard
+              label="Favoris"
+              value={String(favoris.length)}
+              icon={<Heart className="size-4" />}
+            />
+          </>
+        )}
         {profile.profil !== "visiteur" && (
           <StatCard
             label="Mon espace"
@@ -156,88 +160,92 @@ function Profil() {
       </div>
 
       <div className="mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div>
-          <SectionTitle
-            eyebrow="Boutique"
-            title="Mes commandes récentes"
-            action={
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/profil/commandes">Tout voir</Link>
-              </Button>
-            }
-          />
-          {achats.length === 0 ? (
-            <EmptyState
-              icon={<ShoppingBag className="size-5" />}
-              title="Aucune commande pour l'instant"
-              description="Passez votre première commande dans la boutique d'œuvres d'art béninois."
+        {profile.profil !== "admin" && (
+          <div>
+            <SectionTitle
+              eyebrow="Boutique"
+              title="Mes commandes récentes"
               action={
-                <Button asChild variant="gold">
-                  <Link to="/art/boutique">Découvrir la boutique</Link>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/profil/commandes">Tout voir</Link>
                 </Button>
               }
             />
-          ) : (
-            <ul className="mt-5 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
-              {achats.slice(0, 3).map((a) => (
-                <li key={a.reference} className="flex items-center gap-4 p-4">
-                  <img
-                    src={a.articles[0]?.image}
-                    alt={a.articles[0]?.titre ?? "Commande"}
-                    loading="lazy"
-                    className="size-16 rounded-md object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-forest-deep">{a.reference}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {a.articles.length} article{a.articles.length > 1 ? "s" : ""} ·{" "}
-                      {dateFr(a.date)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-display text-lg text-forest-deep">{formatFcfa(a.total)}</p>
-                    <p className="text-xs text-emerald-600">Payée</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <aside className="space-y-6">
-          <div className="rounded-lg border border-border bg-secondary/50 p-6">
-            <p className="eyebrow">Favoris</p>
-            {oeuvresFavorites.length === 0 ? (
-              <p className="mt-4 text-sm text-muted-foreground">
-                Aucune œuvre en favori pour l'instant.
-              </p>
+            {achats.length === 0 ? (
+              <EmptyState
+                icon={<ShoppingBag className="size-5" />}
+                title="Aucune commande pour l'instant"
+                description="Passez votre première commande dans la boutique d'œuvres d'art béninois."
+                action={
+                  <Button asChild variant="gold">
+                    <Link to="/art/boutique">Découvrir la boutique</Link>
+                  </Button>
+                }
+              />
             ) : (
-              <ul className="mt-4 space-y-3">
-                {oeuvresFavorites.slice(0, 3).map((o) => (
-                  <li key={o.slug}>
-                    <Link
-                      to="/art/oeuvres/$slug"
-                      params={{ slug: o.slug }}
-                      className="flex items-center gap-3 text-sm text-foreground/80 hover:text-terracotta"
-                    >
-                      <img
-                        src={o.image}
-                        alt={o.titre}
-                        loading="lazy"
-                        className="size-10 rounded object-cover"
-                      />
-                      {o.titre}
-                    </Link>
+              <ul className="mt-5 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
+                {achats.slice(0, 3).map((a) => (
+                  <li key={a.reference} className="flex items-center gap-4 p-4">
+                    <img
+                      src={a.articles[0]?.image}
+                      alt={a.articles[0]?.titre ?? "Commande"}
+                      loading="lazy"
+                      className="size-16 rounded-md object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-forest-deep">{a.reference}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {a.articles.length} article{a.articles.length > 1 ? "s" : ""} ·{" "}
+                        {dateFr(a.date)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-display text-lg text-forest-deep">{formatFcfa(a.total)}</p>
+                      <p className="text-xs text-emerald-600">Payée</p>
+                    </div>
                   </li>
                 ))}
               </ul>
             )}
-            <Button asChild variant="ghost" size="sm" className="mt-4">
-              <Link to="/profil/favoris">
-                Voir mes favoris <ArrowRight />
-              </Link>
-            </Button>
           </div>
+        )}
+
+        <aside className="space-y-6">
+          {profile.profil !== "admin" && (
+            <div className="rounded-lg border border-border bg-secondary/50 p-6">
+              <p className="eyebrow">Favoris</p>
+              {oeuvresFavorites.length === 0 ? (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  Aucune œuvre en favori pour l'instant.
+                </p>
+              ) : (
+                <ul className="mt-4 space-y-3">
+                  {oeuvresFavorites.slice(0, 3).map((o) => (
+                    <li key={o.slug}>
+                      <Link
+                        to="/art/oeuvres/$slug"
+                        params={{ slug: o.slug }}
+                        className="flex items-center gap-3 text-sm text-foreground/80 hover:text-terracotta"
+                      >
+                        <img
+                          src={o.image}
+                          alt={o.titre}
+                          loading="lazy"
+                          className="size-10 rounded object-cover"
+                        />
+                        {o.titre}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Button asChild variant="ghost" size="sm" className="mt-4">
+                <Link to="/profil/favoris">
+                  Voir mes favoris <ArrowRight />
+                </Link>
+              </Button>
+            </div>
+          )}
           <div className="rounded-lg border border-border bg-card p-6">
             <p className="eyebrow">Mot de passe</p>
             <p className="mt-2 text-sm text-muted-foreground">

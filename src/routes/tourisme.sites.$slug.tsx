@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { CalendarCheck, Clock, MapPin, Star, Video, Users, ArrowRight } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule, SectionTitle } from "@/components/site/Bits";
@@ -17,15 +17,15 @@ export const Route = createFileRoute("/tourisme/sites/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Site introuvable — Dãhomè" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Site introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
       };
     }
     const { site } = loaderData;
     return {
       meta: [
-        { title: `${site.nom} — Tourisme au Bénin | Dãhomè` },
+        { title: `${site.nom} — Tourisme au Bénin | DanXomè` },
         { name: "description", content: site.resume },
-        { property: "og:title", content: `${site.nom} — Dãhomè` },
+        { property: "og:title", content: `${site.nom} — DanXomè` },
         { property: "og:description", content: site.resume },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },
@@ -97,7 +97,7 @@ function SiteDetail() {
               </p>
               <p>
                 On y accède par une route qui prépare le regard — latérite, marché, cortège de
-                motos-taxis — avant que le site n'apparaisse. Les guides du réseau Dãhomè, formés
+                motos-taxis — avant que le site n'apparaisse. Les guides du réseau DanXomè, formés
                 avec les autorités locales, ouvrent la visite par le contexte historique puis
                 laissent la place aux détails : un bas-relief, une empreinte, un silence.
               </p>

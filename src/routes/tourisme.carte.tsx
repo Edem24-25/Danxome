@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layers, MapPin, Star, Video } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -12,13 +12,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/tourisme/carte")({
   head: () => ({
     meta: [
-      { title: "Carte interactive du Bénin — Dãhomè" },
+      { title: "Carte interactive du Bénin — DanXomè" },
       {
         name: "description",
         content:
           "Localisez les sites patrimoniaux, villages lacustres et parcs nationaux du Bénin sur une carte interactive et composez votre itinéraire.",
       },
-      { property: "og:title", content: "Carte interactive du Bénin — Dãhomè" },
+      { property: "og:title", content: "Carte interactive du Bénin — DanXomè" },
       {
         property: "og:description",
         content: "Localisez les sites du Bénin et composez votre itinéraire.",

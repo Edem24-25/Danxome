@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Crown, Languages, Landmark, ScrollText, Sparkles } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead, Rule, SectionTitle } from "@/components/site/Bits";
@@ -10,13 +10,13 @@ import { images, musees, royaumes } from "@/lib/data";
 export const Route = createFileRoute("/culture/")({
   head: () => ({
     meta: [
-      { title: "Culture & patrimoine du Bénin — Dãhomè" },
+      { title: "Culture & patrimoine du Bénin — DanXomè" },
       {
         name: "description",
         content:
           "Royaumes, traditions, musées, histoire et langues nationales du Bénin, en grille éditoriale.",
       },
-      { property: "og:title", content: "Culture & patrimoine du Bénin — Dãhomè" },
+      { property: "og:title", content: "Culture & patrimoine du Bénin — DanXomè" },
       {
         property: "og:description",
         content: "Royaumes, traditions, musées, histoire et langues du Bénin.",
@@ -48,7 +48,7 @@ const piliers = [
   {
     icon: ScrollText,
     titre: "Histoire",
-    texte: "Du Dãhomè précolonial à la République : cinq siècles en récits longs.",
+    texte: "Du DanXomè précolonial à la République : cinq siècles en récits longs.",
     to: "/culture/royaumes/abomey",
   },
   {

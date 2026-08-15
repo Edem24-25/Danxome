@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+﻿import { Link } from "@tanstack/react-router";
 import { Menu, Search, ShoppingCart, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePanier } from "@/lib/cart";
@@ -19,7 +19,7 @@ export function Wordmark({ dark = false }: { dark?: boolean }) {
     <Link to="/" className="group flex items-center gap-2.5">
       <img
         src="/logo.png"
-        alt="Dãhomè"
+        alt="DanXomè"
         className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
       />
       <span
@@ -28,7 +28,7 @@ export function Wordmark({ dark = false }: { dark?: boolean }) {
           dark ? "text-ivory" : "text-forest-deep",
         )}
       >
-        Dãhomè
+        DanXomè
       </span>
     </Link>
   );

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShoppingBag, SlidersHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -14,13 +14,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/art/boutique")({
   head: () => ({
     meta: [
-      { title: "Boutique d'art béninois — Dãhomè" },
+      { title: "Boutique d'art béninois — DanXomè" },
       {
         name: "description",
         content:
           "Acquérez sculptures, tentures et bronzes directement auprès des ateliers béninois : filtres par catégorie, région et budget.",
       },
-      { property: "og:title", content: "Boutique d'art béninois — Dãhomè" },
+      { property: "og:title", content: "Boutique d'art béninois — DanXomè" },
       {
         property: "og:description",
         content: "Sculptures, tentures et bronzes en vente directe des ateliers.",

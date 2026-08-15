@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Compass, Map, SlidersHorizontal, Video } from "lucide-react";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
+import { Compass, Map, SlidersHorizontal, UtensilsCrossed, Video } from "lucide-react";
 import { useMemo, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { EmptyState, PageHead, Rule, SectionTitle } from "@/components/site/Bits";
@@ -15,13 +15,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/tourisme/")({
   head: () => ({
     meta: [
-      { title: "Sites touristiques du Bénin — Dãhomè" },
+      { title: "Sites touristiques du Bénin — DanXomè" },
       {
         name: "description",
         content:
           "Palais d'Abomey, Ganvié, Pendjari, Route des Esclaves : explorez les sites incontournables du Bénin, filtrez par région et réservez votre visite.",
       },
-      { property: "og:title", content: "Sites touristiques du Bénin — Dãhomè" },
+      { property: "og:title", content: "Sites touristiques du Bénin — DanXomè" },
       {
         property: "og:description",
         content: "Explorez les sites incontournables du Bénin, région par région.",
@@ -61,11 +61,18 @@ function Tourisme() {
         intro="Du lac Nokoué aux collines de l'Atacora, chaque site est documenté, noté par les voyageurs et — pour beaucoup — visitable en 360° avant le départ."
         crumbs={[{ label: "Tourisme" }]}
         aside={
-          <Button asChild variant="cultural" className="rounded-full">
-            <Link to="/tourisme/carte">
-              <Map /> Carte interactive
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="cultural" className="rounded-full">
+              <Link to="/tourisme/gastronomie">
+                <UtensilsCrossed /> Gastronomie
+              </Link>
+            </Button>
+            <Button asChild variant="cultural" className="rounded-full">
+              <Link to="/tourisme/carte">
+                <Map /> Carte interactive
+              </Link>
+            </Button>
+          </div>
         }
       />
 

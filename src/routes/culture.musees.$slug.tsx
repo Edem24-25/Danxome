@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Accessibility, Clock, MapPin } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
@@ -15,15 +15,15 @@ export const Route = createFileRoute("/culture/musees/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Musée introuvable — Dãhomè" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Musée introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
       };
     }
     const { musee } = loaderData;
     return {
       meta: [
-        { title: `${musee.nom} — Dãhomè` },
+        { title: `${musee.nom} — DanXomè` },
         { name: "description", content: musee.resume },
-        { property: "og:title", content: `${musee.nom} — Dãhomè` },
+        { property: "og:title", content: `${musee.nom} — DanXomè` },
         { property: "og:description", content: musee.resume },
       ],
     };

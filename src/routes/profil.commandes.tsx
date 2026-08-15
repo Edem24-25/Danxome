@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, ShoppingBag, Truck } from "lucide-react";
 import { ProfilShell } from "@/components/site/ProfilShell";
 import { EmptyState, SectionTitle } from "@/components/site/Bits";
@@ -9,7 +9,7 @@ import { lireAchats } from "@/lib/achats";
 export const Route = createFileRoute("/profil/commandes")({
   head: () => ({
     meta: [
-      { title: "Mes commandes — Dãhomè" },
+      { title: "Mes commandes — DanXomè" },
       { name: "description", content: "L'historique de vos commandes d'œuvres d'art." },
       { name: "robots", content: "noindex" },
     ],

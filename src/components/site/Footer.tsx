@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+﻿import { Link } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/Reveal";
@@ -59,9 +59,9 @@ export function Footer() {
               <div className="grid gap-12 lg:grid-cols-[1.3fr_2fr]">
                 {/* Colonne gauche — Newsletter */}
                 <div>
-                  <img src="/logo.png" alt="Dãhomè" className="h-10 w-auto mb-6" />
+                  <img src="/logo.png" alt="DanXomè" className="h-10 w-auto mb-6" />
                   <p className="font-display text-3xl leading-tight text-ivory sm:text-4xl">
-                    La mémoire du Dãhomè,
+                    La mémoire du DanXomè,
                     <br />
                     <span className="text-gradient-gold">vivante et partagée.</span>
                   </p>
@@ -129,7 +129,7 @@ export function Footer() {
       <div className="bg-forest-darker border-t border-ivory/8">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-6 text-xs text-ivory/40 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p className="flex items-center gap-1.5">
-            © {new Date().getFullYear()} Dãhomè · Fait avec
+            © {new Date().getFullYear()} DanXomè · Fait avec
             <Heart className="size-3 fill-terracotta text-terracotta" />
             au Bénin
           </p>

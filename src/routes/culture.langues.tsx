@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { Pause, Play, Volume2 } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -11,13 +11,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/culture/langues")({
   head: () => ({
     meta: [
-      { title: "Langues nationales du Bénin — Dãhomè" },
+      { title: "Langues nationales du Bénin — DanXomè" },
       {
         name: "description",
         content:
           "Fon, yoruba, bariba, dendi, mina, ditammari : cartes interactives et extraits audio des langues du Bénin.",
       },
-      { property: "og:title", content: "Langues nationales du Bénin — Dãhomè" },
+      { property: "og:title", content: "Langues nationales du Bénin — DanXomè" },
       { property: "og:description", content: "Cartes et extraits audio des langues béninoises." },
     ],
   }),

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { Check, Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -11,13 +11,13 @@ import { Textarea } from "@/components/ui/textarea";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact & presse — Dãhomè" },
+      { title: "Contact & presse — DanXomè" },
       {
         name: "description",
         content:
-          "Écrivez à l'équipe Dãhomè : partenariats culturels, demandes presse, artisans candidats et assistance visiteurs.",
+          "Écrivez à l'équipe DanXomè : partenariats culturels, demandes presse, artisans candidats et assistance visiteurs.",
       },
-      { property: "og:title", content: "Contact & presse — Dãhomè" },
+      { property: "og:title", content: "Contact & presse — DanXomè" },
       { property: "og:description", content: "Nous joindre à Cotonou, Porto-Novo et Abomey." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

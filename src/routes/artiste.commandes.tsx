@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Image, LayoutDashboard, Package, UserRound, Wallet } from "lucide-react";
 import { toast } from "sonner";
@@ -19,12 +19,12 @@ import { statutLabel, statutsCommandes, useCommandes, type CommandeStatut } from
 export const Route = createFileRoute("/artiste/commandes")({
   head: () => ({
     meta: [
-      { title: "Mes commandes — Dãhomè" },
+      { title: "Mes commandes — DanXomè" },
       {
         name: "description",
-        content: "Suivez les commandes reçues, validées et en cours sur Dãhomè.",
+        content: "Suivez les commandes reçues, validées et en cours sur DanXomè.",
       },
-      { property: "og:title", content: "Mes commandes — Dãhomè" },
+      { property: "og:title", content: "Mes commandes — DanXomè" },
     ],
   }),
   component: Commandes,

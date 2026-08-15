@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+﻿import { Link } from "@tanstack/react-router";
 import { LogOut, PanelLeftClose, PanelLeft, ArrowUpRight } from "lucide-react";
 import { useState, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -40,8 +40,8 @@ export function DashboardShell({
         <div className="relative">
           <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-4">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="Dãhomè" className="h-7 w-auto" />
-              {open && <span className="font-display text-xl text-ivory">Dãhomè</span>}
+              <img src="/logo.png" alt="DanXomè" className="h-7 w-auto" />
+              {open && <span className="font-display text-xl text-ivory">DanXomè</span>}
             </Link>
           </div>
           <p

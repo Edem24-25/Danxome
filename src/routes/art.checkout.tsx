@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CreditCard, Lock, ShoppingBag, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -17,13 +17,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/art/checkout")({
   head: () => ({
     meta: [
-      { title: "Finaliser ma commande — Dãhomè" },
+      { title: "Finaliser ma commande — DanXomè" },
       {
         name: "description",
         content:
           "Livraison, moyen de paiement et confirmation : finalisez l'acquisition de vos œuvres béninoises en quelques champs.",
       },
-      { property: "og:title", content: "Finaliser ma commande — Dãhomè" },
+      { property: "og:title", content: "Finaliser ma commande — DanXomè" },
       { property: "og:description", content: "Livraison, paiement et confirmation de commande." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

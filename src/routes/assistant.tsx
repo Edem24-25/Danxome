@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { Compass, Send, Sparkles, User } from "lucide-react";
 import { useRef, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/assistant")({
   head: () => ({
     meta: [
-      { title: "Assistant culturel IA — Dãhomè" },
+      { title: "Assistant culturel IA — DanXomè" },
       {
         name: "description",
         content:
           "Posez vos questions sur le patrimoine béninois : itinéraires, histoire des royaumes, artisanat et festivals.",
       },
-      { property: "og:title", content: "Assistant culturel IA — Dãhomè" },
+      { property: "og:title", content: "Assistant culturel IA — DanXomè" },
       {
         property: "og:description",
         content: "Un guide conversationnel pour préparer votre voyage culturel au Bénin.",
@@ -49,7 +49,7 @@ function Assistant() {
     {
       role: "guide",
       texte:
-        "Bonjour, je suis le guide Dãhomè. Je connais les royaumes, les sites classés, les artisans et l'agenda culturel du Bénin. Que souhaitez-vous découvrir ?",
+        "Bonjour, je suis le guide DanXomè. Je connais les royaumes, les sites classés, les artisans et l'agenda culturel du Bénin. Que souhaitez-vous découvrir ?",
     },
   ]);
   const [valeur, setValeur] = useState("");
@@ -75,7 +75,7 @@ function Assistant() {
       <PageHead
         eyebrow="Assistant IA"
         title="Votre guide culturel, à toute heure"
-        intro="Un compagnon conversationnel nourri des archives Dãhomè : histoire, itinéraires, artisanat et calendrier des fêtes."
+        intro="Un compagnon conversationnel nourri des archives DanXomè : histoire, itinéraires, artisanat et calendrier des fêtes."
         crumbs={[{ label: "Assistant IA" }]}
       />
 
@@ -86,7 +86,7 @@ function Assistant() {
               <Sparkles className="size-4" />
             </span>
             <div>
-              <p className="font-display text-lg text-ivory">Guide Dãhomè</p>
+              <p className="font-display text-lg text-ivory">Guide DanXomè</p>
               <p className="text-xs text-ivory/60">{ecrit ? "écrit…" : "en ligne"}</p>
             </div>
           </div>
@@ -172,7 +172,7 @@ function Assistant() {
             </p>
             <p className="mt-3 leading-relaxed">
               Les réponses s'appuient sur les fiches patrimoine, les notices de musées et l'agenda
-              publiés sur Dãhomè. Pour une réservation ferme, passez par la page réservation.
+              publiés sur DanXomè. Pour une réservation ferme, passez par la page réservation.
             </p>
           </div>
         </aside>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Palette, ShoppingBag } from "lucide-react";
 import { useMemo, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -12,13 +12,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/art/")({
   head: () => ({
     meta: [
-      { title: "Art & artisanat du Bénin — Dãhomè" },
+      { title: "Art & artisanat du Bénin — DanXomè" },
       {
         name: "description",
         content:
           "Sculptures, tentures appliquées d'Abomey, bronzes à la cire perdue : découvrez les artistes béninois et acquérez leurs œuvres en direct.",
       },
-      { property: "og:title", content: "Art & artisanat du Bénin — Dãhomè" },
+      { property: "og:title", content: "Art & artisanat du Bénin — DanXomè" },
       {
         property: "og:description",
         content: "Sculptures, textiles et bronzes des ateliers béninois.",
@@ -148,7 +148,7 @@ function Art() {
         <Reveal variant="scale">
           <div className="relative overflow-hidden rounded-2xl bg-forest-darker">
             <img
-              src={images.artisanImg}
+              src="/Botchio gardien_danxomè.jpg"
               alt="Atelier de sculpture"
               loading="lazy"
               className="absolute inset-0 size-full object-cover opacity-30"
@@ -158,7 +158,7 @@ function Art() {
               <div>
                 <p className="eyebrow-gold">Vous êtes artiste ?</p>
                 <h2 className="mt-3 font-display text-3xl text-ivory sm:text-4xl">
-                  Ouvrez votre galerie sur Dãhomè
+                  Ouvrez votre galerie sur DanXomè
                 </h2>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-ivory/70">
                   Publiez vos œuvres, suivez vos ventes et recevez des dons du public. L'espace
