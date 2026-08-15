@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, MapPin } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -12,13 +12,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/evenements/")({
   head: () => ({
     meta: [
-      { title: "Agenda culturel du Bénin — Dãhomè" },
+      { title: "Agenda culturel du Bénin — DanXomè" },
       {
         name: "description",
         content:
           "Festivals, fêtes royales et rendez-vous d'art contemporain : le calendrier culturel béninois mois par mois.",
       },
-      { property: "og:title", content: "Agenda culturel du Bénin — Dãhomè" },
+      { property: "og:title", content: "Agenda culturel du Bénin — DanXomè" },
       {
         property: "og:description",
         content: "Vodun Days, Gaani, Biennale de Cotonou et tous les rendez-vous du patrimoine.",

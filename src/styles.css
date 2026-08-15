@@ -1,11 +1,11 @@
-@import "tailwindcss" source(none);
+﻿@import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════════════════
-   Dãhomè Design System v2 — Culturel & Immersif
+   DanXomè Design System v2 — Culturel & Immersif
    ═══════════════════════════════════════════════════════════════ */
 
 @theme inline {
@@ -89,7 +89,7 @@
 :root {
   --radius: 0.375rem;
 
-  /* ── Palette Dãhomè v2 — Couleurs intermédiaires ── */
+  /* ── Palette DanXomè v2 — Couleurs intermédiaires ── */
   --ivory: oklch(0.972 0.017 88);
   --ink: oklch(0.28 0.004 60);
 

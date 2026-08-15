@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   CalendarDays,
@@ -20,14 +20,14 @@ import type { Profile } from "@/lib/types/user";
 export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
-      { title: "Back-office institutionnel — Dãhomè" },
+      { title: "Back-office institutionnel — DanXomè" },
       {
         name: "description",
         content:
           "Modération des contenus, validation des artisans partenaires et suivi de fréquentation du patrimoine béninois.",
       },
-      { property: "og:title", content: "Back-office institutionnel — Dãhomè" },
-      { property: "og:description", content: "Modération, partenaires et statistiques Dãhomè." },
+      { property: "og:title", content: "Back-office institutionnel — DanXomè" },
+      { property: "og:description", content: "Modération, partenaires et statistiques DanXomè." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -37,6 +37,7 @@ export const Route = createFileRoute("/admin/")({
 
 const items = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard },
+  { to: "/admin/moderation", label: "Modération", icon: ShieldCheck },
   { to: "/culture", label: "Contenus", icon: Palette },
   { to: "/evenements", label: "Événements", icon: CalendarDays },
   { to: "/art", label: "Partenaires", icon: Users },
@@ -92,8 +93,10 @@ function Admin() {
       title="Pilotage de la plateforme"
       crumbs={[{ label: "Administration" }]}
       actions={
-        <Button variant="gold" size="sm">
-          <ShieldCheck /> File de modération
+        <Button asChild variant="gold" size="sm">
+          <Link to="/admin/moderation">
+            <ShieldCheck /> File de modération
+          </Link>
         </Button>
       }
     >
@@ -143,8 +146,8 @@ function Admin() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">Bohicon</td>
                   <td className="px-4 py-3 text-right">
-                    <Button variant="outline" size="sm">
-                      Examiner
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/admin/moderation">Examiner</Link>
                     </Button>
                   </td>
                 </tr>
@@ -157,8 +160,8 @@ function Admin() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">Cotonou</td>
                   <td className="px-4 py-3 text-right">
-                    <Button variant="outline" size="sm">
-                      Examiner
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/culture/musees/fondation-vallee">Examiner</Link>
                     </Button>
                   </td>
                 </tr>
@@ -169,8 +172,8 @@ function Admin() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">Porto-Novo</td>
                   <td className="px-4 py-3 text-right">
-                    <Button variant="outline" size="sm">
-                      Examiner
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/evenements/zangbeto">Examiner</Link>
                     </Button>
                   </td>
                 </tr>

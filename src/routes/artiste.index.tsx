@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Image, LayoutDashboard, Package, Plus, TrendingUp, UserRound, Wallet } from "lucide-react";
 import { toast } from "sonner";
@@ -32,13 +32,13 @@ import { imageParDefaut, useMesOeuvres } from "@/lib/oeuvres";
 export const Route = createFileRoute("/artiste/")({
   head: () => ({
     meta: [
-      { title: "Espace artiste — Dãhomè" },
+      { title: "Espace artiste — DanXomè" },
       {
         name: "description",
         content:
-          "Gérez vos œuvres, vos commandes et vos revenus d'artisan partenaire sur la plateforme Dãhomè.",
+          "Gérez vos œuvres, vos commandes et vos revenus d'artisan partenaire sur la plateforme DanXomè.",
       },
-      { property: "og:title", content: "Espace artiste — Dãhomè" },
+      { property: "og:title", content: "Espace artiste — DanXomè" },
       {
         property: "og:description",
         content: "Catalogue, commandes et revenus des artisans béninois.",

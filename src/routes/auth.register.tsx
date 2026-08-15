@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Brush, Hammer, Compass, User, Mail, Lock, ArrowRight, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,13 +15,13 @@ import { useRateLimit } from "@/lib/rate-limit";
 export const Route = createFileRoute("/auth/register")({
   head: () => ({
     meta: [
-      { title: "Créer un compte — Dãhomè" },
+      { title: "Créer un compte — DanXomè" },
       {
         name: "description",
         content:
-          "Rejoignez Dãhomè comme visiteur, artiste ou artisan et valorisez le patrimoine béninois.",
+          "Rejoignez DanXomè comme visiteur, artiste ou artisan et valorisez le patrimoine béninois.",
       },
-      { property: "og:title", content: "Créer un compte — Dãhomè" },
+      { property: "og:title", content: "Créer un compte — DanXomè" },
       {
         property: "og:description",
         content: "Visiteur, artiste ou artisan : choisissez votre profil.",
@@ -123,7 +123,7 @@ function Register() {
   return (
     <AuthLayout
       eyebrow="Inscription"
-      titre="Rejoindre Dãhomè"
+      titre="Rejoindre DanXomè"
       intro="Un compte, trois usages : visiter, créer, vendre."
       footer={
         <Link
@@ -280,7 +280,7 @@ function Register() {
           <span className="group-hover:text-forest-deep transition-colors">
             J'accepte les <span className="font-medium text-forest">conditions d'utilisation</span>{" "}
             et la <span className="font-medium text-forest">politique de confidentialité</span> de
-            Dãhomè.
+            DanXomè.
           </span>
         </label>
 

@@ -1,18 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
 
 export const Route = createFileRoute("/legal")({
   head: () => ({
     meta: [
-      { title: "Mentions légales & confidentialité — Dãhomè" },
+      { title: "Mentions légales & confidentialité — DanXomè" },
       {
         name: "description",
         content:
-          "Éditeur, hébergement, propriété intellectuelle, données personnelles et conditions d'utilisation de la plateforme Dãhomè.",
+          "Éditeur, hébergement, propriété intellectuelle, données personnelles et conditions d'utilisation de la plateforme DanXomè.",
       },
-      { property: "og:title", content: "Mentions légales & confidentialité — Dãhomè" },
-      { property: "og:description", content: "Cadre juridique de la plateforme Dãhomè." },
+      { property: "og:title", content: "Mentions légales & confidentialité — DanXomè" },
+      { property: "og:description", content: "Cadre juridique de la plateforme DanXomè." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -24,7 +24,7 @@ const sections = [
   {
     titre: "Éditeur",
     corps: [
-      "La plateforme Dãhomè est éditée en partenariat avec le Ministère du Tourisme, de la Culture et des Arts de la République du Bénin.",
+      "La plateforme DanXomè est éditée en partenariat avec le Ministère du Tourisme, de la Culture et des Arts de la République du Bénin.",
       "Siège : Boulevard de la Marina, Cotonou, Bénin. Contact : bonjour@dahome.bj.",
     ],
   },

@@ -12,6 +12,8 @@ const BASE: NavItem[] = [
   { to: "/profil/mot-de-passe", label: "Mot de passe", icon: KeyRound },
 ];
 
+const ADMIN_HIDDEN = new Set(["/profil/commandes", "/profil/favoris"]);
+
 export function ProfilShell({
   title,
   crumbs,
@@ -25,17 +27,20 @@ export function ProfilShell({
 }) {
   const { profile } = useAuth();
 
-  const espace: NavItem[] =
-    profile?.profil === "admin"
-      ? [{ to: "/admin", label: "Espace admin", icon: LayoutDashboard }]
-      : profile?.profil === "artiste" || profile?.profil === "artisan"
-        ? [{ to: "/artiste", label: "Mon espace", icon: LayoutDashboard }]
-        : [];
+  const isAdmin = profile?.profil === "admin";
+
+  const filtered = isAdmin ? BASE.filter((item) => !ADMIN_HIDDEN.has(item.to)) : BASE;
+
+  const espace: NavItem[] = isAdmin
+    ? [{ to: "/admin", label: "Espace admin", icon: LayoutDashboard }]
+    : profile?.profil === "artiste" || profile?.profil === "artisan"
+      ? [{ to: "/artiste", label: "Mon espace", icon: LayoutDashboard }]
+      : [];
 
   return (
     <DashboardShell
       space="Mon profil"
-      items={[...BASE, ...espace]}
+      items={[...filtered, ...espace]}
       title={title}
       crumbs={crumbs}
       actions={actions}

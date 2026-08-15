@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { EmptyState, LoadingRows, PageHead } from "@/components/site/Bits";
@@ -11,13 +11,13 @@ import { accueilProfil } from "@/lib/types/user";
 export const Route = createFileRoute("/art/panier")({
   head: () => ({
     meta: [
-      { title: "Mon panier — Dãhomè" },
+      { title: "Mon panier — DanXomè" },
       {
         name: "description",
         content:
           "Vérifiez les œuvres sélectionnées, ajustez les quantités et passez à la finalisation de votre commande d'art béninois.",
       },
-      { property: "og:title", content: "Mon panier — Dãhomè" },
+      { property: "og:title", content: "Mon panier — DanXomè" },
       { property: "og:description", content: "Vos œuvres sélectionnées avant commande." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

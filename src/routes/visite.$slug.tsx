@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Compass,
@@ -28,13 +28,13 @@ export const Route = createFileRoute("/visite/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Visite indisponible — Dãhomè" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Visite indisponible — DanXomè" }, { name: "robots", content: "noindex" }],
       };
     }
     const { site } = loaderData;
     return {
       meta: [
-        { title: `Visite virtuelle 360° — ${site.nom} | Dãhomè` },
+        { title: `Visite virtuelle 360° — ${site.nom} | DanXomè` },
         {
           name: "description",
           content: `Explorez ${site.nom} en immersion 360°.`,
@@ -313,6 +313,26 @@ const scenesBySite: Record<string, Scene[]> = {
   ],
 };
 
+function speak(text: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (!window.speechSynthesis) {
+      resolve();
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "fr-FR";
+    utterance.rate = 0.95;
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+function stopSpeech() {
+  window.speechSynthesis?.cancel();
+}
+
 function VisiteVirtuelle() {
   const { site } = Route.useLoaderData();
   const scenes = scenesBySite[site.slug] ?? scenesBySite["palais-royaux-abomey"]!;
@@ -368,22 +388,56 @@ function VisiteVirtuelle() {
     return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
 
+  const changeScene = useCallback(
+    (index: number) => {
+      stopSpeech();
+      setHotspotDetail(null);
+      setSceneIndex(index);
+      setYaw(50);
+      setPitch(0);
+      setZoom(1);
+      if (audioOn) {
+        setTimeout(() => speak(scenes[index]!.narration), 400);
+      }
+    },
+    [audioOn, scenes],
+  );
+
   useEffect(() => {
-    if (autoPlay) {
-      autoTimer.current = setInterval(() => {
-        setSceneIndex((i) => (i + 1) % scenes.length);
-        setYaw(50);
-        setPitch(0);
-      }, 8000);
+    if (!autoPlay) {
+      if (autoTimer.current) clearInterval(autoTimer.current);
+      return;
     }
+    autoTimer.current = setInterval(() => {
+      const next = (sceneIndex + 1) % scenes.length;
+      changeScene(next);
+    }, 10000);
     return () => {
       if (autoTimer.current) clearInterval(autoTimer.current);
     };
-  }, [autoPlay, scenes.length]);
+  }, [autoPlay, sceneIndex, scenes.length, changeScene]);
 
   useEffect(() => {
-    setHotspotDetail(null);
-  }, [sceneIndex]);
+    if (audioOn) {
+      speak(scene.narration);
+    } else {
+      stopSpeech();
+    }
+    return () => stopSpeech();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneIndex, audioOn]);
+
+  const toggleAudio = useCallback(() => {
+    setAudioOn((prev) => {
+      const next = !prev;
+      if (next) {
+        speak(scene.narration);
+      } else {
+        stopSpeech();
+      }
+      return next;
+    });
+  }, [scene.narration]);
 
   const visibleHotspots = scene.hotspots.map((h) => {
     const dx = (((h.x / 100) * 360 - yaw + 540) % 360) - 180;
@@ -418,7 +472,8 @@ function VisiteVirtuelle() {
             variant="onDark"
             size="icon"
             aria-label="Audio"
-            onClick={() => setAudioOn((v) => !v)}
+            className={cn(audioOn && "text-accent")}
+            onClick={toggleAudio}
           >
             {audioOn ? <Volume2 /> : <VolumeX />}
           </Button>
@@ -568,7 +623,7 @@ function VisiteVirtuelle() {
             variant="ghost"
             size="icon"
             className="shrink-0 text-ivory hover:text-accent"
-            onClick={() => setAudioOn((v) => !v)}
+            onClick={toggleAudio}
           >
             {audioOn ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
           </Button>
@@ -591,12 +646,7 @@ function VisiteVirtuelle() {
           {scenes.map((s, i) => (
             <button
               key={s.id}
-              onClick={() => {
-                setSceneIndex(i);
-                setYaw(50);
-                setPitch(0);
-                setHotspotDetail(null);
-              }}
+              onClick={() => changeScene(i)}
               className={cn(
                 "group relative w-40 shrink-0 overflow-hidden rounded-md border text-left transition-all",
                 i === sceneIndex

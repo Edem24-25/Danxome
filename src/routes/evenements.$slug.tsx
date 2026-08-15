@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { CalendarDays, Clock, MapPin, Ticket, Users } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule, SectionTitle } from "@/components/site/Bits";
@@ -18,9 +18,9 @@ export const Route = createFileRoute("/evenements/$slug")({
     const resume = loaderData?.evenement.resume ?? "Agenda culturel du Bénin.";
     return {
       meta: [
-        { title: `${titre} — Agenda Dãhomè` },
+        { title: `${titre} — Agenda DanXomè` },
         { name: "description", content: resume },
-        { property: "og:title", content: `${titre} — Agenda Dãhomè` },
+        { property: "og:title", content: `${titre} — Agenda DanXomè` },
         { property: "og:description", content: resume },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },

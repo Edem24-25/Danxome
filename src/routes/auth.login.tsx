@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Mail, Lock, ArrowRight } from "lucide-react";
@@ -12,15 +12,18 @@ import { accueilProfil } from "@/lib/types/user";
 import { useRateLimit } from "@/lib/rate-limit";
 
 export const Route = createFileRoute("/auth/login")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    from: (search.from as string) || undefined,
+  }),
   head: () => ({
     meta: [
-      { title: "Connexion — Dãhomè" },
+      { title: "Connexion — DanXomè" },
       {
         name: "description",
-        content: "Accédez à vos favoris, commandes et dons sur Dãhomè.",
+        content: "Accédez à vos favoris, commandes et dons sur DanXomè.",
       },
-      { property: "og:title", content: "Connexion — Dãhomè" },
-      { property: "og:description", content: "Accédez à votre compte Dãhomè." },
+      { property: "og:title", content: "Connexion — DanXomè" },
+      { property: "og:description", content: "Accédez à votre compte DanXomè." },
     ],
   }),
   component: Login,
@@ -28,6 +31,7 @@ export const Route = createFileRoute("/auth/login")({
 
 function Login() {
   const navigate = useNavigate();
+  const { from } = Route.useSearch();
   const [loading, setLoading] = useState(false);
   const { signIn, signInWithGoogle } = useAuth();
   const loginRL = useRateLimit("login", 5, 30000);
@@ -62,7 +66,11 @@ function Login() {
 
     loginRL.reset();
     toast.success("Connexion réussie");
-    navigate({ to: accueilProfil(profil) });
+    if (from) {
+      navigate({ to: from });
+    } else {
+      navigate({ to: accueilProfil(profil) });
+    }
   };
 
   const handleGoogle = async () => {

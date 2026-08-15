@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2 } from "lucide-react";
@@ -11,10 +11,10 @@ import { useAuth } from "@/contexts/auth";
 export const Route = createFileRoute("/profil/details")({
   head: () => ({
     meta: [
-      { title: "Mes informations — Dãhomè" },
+      { title: "Mes informations — DanXomè" },
       {
         name: "description",
-        content: "Modifiez vos informations personnelles sur Dãhomè.",
+        content: "Modifiez vos informations personnelles sur DanXomè.",
       },
       { name: "robots", content: "noindex" },
     ],

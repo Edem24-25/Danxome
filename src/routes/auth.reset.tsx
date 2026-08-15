@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MailCheck } from "lucide-react";
@@ -12,12 +12,12 @@ import { useRateLimit } from "@/lib/rate-limit";
 export const Route = createFileRoute("/auth/reset")({
   head: () => ({
     meta: [
-      { title: "Mot de passe oublié — Dãhomè" },
+      { title: "Mot de passe oublié — DanXomè" },
       {
         name: "description",
-        content: "Réinitialisez le mot de passe de votre compte Dãhomè.",
+        content: "Réinitialisez le mot de passe de votre compte DanXomè.",
       },
-      { property: "og:title", content: "Mot de passe oublié — Dãhomè" },
+      { property: "og:title", content: "Mot de passe oublié — DanXomè" },
       { property: "og:description", content: "Recevez un lien de réinitialisation par e-mail." },
     ],
   }),

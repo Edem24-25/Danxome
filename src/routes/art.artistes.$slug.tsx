@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Heart, MapPin, Sparkles } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule, SectionTitle, StatCard } from "@/components/site/Bits";
@@ -17,15 +17,15 @@ export const Route = createFileRoute("/art/artistes/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Artiste introuvable — Dãhomè" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Artiste introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
       };
     }
     const { artiste } = loaderData;
     return {
       meta: [
-        { title: `${artiste.nom}, ${artiste.metier} — Dãhomè` },
+        { title: `${artiste.nom}, ${artiste.metier} — DanXomè` },
         { name: "description", content: artiste.bio },
-        { property: "og:title", content: `${artiste.nom} — ${artiste.metier} | Dãhomè` },
+        { property: "og:title", content: `${artiste.nom} — ${artiste.metier} | DanXomè` },
         { property: "og:description", content: artiste.bio },
         { property: "og:type", content: "profile" },
         { name: "twitter:card", content: "summary_large_image" },

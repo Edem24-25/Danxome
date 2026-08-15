@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
 import { ProfilShell } from "@/components/site/ProfilShell";
 import { EmptyState, SectionTitle } from "@/components/site/Bits";
@@ -11,8 +11,8 @@ import { useFavoris } from "@/lib/favoris";
 export const Route = createFileRoute("/profil/favoris")({
   head: () => ({
     meta: [
-      { title: "Mes favoris — Dãhomè" },
-      { name: "description", content: "Vos œuvres d'art favorites sur Dãhomè." },
+      { title: "Mes favoris — DanXomè" },
+      { name: "description", content: "Vos œuvres d'art favorites sur DanXomè." },
       { name: "robots", content: "noindex" },
     ],
   }),

@@ -1,5 +1,5 @@
 -- ============================================================
--- Schéma de base de données pour Dãhomè — Supabase
+-- Schéma de base de données pour DanXomè — Supabase
 -- ============================================================
 
 -- Table profiles (liée à auth.users)
@@ -159,3 +159,57 @@ BEGIN
   DELETE FROM auth.users WHERE id = auth.uid();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
+-- Table avis_plats (avis sur les plats de gastronomie)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS avis_plats (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  plat_slug TEXT NOT NULL,
+  note INTEGER NOT NULL CHECK (note >= 1 AND note <= 5),
+  commentaire TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, plat_slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_avis_plats_plat ON avis_plats(plat_slug);
+CREATE INDEX IF NOT EXISTS idx_avis_plats_user ON avis_plats(user_id);
+
+-- ============================================================
+-- RLS avis_plats
+-- ============================================================
+ALTER TABLE avis_plats ENABLE ROW LEVEL SECURITY;
+
+-- Tout le monde peut lire les avis
+DROP POLICY IF EXISTS "Les avis sont publics" ON avis_plats;
+CREATE POLICY "Les avis sont publics"
+  ON avis_plats FOR SELECT
+  USING (true);
+
+-- Les utilisateurs connectés peuvent créer un avis
+DROP POLICY IF EXISTS "Les utilisateurs créent un avis" ON avis_plats;
+CREATE POLICY "Les utilisateurs créent un avis"
+  ON avis_plats FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Les utilisateurs ne peuvent modifier que leur propre avis
+DROP POLICY IF EXISTS "Les utilisateurs modifient leur avis" ON avis_plats;
+CREATE POLICY "Les utilisateurs modifient leur avis"
+  ON avis_plats FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Les utilisateurs ne peuvent supprimer que leur propre avis
+DROP POLICY IF EXISTS "Les utilisateurs suppriment leur avis" ON avis_plats;
+CREATE POLICY "Les utilisateurs suppriment leur avis"
+  ON avis_plats FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Trigger updated_at pour avis_plats
+DROP TRIGGER IF EXISTS on_avis_plats_updated ON avis_plats;
+CREATE TRIGGER on_avis_plats_updated
+  BEFORE UPDATE ON avis_plats
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();

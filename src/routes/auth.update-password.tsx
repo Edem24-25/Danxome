@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Lock, ArrowRight, Check } from "lucide-react";
@@ -11,10 +11,10 @@ import { useAuth } from "@/contexts/auth";
 export const Route = createFileRoute("/auth/update-password")({
   head: () => ({
     meta: [
-      { title: "Nouveau mot de passe — Dãhomè" },
+      { title: "Nouveau mot de passe — DanXomè" },
       {
         name: "description",
-        content: "Choisissez un nouveau mot de passe pour votre compte Dãhomè.",
+        content: "Choisissez un nouveau mot de passe pour votre compte DanXomè.",
       },
     ],
   }),

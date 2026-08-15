@@ -1,1 +1,303 @@
+# DanXomè — Patrimoine, art et tourisme du Bénin
 
+Plateforme immersive dédiée au patrimoine culturel du Bénin : royaumes historiques, musées, visites virtuelles 360°, galerie d'artisans, événements culturels et gastronomie locale.
+
+---
+
+## Table des matières
+
+- [À propos du projet](#à-propos-du-projet)
+- [Fonctionnalités](#fonctionnalités)
+- [Stack technique](#stack-technique)
+- [Architecture du projet](#architecture-du-projet)
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Configuration de l'environnement](#configuration-de-lenvironnement)
+- [Lancement du projet](#lancement-du-projet)
+- [Commandes disponibles](#commandes-disponibles)
+- [Base de données](#base-de-données)
+- [Structure des routes](#structure-des-routes)
+- [Déploiement](#déploiement)
+
+---
+
+## À propos du projet
+
+**DanXomè** est une application web full-stack qui met en lumière la richesse culturelle du Bénin. Le projet offre aux visiteurs du monde entier la possibilité d'explorer le patrimoine béninois de manière interactive : cartes de localisation des sites, visites virtuelles panoramiques, galerie d'artisans avec possibilité d'achat en ligne, agenda des événements culturels et découverte de la gastronomie locale.
+
+Le nom « DanXomè » rend hommage au royaume historique du Dahomey, puissance militaire et diplomatique qui a régné sur une partie du territoire actuel du Bénin du XVIIe au XIXe siècle.
+
+---
+
+## Fonctionnalités
+
+### Tourisme
+
+- **Sites touristiques** : fiches détaillées des sites classés (Palais royaux d'Abomey, Ganvié, Pendjari, Porte du Non-Retour…)
+- **Carte interactive** : localisation géographique des sites avec navigation par région
+- **Visites virtuelles 360°** : panoramas haute résolution avec hotspots documentés
+- **Réservations** : système de réservation de visites et d'hébergements
+- **Gastronomie** : recettes et spécialités culinaires du Bénin (pâte rouge, ablo, wagashi…)
+
+### Culture
+
+- **Royaumes** : histoire des royaumes historiques (Abomey, Hogbonu, Baatonu de Nikki)
+- **Musées & collections** : musées d'Abomey, Fondation Zinsou, Musée da Silva
+- **Langues** : atlas linguistique du Bénin (fon, yoruba, bariba, dendi…)
+- **Événements** : calendrier culturel (Vodun Days, Gaani, Biennale, Festival Quintessence…)
+
+### Art & Artisanat
+
+- **Boutique en ligne** : achat direct d'œuvres d'artisans (sculptures, tentures appliquées, bronzes)
+- **Profil artiste** : vitrine individuelle pour chaque artisan
+- **Panier & checkout** : processus d'achat complet
+
+### Utilisateurs
+
+- **Authentification** : email/mot de passe, Google OAuth, Apple OAuth
+- **4 rôles** : visiteur, artisan, artiste, admin
+- **Profil utilisateur** : gestion du profil, favoris, historique de commandes
+- **Espace admin** : modération et gestion des contenus
+- **Assistant IA** : aide à la navigation et à la découverte
+
+### Pages complémentaires
+
+- Contact, FAQ, À propos, Mentions légales
+
+---
+
+## Stack technique
+
+| Couche               | Technologie                                                               |
+| -------------------- | ------------------------------------------------------------------------- |
+| **Framework**        | [TanStack Start](https://tanstack.com/start) (SSR React)                  |
+| **Routing**          | [TanStack Router](https://tanstack.com/router) (file-based routing)       |
+| **UI**               | [React 19](https://react.dev)                                             |
+| **Styling**          | [Tailwind CSS v4](https://tailwindcss.com)                                |
+| **Composants UI**    | [Radix UI](https://www.radix-ui.com) + [shadcn/ui](https://ui.shadcn.com) |
+| **Base de données**  | [Supabase](https://supabase.com) (PostgreSQL + Auth + RLS)                |
+| **Forms**            | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev)   |
+| **State management** | [TanStack React Query](https://tanstack.com/query)                        |
+| **Charts**           | [Recharts](https://recharts.org)                                          |
+| **Build**            | [Vite](https://vitejs.dev)                                                |
+| **Language**         | [TypeScript](https://www.typescriptlang.org)                              |
+| **Package manager**  | Bun (recommandé) / npm                                                    |
+| **Deployment**       | Nitro (Cloudflare) via Lovable                                            |
+
+---
+
+## Architecture du projet
+
+```
+Danxòmè/
+├── public/                        # Assets statiques (favicon, images)
+├── scripts/                       # Scripts utilitaires
+├── supabase/
+│   ├── schema.sql                 # Schéma de la base de données
+│   └── create-admin.sql           # Script de création d'un admin
+├── src/
+│   ├── assets/                    # Images importées dynamiquement
+│   ├── components/
+│   │   ├── site/                  # Composants spécifiques au site
+│   │   │   ├── Header.tsx         # Navigation principale
+│   │   │   ├── Footer.tsx         # Pied de page
+│   │   │   ├── SiteShell.tsx      # Layout principal du site
+│   │   │   ├── BeninMap.tsx       # Carte interactive du Bénin
+│   │   │   ├── ContentCard.tsx    # Carte de contenu réutilisable
+│   │   │   ├── Reveal.tsx         # Animations au scroll
+│   │   │   └── ...
+│   │   └── ui/                    # Composants UI génériques (shadcn/ui)
+│   │       ├── button.tsx
+│   │       ├── dialog.tsx
+│   │       ├── input.tsx
+│   │       └── ...
+│   ├── contexts/
+│   │   └── auth.tsx               # Contexte d'authentification
+│   ├── hooks/                     # Hooks React personnalisés
+│   ├── lib/
+│   │   ├── supabase/              # Client Supabase
+│   │   ├── types/                 # Types TypeScript
+│   │   ├── data.ts                # Données statiques (sites, œuvres…)
+│   │   ├── cart.ts                # Logique panier
+│   │   ├── achats.ts              # Logique d'achat
+│   │   ├── commandes.ts           # Logique commandes
+│   │   ├── favoris.ts             # Logique favoris
+│   │   ├── oeuvres.ts             # Logique œuvres
+│   │   └── utils.ts               # Utilitaires
+│   ├── routes/                    # Routes (file-based routing)
+│   │   ├── __root.tsx             # Layout racine (shell de l'app)
+│   │   ├── index.tsx              # Page d'accueil (/)
+│   │   ├── auth.*.tsx             # Authentification (/auth/*)
+│   │   ├── art.*.tsx              # Art & boutique (/art/*)
+│   │   ├── culture.*.tsx          # Culture (/culture/*)
+│   │   ├── tourisme.*.tsx         # Tourisme (/tourisme/*)
+│   │   ├── artiste.*.tsx          # Espace artiste (/artiste/*)
+│   │   ├── admin.*.tsx            # Administration (/admin/*)
+│   │   ├── profil.*.tsx           # Espace utilisateur (/profil/*)
+│   │   └── ...
+│   ├── router.tsx                 # Configuration du routeur
+│   ├── routeTree.gen.ts           # Arbre des routes (auto-généré)
+│   ├── server.ts                  # Entrée SSR
+│   ├── start.ts                   # Point d'entrée TanStack Start
+│   └── styles.css                 # Styles globaux (Tailwind)
+├── .env                           # Variables d'environnement (client)
+├── .env.server                    # Variables d'environnement (serveur)
+├── vite.config.ts                 # Configuration Vite
+├── tsconfig.json                  # Configuration TypeScript
+├── components.json                # Configuration shadcn/ui
+├── eslint.config.js               # Configuration ESLint
+└── package.json
+```
+
+---
+
+## Prérequis
+
+- **Node.js** >= 18
+- **Bun** (recommandé) ou **npm**
+- **Supabase** : un projet Supabase (gratuit) avec les clés API
+
+---
+
+## Installation
+
+1. **Cloner le dépôt**
+
+```bash
+git clone <url-du-depot>
+cd Danxòmè
+```
+
+2. **Installer les dépendances**
+
+Avec Bun (recommandé) :
+
+```bash
+bun install
+```
+
+Ou avec npm :
+
+```bash
+npm install
+```
+
+---
+
+## Configuration de l'environnement
+
+Créer un fichier `.env` à la racine du projet avec les variables suivantes :
+
+```env
+VITE_SUPABASE_URL=https://votre-projet.supabase.co
+VITE_SUPABASE_ANON_KEY=votre-clé-anon-supabase
+```
+
+> Ces valeurs sont obtenues depuis le tableau de bord Supabase : **Settings → API**.
+
+Optionnellement, créer un fichier `.env.server` pour les variables côté serveur (cles privées Supabase, etc.).
+
+---
+
+## Lancement du projet
+
+```bash
+bun run dev
+```
+
+Le serveur de développement démarre sur `http://localhost:5173` (port par défaut de Vite).
+
+---
+
+## Commandes disponibles
+
+| Commande            | Description                              |
+| ------------------- | ---------------------------------------- |
+| `bun run dev`       | Lance le serveur de développement (Vite) |
+| `bun run build`     | Build de production                      |
+| `bun run build:dev` | Build en mode développement              |
+| `bun run preview`   | Prévisualise le build de production      |
+| `bun run lint`      | Vérifie le code avec ESLint              |
+| `bun run format`    | Formate le code avec Prettier            |
+
+---
+
+## Base de données
+
+Le schéma Supabase se trouve dans `supabase/schema.sql`. Il définit :
+
+### Table `profiles`
+
+| Colonne      | Type        | Description                                        |
+| ------------ | ----------- | -------------------------------------------------- |
+| `id`         | UUID (PK)   | Lié à `auth.users(id)`                             |
+| `email`      | TEXT        | Email de l'utilisateur                             |
+| `prenom`     | TEXT        | Prénom                                             |
+| `nom`        | TEXT        | Nom de famille                                     |
+| `profil`     | TEXT        | Rôle : `visiteur`, `artiste`, `artisan` ou `admin` |
+| `avatar_url` | TEXT        | URL de l'avatar (optionnel)                        |
+| `telephone`  | TEXT        | Numéro de téléphone                                |
+| `adresse`    | TEXT        | Adresse postale                                    |
+| `ville`      | TEXT        | Ville                                              |
+| `pays`       | TEXT        | Pays                                               |
+| `created_at` | TIMESTAMPTZ | Date de création                                   |
+| `updated_at` | TIMESTAMPTZ | Dernière mise à jour                               |
+
+### Triggers
+
+- **`handle_new_user`** : crée automatiquement un profil lors de l'inscription (seuls `artiste` et `artisan` sont autorisés côté client ; `admin` est réservé).
+- **`prevent_profile_role_change`** : empêche la modification du rôle sauf par un admin.
+- **`handle_updated_at`** : met à jour automatiquement le champ `updated_at`.
+
+### Row Level Security (RLS)
+
+- Les utilisateurs lisent et modifient uniquement leur propre profil.
+- Les profils `artiste` et `artisan` sont publics.
+- Les `admin` ont un accès complet.
+- Fonction `is_admin()` (SECURITY DEFINER) pour vérifier le rôle admin sans récursion RLS.
+- Fonction `delete_user()` pour la suppression complète du compte.
+
+---
+
+## Structure des routes
+
+Le projet utilise le **file-based routing** de TanStack Router. Chaque fichier `.tsx` dans `src/routes/` définit une route.
+
+| Fichier                    | URL                     |
+| -------------------------- | ----------------------- |
+| `index.tsx`                | `/`                     |
+| `auth.login.tsx`           | `/auth/login`           |
+| `auth.register.tsx`        | `/auth/register`        |
+| `art.index.tsx`            | `/art`                  |
+| `art.boutique.tsx`         | `/art/boutique`         |
+| `art.artistes.$slug.tsx`   | `/art/artistes/:slug`   |
+| `culture.index.tsx`        | `/culture`              |
+| `culture.langues.tsx`      | `/culture/langues`      |
+| `culture.musees.$slug.tsx` | `/culture/musees/:slug` |
+| `tourisme.index.tsx`       | `/tourisme`             |
+| `tourisme.carte.tsx`       | `/tourisme/carte`       |
+| `tourisme.sites.$slug.tsx` | `/tourisme/sites/:slug` |
+| `evenements.index.tsx`     | `/evenements`           |
+| `profil.index.tsx`         | `/profil`               |
+| `admin.index.tsx`          | `/admin`                |
+| `__root.tsx`               | Layout racine (shell)   |
+
+> `routeTree.gen.ts` est auto-généré. Ne pas le modifier manuellement.
+
+---
+
+## Déploiement
+
+La configuration Vite utilise `@lovable.dev/vite-tanstack-config` qui intègre Nitro avec Cloudflare comme cible par défaut.
+
+```bash
+bun run build
+```
+
+Le build génère les fichiers prêts à déployer via Lovable ou n'importe quel hébergement compatible Nitro/Cloudflare.
+
+---
+
+## Licence
+
+Projet privé — Tous droits réservés.

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Check, Heart, Info, Ruler, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
@@ -20,15 +20,15 @@ export const Route = createFileRoute("/art/oeuvres/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Œuvre introuvable — Dãhomè" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Œuvre introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
       };
     }
     const { oeuvre } = loaderData;
     return {
       meta: [
-        { title: `${oeuvre.titre} par ${oeuvre.artiste} — Dãhomè` },
+        { title: `${oeuvre.titre} par ${oeuvre.artiste} — DanXomè` },
         { name: "description", content: oeuvre.description },
-        { property: "og:title", content: `${oeuvre.titre} — ${oeuvre.artiste} | Dãhomè` },
+        { property: "og:title", content: `${oeuvre.titre} — ${oeuvre.artiste} | DanXomè` },
         { property: "og:description", content: oeuvre.description },
         { property: "og:type", content: "product" },
         { name: "twitter:card", content: "summary_large_image" },

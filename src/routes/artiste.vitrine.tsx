@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
   Eye,
@@ -22,12 +22,12 @@ import { useMesOeuvres } from "@/lib/oeuvres";
 export const Route = createFileRoute("/artiste/vitrine")({
   head: () => ({
     meta: [
-      { title: "Ma vitrine — Dãhomè" },
+      { title: "Ma vitrine — DanXomè" },
       {
         name: "description",
-        content: "Gérez les œuvres exposées dans votre vitrine d'artiste sur Dãhomè.",
+        content: "Gérez les œuvres exposées dans votre vitrine d'artiste sur DanXomè.",
       },
-      { property: "og:title", content: "Ma vitrine — Dãhomè" },
+      { property: "og:title", content: "Ma vitrine — DanXomè" },
     ],
   }),
   component: Vitrine,
