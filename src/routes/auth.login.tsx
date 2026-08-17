@@ -13,7 +13,7 @@ import { useRateLimit } from "@/lib/rate-limit";
 
 export const Route = createFileRoute("/auth/login")({
   validateSearch: (search: Record<string, unknown>) => ({
-    from: (search.from as string) || undefined,
+    from: (search["from"] as string) || undefined,
   }),
   head: () => ({
     meta: [

@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Brush, Hammer, Compass, User, Mail, Lock, ArrowRight, Check } from "lucide-react";
+import { User, Mail, Lock, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AuthLayout } from "@/components/site/AuthLayout";
@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
-import type { ProfilType } from "@/lib/types/user";
 import { useRateLimit } from "@/lib/rate-limit";
 
 export const Route = createFileRoute("/auth/register")({
@@ -19,51 +17,19 @@ export const Route = createFileRoute("/auth/register")({
       {
         name: "description",
         content:
-          "Rejoignez DanXomè comme visiteur, artiste ou artisan et valorisez le patrimoine béninois.",
+          "Créez votre compte visiteur et accédez au patrimoine béninois : visites virtuelles, réservations et boutique artisanale.",
       },
       { property: "og:title", content: "Créer un compte — DanXomè" },
       {
         property: "og:description",
-        content: "Visiteur, artiste ou artisan : choisissez votre profil.",
+        content: "Inscrivez-vous comme visiteur pour explorer le patrimoine du Bénin.",
       },
     ],
   }),
   component: Register,
 });
 
-const profils = [
-  {
-    id: "visiteur" as ProfilType,
-    label: "Visiteur",
-    desc: "Explorer, réserver, soutenir",
-    icon: Compass,
-    color: "text-terracotta",
-    bgColor: "bg-terracotta/10",
-    borderColor: "border-terracotta/30",
-  },
-  {
-    id: "artiste" as ProfilType,
-    label: "Artiste",
-    desc: "Exposer et vendre mes œuvres",
-    icon: Brush,
-    color: "text-forest",
-    bgColor: "bg-forest/10",
-    borderColor: "border-forest/30",
-  },
-  {
-    id: "artisan" as ProfilType,
-    label: "Artisan",
-    desc: "Atelier, commandes, dons",
-    icon: Hammer,
-    color: "text-gold",
-    bgColor: "bg-gold/10",
-    borderColor: "border-gold/30",
-  },
-];
-
 function Register() {
-  const [profil, setProfil] = useState<ProfilType>("visiteur");
-  const [hoveredProfil, setHoveredProfil] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -106,7 +72,7 @@ function Register() {
     }
 
     setLoading(true);
-    const { error } = await signUp({ email, password, prenom, nom, profil });
+    const { error } = await signUp({ email, password, prenom, nom, profil: "visiteur" });
 
     if (error) {
       toast.error("Erreur lors de l'inscription", { description: error });
@@ -117,17 +83,18 @@ function Register() {
     toast.success("Compte créé avec succès", {
       description: "Vérifiez votre boîte mail pour confirmer votre compte.",
     });
-    navigate({ to: "/auth/login" });
+    navigate({ to: "/auth/login", search: { from: undefined } });
   };
 
   return (
     <AuthLayout
       eyebrow="Inscription"
       titre="Rejoindre DanXomè"
-      intro="Un compte, trois usages : visiter, créer, vendre."
+      intro="Créez votre compte visiteur pour explorer le patrimoine béninois."
       footer={
         <Link
           to="/auth/login"
+          search={{ from: undefined }}
           className="group inline-flex items-center gap-2 font-semibold text-forest transition-all duration-300 hover:text-terracotta hover:gap-3"
         >
           Se connecter
@@ -136,69 +103,6 @@ function Register() {
       }
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
-        <fieldset>
-          <legend className="mb-4 text-sm font-semibold text-forest-deep">
-            Je m'inscris comme
-          </legend>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {profils.map((p) => {
-              const isSelected = profil === p.id;
-              const isHovered = hoveredProfil === p.id;
-              const Icon = p.icon;
-
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setProfil(p.id)}
-                  onMouseEnter={() => setHoveredProfil(p.id)}
-                  onMouseLeave={() => setHoveredProfil(null)}
-                  aria-pressed={isSelected}
-                  className={cn(
-                    "group relative rounded-xl border-2 p-4 text-left transition-all duration-300",
-                    isSelected
-                      ? cn("shadow-lg", p.borderColor, p.bgColor)
-                      : "border-border bg-card hover:border-forest/30 hover:shadow-md",
-                    isHovered && !isSelected && "scale-[1.02]",
-                  )}
-                >
-                  {isSelected && (
-                    <div className="absolute -right-2 -top-2 size-6 rounded-full bg-forest flex items-center justify-center">
-                      <Check className="size-3 text-white" />
-                    </div>
-                  )}
-
-                  <div
-                    className={cn(
-                      "mb-3 flex size-10 items-center justify-center rounded-lg transition-all duration-300",
-                      isSelected ? p.bgColor : "bg-muted group-hover:bg-secondary",
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "size-5 transition-colors duration-300",
-                        isSelected ? p.color : "text-muted-foreground group-hover:text-forest-deep",
-                      )}
-                    />
-                  </div>
-
-                  <p
-                    className={cn(
-                      "text-sm font-semibold transition-colors duration-300",
-                      isSelected ? "text-forest-deep" : "text-forest-deep/80",
-                    )}
-                  >
-                    {p.label}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{p.desc}</p>
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="prenom" className="text-sm font-medium text-forest-deep">

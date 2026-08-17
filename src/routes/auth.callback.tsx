@@ -21,7 +21,7 @@ function AuthCallback() {
           .single();
         navigate({ to: accueilProfil(prof?.profil) });
       } else {
-        navigate({ to: "/auth/login" });
+        navigate({ to: "/auth/login", search: { from: undefined } });
       }
     });
   }, [navigate]);

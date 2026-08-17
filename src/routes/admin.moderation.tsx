@@ -48,7 +48,7 @@ function Moderation() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate({ to: "/auth/login" });
+      navigate({ to: "/auth/login", search: { from: undefined } });
     }
     if (!loading && profile && profile.profil !== "admin") {
       navigate({ to: "/profil" });

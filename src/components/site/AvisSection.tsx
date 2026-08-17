@@ -169,7 +169,7 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
         <p className="mt-6 text-sm text-muted-foreground">
           <Link
             to="/auth/login"
-            search={currentPath ? { from: currentPath } : undefined}
+            search={{ from: currentPath ?? undefined }}
             className="text-accent underline"
           >
             Connectez-vous

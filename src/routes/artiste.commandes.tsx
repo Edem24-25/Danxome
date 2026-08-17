@@ -64,7 +64,7 @@ function Commandes() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate({ to: "/auth/login" });
+      navigate({ to: "/auth/login", search: { from: undefined } });
     } else if (!loading && profile && profile.profil === "visiteur") {
       navigate({ to: "/profil" });
     }

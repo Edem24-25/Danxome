@@ -65,7 +65,7 @@ function Reset() {
       titre="Retrouver l'accès"
       intro="Indiquez l'adresse associée à votre compte : nous vous envoyons un lien valable une heure."
       footer={
-        <Link to="/auth/login" className="font-semibold text-forest hover:text-terracotta">
+        <Link to="/auth/login" search={{ from: undefined }} className="font-semibold text-forest hover:text-terracotta">
           ← Retour à la connexion
         </Link>
       }

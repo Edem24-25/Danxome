@@ -75,7 +75,7 @@ function UpdatePassword() {
     setSuccess(true);
     setLoading(false);
     toast.success("Mot de passe mis à jour");
-    setTimeout(() => navigate({ to: "/auth/login" }), 2000);
+    setTimeout(() => navigate({ to: "/auth/login", search: { from: undefined } }), 2000);
   };
 
   if (!session) {
@@ -103,7 +103,7 @@ function UpdatePassword() {
       titre="Choisissez votre mot de passe"
       intro="Entrez un nouveau mot de passe sécurisé pour votre compte."
       footer={
-        <Link to="/auth/login" className="font-semibold text-forest hover:text-terracotta">
+        <Link to="/auth/login" search={{ from: undefined }} className="font-semibold text-forest hover:text-terracotta">
           ← Retour à la connexion
         </Link>
       }

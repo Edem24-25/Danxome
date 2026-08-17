@@ -45,7 +45,7 @@ function Profil() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate({ to: "/auth/login" });
+      navigate({ to: "/auth/login", search: { from: undefined } });
     }
   }, [loading, user, navigate]);
 

@@ -1,5 +1,5 @@
 ﻿import { Link } from "@tanstack/react-router";
-import { Menu, Search, ShoppingCart, User, X } from "lucide-react";
+import { Menu, Search, ShoppingCart, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePanier } from "@/lib/cart";
 import { useAuth } from "@/contexts/auth";
@@ -110,7 +110,7 @@ export function Header() {
             </Button>
           ) : (
             <Button asChild variant="gold" size="sm" className="hidden rounded-full sm:inline-flex">
-              <Link to="/auth/login">
+              <Link to="/auth/login" search={{ from: undefined }}>
                 <User /> Connexion
               </Link>
             </Button>
@@ -129,16 +129,8 @@ export function Header() {
             <SheetContent side="right" className="w-[86vw] max-w-sm border-l-border/50 p-0">
               <div className="flex h-full flex-col">
                 {/* Header mobile */}
-                <div className="flex items-center justify-between border-b border-border/50 px-6 py-4">
+                <div className="border-b border-border/50 px-6 py-4">
                   <Wordmark />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setOpen(false)}
-                    className="rounded-full"
-                  >
-                    <X className="size-5" />
-                  </Button>
                 </div>
 
                 {/* Navigation mobile */}
@@ -171,20 +163,22 @@ export function Header() {
                       )}
                     </Link>
                   )}
-                  <Link
-                    to={accueil}
-                    onClick={() => setOpen(false)}
-                    className="group flex items-center gap-3 rounded-lg px-4 py-3.5 font-display text-lg text-forest-deep transition-all duration-300 hover:bg-forest/5 hover:pl-6"
-                  >
-                    <span className="size-1.5 rounded-full bg-accent opacity-0 transition-opacity group-hover:opacity-100" />
-                    Mon espace
-                  </Link>
+                  {user && !loading && (
+                    <Link
+                      to={accueil}
+                      onClick={() => setOpen(false)}
+                      className="group flex items-center gap-3 rounded-lg px-4 py-3.5 font-display text-lg text-forest-deep transition-all duration-300 hover:bg-forest/5 hover:pl-6"
+                    >
+                      <span className="size-1.5 rounded-full bg-accent opacity-0 transition-opacity group-hover:opacity-100" />
+                      Mon espace
+                    </Link>
+                  )}
                 </nav>
 
                 {/* Footer mobile */}
                 <div className="border-t border-border/50 px-6 py-6">
                   <Button asChild variant="gold" size="lg" className="w-full rounded-full">
-                    <Link to="/auth/login" onClick={() => setOpen(false)}>
+                    <Link to="/auth/login" search={{ from: undefined }} onClick={() => setOpen(false)}>
                       Connexion
                     </Link>
                   </Button>
