@@ -15,11 +15,18 @@ import { toast } from "sonner";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatFcfa } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  useMesOeuvres,
+  useUpdateOeuvreStatut,
+  useDeleteOeuvre,
+  formatFcfa,
+} from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
-import { useMesOeuvres } from "@/lib/oeuvres";
+import { requireRole } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/artiste/vitrine")({
+  beforeLoad: () => requireRole(["artiste", "artisan", "admin"]),
   head: () => ({
     meta: [
       { title: "Ma vitrine — DanXomè" },
@@ -44,7 +51,12 @@ const items = [
 function Vitrine() {
   const { profile, loading, user } = useAuth();
   const navigate = useNavigate();
-  const { liste, publiees, pret, changerStatut, retirer } = useMesOeuvres();
+  const { data: liste, isLoading } = useMesOeuvres();
+  const updateStatut = useUpdateOeuvreStatut();
+  const deleteOeuvre = useDeleteOeuvre();
+
+  const allOeuvres = liste ?? [];
+  const publiees = allOeuvres.filter((o) => o.statut === "publiee");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -54,29 +66,51 @@ function Vitrine() {
     }
   }, [loading, user, profile, navigate]);
 
-  if (loading || !profile || !pret) {
+  if (loading || !profile || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="w-full max-w-4xl space-y-6 p-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="overflow-hidden rounded-xl border border-border">
+                <Skeleton className="aspect-[4/3] w-full" />
+                <div className="space-y-2 p-4">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   const nomAtelier = `${profile.prenom} ${profile.nom}`;
 
-  const basculer = (slug: string, statut: "publiee" | "brouillon") => {
-    changerStatut(slug, statut);
-    toast.success(statut === "publiee" ? "Œuvre publiée" : "Œuvre masquée", {
-      description:
-        statut === "publiee"
-          ? "Elle est de nouveau visible dans votre vitrine."
-          : "Elle n'est plus visible dans votre vitrine.",
-    });
+  const basculer = (id: string, statut: "publiee" | "brouillon") => {
+    updateStatut.mutate(
+      { id, statut },
+      {
+        onSuccess: () => {
+          toast.success(statut === "publiee" ? "Œuvre publiée" : "Œuvre masquée", {
+            description:
+              statut === "publiee"
+                ? "Elle est de nouveau visible dans votre vitrine."
+                : "Elle n'est plus visible dans votre vitrine.",
+          });
+        },
+      },
+    );
   };
 
-  const supprimer = (slug: string, titre: string) => {
-    retirer(slug);
-    toast.success("Œuvre supprimée", { description: `« ${titre} » a été retirée.` });
+  const supprimer = (id: string, titre: string) => {
+    deleteOeuvre.mutate(id, {
+      onSuccess: () => {
+        toast.success("Œuvre supprimée", { description: `« ${titre} » a été retirée.` });
+      },
+    });
   };
 
   return (
@@ -88,19 +122,19 @@ function Vitrine() {
     >
       <p className="text-sm text-muted-foreground">
         {publiees.length} œuvre{publiees.length > 1 ? "s" : ""} publiée
-        {publiees.length > 1 ? "s" : ""} · {liste.length - publiees.length} masquée
-        {liste.length - publiees.length > 1 ? "s" : ""}
+        {publiees.length > 1 ? "s" : ""} · {allOeuvres.length - publiees.length} masquée
+        {allOeuvres.length - publiees.length > 1 ? "s" : ""}
       </p>
 
       <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {liste.map((o) => (
+        {allOeuvres.map((o) => (
           <article
-            key={o.slug}
+            key={o.id}
             className="overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md"
           >
             <div className="relative">
               <img
-                src={o.image}
+                src={o.image_url}
                 alt={o.titre}
                 loading="lazy"
                 className="aspect-[4/3] w-full object-cover"
@@ -128,7 +162,7 @@ function Vitrine() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => basculer(o.slug, o.statut === "publiee" ? "brouillon" : "publiee")}
+                  onClick={() => basculer(o.id, o.statut === "publiee" ? "brouillon" : "publiee")}
                 >
                   {o.statut === "publiee" ? (
                     <EyeOff className="size-4" />
@@ -141,7 +175,7 @@ function Vitrine() {
                   variant="ghost"
                   size="sm"
                   className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  onClick={() => supprimer(o.slug, o.titre)}
+                  onClick={() => supprimer(o.id, o.titre)}
                 >
                   <Trash2 className="size-4" /> Retirer
                 </Button>

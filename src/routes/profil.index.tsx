@@ -14,10 +14,9 @@ import { ProfilShell } from "@/components/site/ProfilShell";
 import { ProfilBadge } from "@/components/site/ProfilBadge";
 import { EmptyState, SectionTitle, StatCard } from "@/components/site/Bits";
 import { Button } from "@/components/ui/button";
-import { formatFcfa, oeuvres } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useOeuvres, formatFcfa, useFavoris, useCommandesClient } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
-import { useFavoris } from "@/lib/favoris";
-import { lireAchats } from "@/lib/achats";
 
 export const Route = createFileRoute("/profil/")({
   head: () => ({
@@ -40,8 +39,10 @@ const dateFr = (iso: string) =>
 function Profil() {
   const { profile, loading, user } = useAuth();
   const navigate = useNavigate();
-  const { favoris } = useFavoris();
-  const achats = lireAchats();
+  const { data: favorisData } = useFavoris();
+  const favorisIds = (favorisData ?? []).map(f => f.oeuvre_id);
+  const { data: oeuvres = [], isLoading: oeuvresLoading } = useOeuvres();
+  const { data: achats = [], isLoading: achatsLoading } = useCommandesClient();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,8 +53,33 @@ function Profil() {
   if (loading) {
     return (
       <ProfilShell title="Chargement…" crumbs={[{ label: "Mon profil" }]}>
-        <div className="flex items-center justify-center py-12">
-          <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="size-16 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-3 w-28" />
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border p-4">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="mt-2 h-6 w-32" />
+              </div>
+            ))}
+          </div>
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg border border-border p-3">
+                <Skeleton className="size-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-2 w-48" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </ProfilShell>
     );
@@ -62,7 +88,7 @@ function Profil() {
   if (!profile) return null;
 
   const initiales = `${profile.prenom[0] ?? ""}${profile.nom[0] ?? ""}`.toUpperCase();
-  const oeuvresFavorites = oeuvres.filter((o) => favoris.includes(o.slug));
+  const oeuvresFavorites = oeuvres.filter((o) => favorisIds.includes(o.id));
   const details = [
     {
       icon: Phone,
@@ -145,7 +171,7 @@ function Profil() {
             />
             <StatCard
               label="Favoris"
-              value={String(favoris.length)}
+              value={String(favorisIds.length)}
               icon={<Heart className="size-4" />}
             />
           </>
@@ -185,22 +211,18 @@ function Profil() {
             ) : (
               <ul className="mt-5 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
                 {achats.slice(0, 3).map((a) => (
-                  <li key={a.reference} className="flex items-center gap-4 p-4">
-                    <img
-                      src={a.articles[0]?.image}
-                      alt={a.articles[0]?.titre ?? "Commande"}
-                      loading="lazy"
-                      className="size-16 rounded-md object-cover"
-                    />
+                  <li key={a.ref} className="flex items-center gap-4 p-4">
+                    <div className="size-16 flex items-center justify-center rounded-md bg-forest/10 text-forest-deep font-display text-lg">
+                      {a.oeuvre_titre.charAt(0)}
+                    </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-forest-deep">{a.reference}</p>
+                      <p className="font-semibold text-forest-deep">{a.ref}</p>
                       <p className="text-xs text-muted-foreground">
-                        {a.articles.length} article{a.articles.length > 1 ? "s" : ""} ·{" "}
-                        {dateFr(a.date)}
+                        {a.oeuvre_titre} · {dateFr(a.date)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-display text-lg text-forest-deep">{formatFcfa(a.total)}</p>
+                      <p className="font-display text-lg text-forest-deep">{formatFcfa(a.montant)}</p>
                       <p className="text-xs text-emerald-600">Payée</p>
                     </div>
                   </li>
@@ -227,12 +249,12 @@ function Profil() {
                         params={{ slug: o.slug }}
                         className="flex items-center gap-3 text-sm text-foreground/80 hover:text-terracotta"
                       >
-                        <img
-                          src={o.image}
-                          alt={o.titre}
-                          loading="lazy"
-                          className="size-10 rounded object-cover"
-                        />
+                    <img
+                      src={o.image_url}
+                      alt={o.titre}
+                      loading="lazy"
+                      className="size-10 rounded object-cover"
+                    />
                         {o.titre}
                       </Link>
                     </li>

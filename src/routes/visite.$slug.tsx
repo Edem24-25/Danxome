@@ -16,35 +16,16 @@ import {
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { sites } from "@/lib/data";
+import { useSite } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/visite/$slug")({
-  loader: ({ params }) => {
-    const site = sites.find((s) => s.slug === params.slug && s.virtuel);
-    if (!site) throw notFound();
-    return { site };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [{ title: "Visite indisponible — DanXomè" }, { name: "robots", content: "noindex" }],
-      };
-    }
-    const { site } = loaderData;
-    return {
-      meta: [
-        { title: `Visite virtuelle 360° — ${site.nom} | DanXomè` },
-        {
-          name: "description",
-          content: `Explorez ${site.nom} en immersion 360°.`,
-        },
-        { property: "og:title", content: `Visite virtuelle 360° — ${site.nom}` },
-        { property: "og:description", content: `Explorez ${site.nom} en immersion 360°.` },
-        { property: "og:type", content: "article" },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Visite virtuelle — DanXomè" },
+      { name: "description", content: "Explorez ce site en immersion 360°." },
+    ],
+  }),
   component: VisiteVirtuelle,
 });
 
@@ -334,8 +315,9 @@ function stopSpeech() {
 }
 
 function VisiteVirtuelle() {
-  const { site } = Route.useLoaderData();
-  const scenes = scenesBySite[site.slug] ?? scenesBySite["palais-royaux-abomey"]!;
+  const { slug } = Route.useParams();
+  const { data: site, isLoading } = useSite(slug);
+  const scenes = scenesBySite[slug] ?? scenesBySite["palais-royaux-abomey"]!;
   const [sceneIndex, setSceneIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [yaw, setYaw] = useState(50);
@@ -447,6 +429,18 @@ function VisiteVirtuelle() {
     return { ...h, screenX, screenY, visible };
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-forest-deep">
+        <div className="size-8 animate-spin rounded-full border-2 border-ivory border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!site || !site.virtuel) {
+    throw notFound();
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-forest-deep text-ivory">
       {/* Header */}
@@ -505,10 +499,13 @@ function VisiteVirtuelle() {
           }}
         >
           <img
-            src={site.image}
+            src={site.image_url}
             alt={`Panorama ${scene.titre} — ${site.nom}`}
             draggable={false}
             className="size-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
+            }}
           />
         </div>
 
@@ -655,11 +652,14 @@ function VisiteVirtuelle() {
               )}
             >
               <img
-                src={site.image}
+                src={site.image_url}
                 alt=""
                 loading="lazy"
                 className="h-20 w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 style={{ objectPosition: `${scene.yawPositions[i] ?? 50}% 50%` }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/placeholder.svg";
+                }}
               />
               <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest-deep to-transparent px-2.5 py-1.5 text-xs font-semibold">
                 {s.titre}

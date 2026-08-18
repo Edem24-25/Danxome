@@ -2,9 +2,20 @@
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { EmptyState, LoadingRows, PageHead } from "@/components/site/Bits";
-import { Button } from "@/components/ui/button";
-import { formatFcfa } from "@/lib/data";
-import { usePanier } from "@/lib/cart";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { usePanier, useUpdateCartQty, useRemoveFromCart, useClearCart, formatFcfa } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { accueilProfil } from "@/lib/types/user";
 
@@ -28,8 +39,13 @@ export const Route = createFileRoute("/art/panier")({
 });
 
 function Panier() {
-  const { articles, total, pret, definir, retirer, vider } = usePanier();
+  const { data, isLoading } = usePanier();
+  const updateQty = useUpdateCartQty();
+  const removeFromCart = useRemoveFromCart();
+  const clearCart = useClearCart();
   const { peutCommander, profile } = useAuth();
+  const articles = data ?? [];
+  const total = articles.reduce((s, i) => s + (i.oeuvre?.prix ?? 0) * i.qte, 0);
   const livraison = articles.length > 0 ? 12000 : 0;
 
   if (!peutCommander) {
@@ -73,7 +89,7 @@ function Panier() {
       />
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        {!pret ? (
+        {isLoading ? (
           <LoadingRows rows={3} />
         ) : articles.length === 0 ? (
           <EmptyState
@@ -89,7 +105,10 @@ function Panier() {
         ) : (
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <div className="divide-y divide-border rounded-lg border border-border bg-card">
-              {articles.map(({ oeuvre, qte }) => (
+              {articles.map((item) => {
+                const oeuvre = item.oeuvre;
+                if (!oeuvre) return null;
+                return (
                 <div key={oeuvre.slug} className="flex gap-4 p-5">
                   <Link
                     to="/art/oeuvres/$slug"
@@ -97,7 +116,7 @@ function Panier() {
                     className="shrink-0 overflow-hidden rounded-md"
                   >
                     <img
-                      src={oeuvre.image}
+                      src={oeuvre.image_url}
                       alt={oeuvre.titre}
                       className="media-warm size-24 object-cover"
                     />
@@ -109,7 +128,7 @@ function Panier() {
                       </Link>
                     </h2>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {oeuvre.categorie} · {oeuvre.artiste}
+                      {oeuvre.categorie} · {oeuvre.artiste?.nom}
                     </p>
                     <div className="mt-4 flex flex-wrap items-center gap-4">
                       <div className="flex items-center gap-2">
@@ -117,40 +136,84 @@ function Panier() {
                           variant="outline"
                           size="icon"
                           aria-label="Diminuer la quantité"
-                          onClick={() => definir(oeuvre.slug, qte - 1)}
+                          onClick={() => updateQty.mutate({ oeuvreId: item.oeuvre_id, qte: item.qte - 1 })}
                         >
                           <Minus />
                         </Button>
-                        <span className="w-6 text-center font-semibold">{qte}</span>
+                        <span className="w-6 text-center font-semibold">{item.qte}</span>
                         <Button
                           variant="outline"
                           size="icon"
                           aria-label="Augmenter la quantité"
-                          onClick={() => definir(oeuvre.slug, qte + 1)}
+                          onClick={() => updateQty.mutate({ oeuvreId: item.oeuvre_id, qte: item.qte + 1 })}
                         >
                           <Plus />
                         </Button>
                       </div>
-                      <button
-                        onClick={() => retirer(oeuvre.slug)}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-terracotta hover:underline"
-                      >
-                        <Trash2 className="size-3.5" /> Retirer
-                      </button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            className="flex items-center gap-1.5 text-xs font-semibold text-terracotta hover:underline"
+                          >
+                            <Trash2 className="size-3.5" /> Retirer
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Retirer cet article ?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Êtes-vous sûr de vouloir retirer « {oeuvre.titre} » de votre panier ?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction
+                              className={buttonVariants({ variant: "destructive" })}
+                              onClick={() => {
+                                removeFromCart.mutate(item.oeuvre_id);
+                                toast.success("Article retiré du panier");
+                              }}
+                            >
+                              Retirer
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                   <p className="shrink-0 font-display text-lg text-forest-deep">
-                    {formatFcfa(oeuvre.prix * qte)}
+                    {formatFcfa(oeuvre.prix * item.qte)}
                   </p>
                 </div>
-              ))}
+                );
+              })}
               <div className="p-5">
-                <button
-                  onClick={vider}
-                  className="text-xs font-semibold text-muted-foreground hover:underline"
-                >
-                  Vider le panier
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="text-xs font-semibold text-muted-foreground hover:underline"
+                    >
+                      Vider le panier
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Vider le panier ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action supprimera tous les articles de votre panier. Cette action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        className={buttonVariants({ variant: "destructive" })}
+                        onClick={() => clearCart.mutate()}
+                      >
+                        Vider
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
 

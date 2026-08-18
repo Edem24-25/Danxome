@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { SectionTitle } from "@/components/site/Bits";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -12,11 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatFcfa } from "@/lib/data";
+import {
+  formatFcfa,
+  statutLabel,
+  statutsCommandes,
+  useCommandes,
+  useUpdateCommandeStatut,
+  type CommandeStatut,
+} from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
-import { statutLabel, statutsCommandes, useCommandes, type CommandeStatut } from "@/lib/commandes";
+import { requireRole } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/artiste/commandes")({
+  beforeLoad: () => requireRole(["artiste", "artisan", "admin"]),
   head: () => ({
     meta: [
       { title: "Mes commandes — DanXomè" },
@@ -54,12 +63,14 @@ const badgeVariant: Record<CommandeStatut, "default" | "gold" | "forest" | "seco
     en_cours: "forest",
     expediee: "secondary",
     livree: "quiet",
+    annulee: "secondary",
   };
 
 function Commandes() {
   const { profile, loading, user } = useAuth();
   const navigate = useNavigate();
-  const { commandes, pret, changerStatut } = useCommandes();
+  const { data: commandes = [], isLoading: loadingCommandes } = useCommandes();
+  const updateStatut = useUpdateCommandeStatut();
   const [filtre, setFiltre] = useState<(typeof filtreCommandes)[number]["id"]>("toutes");
 
   useEffect(() => {
@@ -70,16 +81,40 @@ function Commandes() {
     }
   }, [loading, user, profile, navigate]);
 
-  if (loading || !profile || !pret) {
+  if (loading || !profile || loadingCommandes) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="w-full max-w-4xl space-y-6 p-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="flex gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-20 rounded-full" />
+            ))}
+          </div>
+          <div className="rounded-xl border border-border">
+            <div className="border-b border-border p-4">
+              <Skeleton className="h-5 w-32" />
+            </div>
+            <div className="p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 border-b border-border py-3 last:border-0"
+                >
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 flex-1" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   const changer = (ref: string, statut: CommandeStatut) => {
-    changerStatut(ref, statut);
+    updateStatut.mutate({ ref, statut });
     toast.success("Statut mis à jour", {
       description: `${statutLabel(statut)} — ${ref}`,
     });
@@ -140,8 +175,8 @@ function Commandes() {
               {visibles.map((c) => (
                 <tr key={c.ref}>
                   <td className="px-4 py-3 font-mono text-xs">{c.ref}</td>
-                  <td className="px-4 py-3">{c.client}</td>
-                  <td className="px-4 py-3">{c.piece}</td>
+                  <td className="px-4 py-3">{c.client_nom}</td>
+                  <td className="px-4 py-3">{c.oeuvre_titre}</td>
                   <td className="px-4 py-3 font-display text-forest-deep">
                     {formatFcfa(c.montant)}
                   </td>

@@ -9,7 +9,9 @@ import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Rule, SectionTitle } from "@/components/site/Bits";
 import { BeninMap } from "@/components/site/BeninMap";
-import { artistes, evenements, images, musees, oeuvres, plats, royaumes, sites } from "@/lib/data";
+import { useSites, useArtistes, useEvenements, useMusees, useRoyaumes, usePlats, useOeuvres } from "@/hooks/use-data";
+import heroAbomey from "@/assets/hero-abomey.jpg";
+import museum from "@/assets/museum.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,38 +36,41 @@ export const Route = createFileRoute("/")({
 function Accueil() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const { data: sites = [] } = useSites();
+  const { data: artistes = [] } = useArtistes();
+  const { data: evenements = [] } = useEvenements();
+  const { data: musees = [] } = useMusees();
+  const { data: royaumes = [] } = useRoyaumes();
+  const { data: plats = [] } = usePlats();
+  const { data: oeuvres = [] } = useOeuvres();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = query.trim().toLowerCase();
     if (!q) return;
 
-    const match =
-      sites.find((s) => `${s.nom} ${s.region} ${s.type} ${s.resume}`.toLowerCase().includes(q)) ||
-      artistes.find((a) => `${a.nom} ${a.metier} ${a.ville} ${a.bio}`.toLowerCase().includes(q)) ||
-      evenements.find((e) => `${e.titre} ${e.lieu} ${e.categorie} ${e.resume}`.toLowerCase().includes(q)) ||
-      musees.find((m) => `${m.nom} ${m.ville} ${m.resume}`.toLowerCase().includes(q)) ||
-      royaumes.find((r) => `${r.nom} ${r.resume}`.toLowerCase().includes(q)) ||
-      plats.find((p) => `${p.nom} ${p.region} ${p.resume}`.toLowerCase().includes(q)) ||
-      oeuvres.find((o) => `${o.titre} ${o.artiste} ${o.categorie} ${o.description}`.toLowerCase().includes(q));
+    const matchSite = sites.find((s) => `${s.nom} ${s.region} ${s.type} ${s.resume}`.toLowerCase().includes(q));
+    const matchArtiste = artistes.find((a) => `${a.nom} ${a.metier} ${a.ville} ${a.bio}`.toLowerCase().includes(q));
+    const matchEvenement = evenements.find((ev) => `${ev.titre} ${ev.lieu} ${ev.categorie} ${ev.resume}`.toLowerCase().includes(q));
+    const matchMusee = musees.find((m) => `${m.nom} ${m.ville} ${m.resume}`.toLowerCase().includes(q));
+    const matchRoyaume = royaumes.find((r) => `${r.nom} ${r.resume}`.toLowerCase().includes(q));
+    const matchPlat = plats.find((p) => `${p.nom} ${p.region} ${p.resume}`.toLowerCase().includes(q));
+    const matchOeuvre = oeuvres.find((o) => `${o.titre} ${o.categorie} ${o.description}`.toLowerCase().includes(q));
 
-    if (match && "slug" in match) {
-      const m = match as { slug: string };
-      if (sites.includes(match as (typeof sites)[0])) {
-        navigate({ to: "/tourisme/sites/$slug", params: { slug: m.slug } });
-      } else if (artistes.includes(match as (typeof artistes)[0])) {
-        navigate({ to: "/art/artistes/$slug", params: { slug: m.slug } });
-      } else if (evenements.includes(match as (typeof evenements)[0])) {
-        navigate({ to: "/evenements/$slug", params: { slug: m.slug } });
-      } else if (musees.includes(match as (typeof musees)[0])) {
-        navigate({ to: "/culture/musees/$slug", params: { slug: m.slug } });
-      } else if (royaumes.includes(match as (typeof royaumes)[0])) {
-        navigate({ to: "/culture/royaumes/$slug", params: { slug: m.slug } });
-      } else if (plats.includes(match as (typeof plats)[0])) {
-        navigate({ to: "/tourisme/gastronomie/$slug", params: { slug: m.slug } });
-      } else if (oeuvres.includes(match as (typeof oeuvres)[0])) {
-        navigate({ to: "/art/oeuvres/$slug", params: { slug: m.slug } });
-      }
+    if (matchSite) {
+      navigate({ to: "/tourisme/sites/$slug", params: { slug: matchSite.slug } });
+    } else if (matchArtiste) {
+      navigate({ to: "/art/artistes/$slug", params: { slug: matchArtiste.slug } });
+    } else if (matchEvenement) {
+      navigate({ to: "/evenements/$slug", params: { slug: matchEvenement.slug } });
+    } else if (matchMusee) {
+      navigate({ to: "/culture/musees/$slug", params: { slug: matchMusee.slug } });
+    } else if (matchRoyaume) {
+      navigate({ to: "/culture/royaumes/$slug", params: { slug: matchRoyaume.slug } });
+    } else if (matchPlat) {
+      navigate({ to: "/tourisme/gastronomie/$slug", params: { slug: matchPlat.slug } });
+    } else if (matchOeuvre) {
+      navigate({ to: "/art/oeuvres/$slug", params: { slug: matchOeuvre.slug } });
     }
   };
 
@@ -74,7 +79,7 @@ function Accueil() {
       {/* ═══ HERO ═══ */}
       <section className="relative isolate flex min-h-[92vh] items-end overflow-hidden">
         <img
-          src={images.heroAbomey}
+          src={heroAbomey}
           alt="Bas-reliefs des palais royaux d'Abomey au coucher du soleil"
           width={1920}
           height={1280}
@@ -168,14 +173,14 @@ function Accueil() {
         </Reveal>
         <Reveal variant="up" delay={120} className="mt-12">
           <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
-            <BeninMap className="min-h-[420px]" />
+            <BeninMap sites={sites} className="min-h-[420px]" />
             <div className="grid gap-4 sm:grid-cols-2">
               {sites.slice(0, 4).map((s) => (
                 <ContentCard
                   key={s.slug}
                   to="/tourisme/sites/$slug"
                   params={{ slug: s.slug }}
-                  image={s.image}
+                  image={s.image_url}
                   titre={s.nom}
                   meta={`${s.region} · ${s.type}`}
                   note={s.note}
@@ -210,7 +215,7 @@ function Accueil() {
                   className="group relative aspect-[4/3] overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]"
                 >
                   <img
-                    src={s.image}
+                    src={s.image_url}
                     alt={s.nom}
                     loading="lazy"
                     className="media-warm size-full object-cover transition-all duration-700 group-hover:scale-110"
@@ -255,7 +260,7 @@ function Accueil() {
                 <ContentCard
                   to="/art/artistes/$slug"
                   params={{ slug: a.slug }}
-                  image={a.image}
+                  image={a.image_url}
                   titre={a.nom}
                   meta={`${a.metier} · ${a.ville}`}
                   resume={a.bio}
@@ -312,7 +317,7 @@ function Accueil() {
       <section className="relative isolate overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-fixed bg-center"
-          style={{ backgroundImage: `url(${images.museum})` }}
+          style={{ backgroundImage: `url(${museum})` }}
           aria-hidden
         />
         <div className="absolute inset-0 bg-forest-darker/85" />

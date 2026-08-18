@@ -1,6 +1,16 @@
-const supabaseUrl = "https://atmdqjuoixrfxxfwjimj.supabase.co";
-const supabaseServiceKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0bWRxanVvaXhyZnh4ZndqaW1qIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjE3MzMxNSwiZXhwIjoyMTAxNzQ5MzE1fQ.LgmRYHn5hRqJNx0Xw0wWtLzB19Kfq-Qq44DXvj6kwgw";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.server" });
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error(
+    "Variables manquantes. Assurez-vous que VITE_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont définies dans .env.server",
+  );
+  process.exit(1);
+}
 
 async function listAll() {
   const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=1&per_page=100`, {

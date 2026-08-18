@@ -1,32 +1,25 @@
 ﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { CalendarDays, Clock, MapPin, Ticket, Users } from "lucide-react";
+import { useMemo } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule, SectionTitle } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { evenements } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEvenement, useEvenements } from "@/hooks/use-data";
 
 export const Route = createFileRoute("/evenements/$slug")({
-  loader: ({ params }) => {
-    const evenement = evenements.find((e) => e.slug === params.slug);
-    if (!evenement) throw notFound();
-    return { evenement };
-  },
-  head: ({ loaderData }) => {
-    const titre = loaderData?.evenement.titre ?? "Événement";
-    const resume = loaderData?.evenement.resume ?? "Agenda culturel du Bénin.";
-    return {
-      meta: [
-        { title: `${titre} — Agenda DanXomè` },
-        { name: "description", content: resume },
-        { property: "og:title", content: `${titre} — Agenda DanXomè` },
-        { property: "og:description", content: resume },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Événement — Agenda DanXomè" },
+      { name: "description", content: "Agenda culturel du Bénin." },
+      { property: "og:title", content: "Événement — Agenda DanXomè" },
+      { property: "og:description", content: "Agenda culturel du Bénin." },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: EvenementDetail,
 });
 
@@ -42,16 +35,42 @@ const programme = [
 ];
 
 function EvenementDetail() {
-  const { evenement } = Route.useLoaderData();
-  const autres = evenements.filter((e) => e.slug !== evenement.slug).slice(0, 3);
+  const { slug } = Route.useParams();
+  const { data: evenement, isLoading: isLoadingEvenement } = useEvenement(slug);
+  const { data: evenements, isLoading: isLoadingAutres } = useEvenements();
+
+  const autres = useMemo(
+    () => (evenements ?? []).filter((e) => e.slug !== evenement?.slug).slice(0, 3),
+    [evenements, evenement?.slug],
+  );
+
+  if (isLoadingEvenement || isLoadingAutres) {
+    return (
+      <SiteShell>
+        <Skeleton className="h-[30rem] w-full" />
+        <div className="mx-auto max-w-7xl space-y-6 px-4 py-16 sm:px-6 lg:px-8">
+          <Skeleton className="h-10 w-96" />
+          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </SiteShell>
+    );
+  }
+
+  if (!evenement) {
+    throw notFound();
+  }
 
   return (
     <SiteShell>
       <section className="relative">
         <img
-          src={evenement.image}
+          src={evenement.image_url}
           alt={`${evenement.titre} à ${evenement.lieu}`}
           className="h-[24rem] w-full object-cover sm:h-[30rem]"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/placeholder.svg";
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-forest-deep via-forest-deep/70 to-forest-deep/25" />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
@@ -151,10 +170,13 @@ function EvenementDetail() {
                 className="group block overflow-hidden rounded-lg border border-border bg-card"
               >
                 <img
-                  src={e.image}
+                  src={e.image_url}
                   alt={e.titre}
                   loading="lazy"
                   className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                  }}
                 />
                 <div className="p-5">
                   <Badge variant="quiet">{e.categorie}</Badge>

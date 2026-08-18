@@ -6,32 +6,16 @@ import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { sites } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSite, useSites } from "@/hooks/use-data";
 
 export const Route = createFileRoute("/tourisme/sites/$slug")({
-  loader: ({ params }) => {
-    const site = sites.find((s) => s.slug === params.slug);
-    if (!site) throw notFound();
-    return { site };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [{ title: "Site introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
-      };
-    }
-    const { site } = loaderData;
-    return {
-      meta: [
-        { title: `${site.nom} — Tourisme au Bénin | DanXomè` },
-        { name: "description", content: site.resume },
-        { property: "og:title", content: `${site.nom} — DanXomè` },
-        { property: "og:description", content: site.resume },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Site touristique — DanXomè" },
+      { name: "description", content: "Découvrez ce site touristique du Bénin." },
+    ],
+  }),
   component: SiteDetail,
 });
 
@@ -42,14 +26,48 @@ const infos = [
 ];
 
 function SiteDetail() {
-  const { site } = Route.useLoaderData();
-  const autres = sites.filter((s) => s.slug !== site.slug).slice(0, 3);
+  const { slug } = Route.useParams();
+  const { data: site, isLoading } = useSite(slug);
+  const { data: allSites = [] } = useSites();
+  const autres = allSites.filter((s) => s.slug !== slug).slice(0, 3);
+
+  if (isLoading) {
+    return (
+      <SiteShell>
+        <Skeleton className="h-[28rem] w-full" />
+        <div className="mx-auto max-w-7xl space-y-4 px-4 py-10 sm:px-6 lg:px-8">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-32 w-full" />
+          <div className="grid gap-4 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border p-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="mt-2 h-3 w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </SiteShell>
+    );
+  }
+
+  if (!site) {
+    throw notFound();
+  }
 
   return (
     <SiteShell>
       <section className="relative">
         <div className="absolute inset-0">
-          <img src={site.image} alt={site.nom} className="media-warm size-full object-cover" />
+          <img
+            src={site.image_url}
+            alt={site.nom}
+            className="media-warm size-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
+            }}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-forest-deep via-forest-deep/70 to-forest-deep/30" />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 pt-8 pb-14 sm:px-6 sm:pt-10 sm:pb-20 lg:px-8">
@@ -69,7 +87,7 @@ function SiteDetail() {
               </span>
               <span className="flex items-center gap-1.5">
                 <Star className="size-4 fill-accent text-accent" />
-                <strong className="text-ivory">{site.note.toFixed(1)}</strong> · {site.avis} avis
+                <strong className="text-ivory">{site.note.toFixed(1)}</strong> · {site.avis_count} avis
               </span>
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -164,7 +182,7 @@ function SiteDetail() {
               <ContentCard
                 to="/tourisme/sites/$slug"
                 params={{ slug: s.slug }}
-                image={s.image}
+                image={s.image_url}
                 titre={s.nom}
                 meta={`${s.region} · ${s.type}`}
                 resume={s.resume}

@@ -8,9 +8,11 @@ export function FadeInImage({
   src,
   alt,
   className,
+  onError,
   ...props
 }: ImgHTMLAttributes<HTMLImageElement>) {
   const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
@@ -18,14 +20,19 @@ export function FadeInImage({
       <div
         className={cn(
           "absolute inset-0 bg-secondary transition-opacity duration-700",
-          loaded ? "opacity-0" : "opacity-100",
+          loaded || errored ? "opacity-0" : "opacity-100",
         )}
       />
       <img
-        src={src}
+        src={errored ? "/placeholder.svg" : src}
         alt={alt}
         loading="lazy"
         onLoad={() => setLoaded(true)}
+        onError={(e) => {
+          setErrored(true);
+          setLoaded(true);
+          onError?.(e);
+        }}
         className={cn(
           "size-full object-cover transition-all duration-700",
           loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-sm scale-105",

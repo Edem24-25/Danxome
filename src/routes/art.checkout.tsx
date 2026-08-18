@@ -1,15 +1,14 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CreditCard, Lock, ShoppingBag, Smartphone } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { SiteShell } from "@/components/site/SiteShell";
 import { EmptyState, PageHead } from "@/components/site/Bits";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatFcfa } from "@/lib/data";
-import { usePanier } from "@/lib/cart";
-import { enregistrerAchat } from "@/lib/achats";
+import { formatFcfa, usePanier } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { accueilProfil } from "@/lib/types/user";
 import { cn } from "@/lib/utils";
@@ -40,11 +39,13 @@ const moyens = [
 
 function Checkout() {
   const navigate = useNavigate();
-  const { articles, total, vider } = usePanier();
-  const { peutCommander, profile } = useAuth();
+  const { data } = usePanier();
+  const { peutCommander, profile, user } = useAuth();
   const [moyen, setMoyen] = useState<string>("momo");
   const [enCours, setEnCours] = useState(false);
   const [simuleErreur, setSimuleErreur] = useState(false);
+  const articles = data ?? [];
+  const total = articles.reduce((s, i) => s + (i.oeuvre?.prix ?? 0) * i.qte, 0);
   const livraison = articles.length > 0 ? 12000 : 0;
 
   if (!peutCommander) {
@@ -75,35 +76,44 @@ function Checkout() {
     );
   }
 
-  const payer = () => {
+  const payer = async () => {
     if (enCours) return;
     setEnCours(true);
 
-    setTimeout(() => {
-      setEnCours(false);
+    try {
+      // Simulated payment delay
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+
       if (simuleErreur) {
         navigate({ to: "/art/commande/erreur", search: { motif: "paiement-refuse" } });
         return;
       }
-      const reference = `DAH-${new Date().getFullYear()}-${Math.floor(
-        1000 + Math.random() * 9000,
-      )}`;
-      enregistrerAchat({
-        reference,
-        date: new Date().toISOString(),
-        articles: articles.map(({ oeuvre, qte }) => ({
-          titre: oeuvre.titre,
-          artiste: oeuvre.artiste,
-          image: oeuvre.image,
-          quantite: qte,
-          prix: oeuvre.prix,
-        })),
-        total,
-        livraison: 12000,
+
+      if (!user?.id) {
+        toast.error("Erreur", { description: "Vous devez être connecté pour commander." });
+        setEnCours(false);
+        return;
+      }
+
+      // Server-side order creation: validates prices, generates ref, marks as sold, clears cart
+      const { createOrderFromCart } = await import("@/server-functions/commands");
+      const result = await createOrderFromCart({
+        data: {
+          client_id: user.id,
+          client_nom: `${profile?.prenom ?? ""} ${profile?.nom ?? ""}`.trim(),
+          items: articles
+            .filter((a) => a.oeuvre)
+            .map((a) => ({ oeuvre_id: a.oeuvre!.id, qte: a.qte })),
+        },
       });
-      vider();
-      navigate({ to: "/art/commande/succes", search: { ref: reference } });
-    }, 1800);
+
+      toast.success("Commande confirmée !");
+      navigate({ to: "/art/commande/succes", search: { ref: result.ref } });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      toast.error("Erreur de commande", { description: message });
+      setEnCours(false);
+    }
   };
 
   return (
@@ -208,24 +218,28 @@ function Checkout() {
               <div className="rounded-lg border border-border bg-card p-6">
                 <p className="eyebrow">Votre commande</p>
                 <ul className="mt-5 space-y-3">
-                  {articles.map(({ oeuvre, qte }) => (
-                    <li key={oeuvre.slug} className="flex items-center gap-3">
-                      <img
-                        src={oeuvre.image}
-                        alt={oeuvre.titre}
-                        className="media-warm size-12 rounded-md object-cover"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-forest-deep">
-                          {oeuvre.titre}
+                  {articles.map((item) => {
+                    const oeuvre = item.oeuvre;
+                    if (!oeuvre) return null;
+                    return (
+                      <li key={oeuvre.slug} className="flex items-center gap-3">
+                        <img
+                          src={oeuvre.image_url}
+                          alt={oeuvre.titre}
+                          className="media-warm size-12 rounded-md object-cover"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-forest-deep">
+                            {oeuvre.titre}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">× {item.qte}</span>
                         </span>
-                        <span className="block text-xs text-muted-foreground">× {qte}</span>
-                      </span>
-                      <span className="text-sm font-semibold text-forest">
-                        {formatFcfa(oeuvre.prix * qte)}
-                      </span>
-                    </li>
-                  ))}
+                        <span className="text-sm font-semibold text-forest">
+                          {formatFcfa(oeuvre.prix * item.qte)}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
                 <div className="mt-5 space-y-2.5 border-t border-border pt-4 text-sm">
                   <div className="flex justify-between gap-4">

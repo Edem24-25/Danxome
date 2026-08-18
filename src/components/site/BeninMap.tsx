@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
 import { useState } from "react";
-import { sites } from "@/lib/data";
+import type { Site } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 /** Carte stylisée du Bénin avec pins animés et tooltips interactifs. */
-export function BeninMap({ className, actifs }: { className?: string; actifs?: string[] }) {
+export function BeninMap({ className, actifs, sites = [] }: { className?: string; actifs?: string[]; sites?: Site[] }) {
   const visibles = actifs ? sites.filter((s) => actifs.includes(s.type)) : sites;
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -61,7 +61,7 @@ export function BeninMap({ className, actifs }: { className?: string; actifs?: s
           key={s.slug}
           to="/tourisme/sites/$slug"
           params={{ slug: s.slug }}
-          style={{ left: `${s.coords.x}%`, top: `${s.coords.y}%` }}
+          style={{ left: `${s.coords_x}%`, top: `${s.coords_y}%` }}
           className="group absolute -translate-x-1/2 -translate-y-full"
           onMouseEnter={() => setHovered(s.slug)}
           onMouseLeave={() => setHovered(null)}

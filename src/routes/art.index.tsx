@@ -6,7 +6,7 @@ import { EmptyState, PageHead, Rule, SectionTitle } from "@/components/site/Bits
 import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
-import { artistes, formatFcfa, images, oeuvres } from "@/lib/data";
+import { useArtistes, useOeuvres, formatFcfa } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/art/")({
@@ -28,14 +28,30 @@ export const Route = createFileRoute("/art/")({
   component: Art,
 });
 
-const categories = ["Toutes", ...Array.from(new Set(oeuvres.map((o) => o.categorie)))];
-
 function Art() {
+  const { data: oeuvres, isLoading: loadingOeuvres } = useOeuvres();
+  const { data: artistes, isLoading: loadingArtistes } = useArtistes();
   const [cat, setCat] = useState("Toutes");
-  const liste = useMemo(
-    () => (cat === "Toutes" ? oeuvres : oeuvres.filter((o) => o.categorie === cat)),
-    [cat],
+
+  const categories = useMemo(
+    () => ["Toutes", ...Array.from(new Set((oeuvres ?? []).map((o) => o.categorie)))],
+    [oeuvres],
   );
+
+  const liste = useMemo(
+    () => (cat === "Toutes" ? (oeuvres ?? []) : (oeuvres ?? []).filter((o) => o.categorie === cat)),
+    [cat, oeuvres],
+  );
+
+  if (loadingOeuvres || loadingArtistes) {
+    return (
+      <SiteShell>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        </div>
+      </SiteShell>
+    );
+  }
 
   return (
     <SiteShell>
@@ -103,9 +119,9 @@ function Art() {
                 <ContentCard
                   to="/art/oeuvres/$slug"
                   params={{ slug: o.slug }}
-                  image={o.image}
+                  image={o.image_url}
                   titre={o.titre}
-                  meta={`${o.categorie} · ${o.artiste}`}
+                  meta={`${o.categorie} · ${o.artiste?.nom ?? ""}`}
                   resume={o.description}
                   ratio={i % 5 === 0 ? "paysage" : "portrait"}
                   footer={formatFcfa(o.prix)}
@@ -127,12 +143,12 @@ function Art() {
           />
         </Reveal>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {artistes.map((a, i) => (
+          {(artistes ?? []).map((a, i) => (
             <Reveal key={a.slug} variant="up" delay={i * 80}>
               <ContentCard
                 to="/art/artistes/$slug"
                 params={{ slug: a.slug }}
-                image={a.image}
+                image={a.image_url}
                 titre={a.nom}
                 meta={`${a.metier} · ${a.ville}`}
                 resume={a.bio}

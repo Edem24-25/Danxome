@@ -1,12 +1,12 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layers, MapPin, Star, Video } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs } from "@/components/site/Bits";
 import { BeninMap } from "@/components/site/BeninMap";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { sites } from "@/lib/data";
+import { useSites } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/tourisme/carte")({
@@ -30,9 +30,9 @@ export const Route = createFileRoute("/tourisme/carte")({
   component: Carte,
 });
 
-const couches = Array.from(new Set(sites.map((s) => s.type)));
-
 function Carte() {
+  const { data: sites = [] } = useSites();
+  const couches = useMemo(() => Array.from(new Set(sites.map((s) => s.type))), [sites]);
   const [actifs, setActifs] = useState<string[]>(couches);
   const visibles = sites.filter((s) => actifs.includes(s.type));
 
@@ -61,7 +61,7 @@ function Carte() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]">
           <div className="order-2 lg:order-1">
-            <BeninMap actifs={actifs} className="min-h-[520px] w-full lg:min-h-[680px]" />
+            <BeninMap sites={sites} actifs={actifs} className="min-h-[520px] w-full lg:min-h-[680px]" />
             <p className="mt-3 text-xs text-muted-foreground">
               Survolez un repère pour afficher le nom du site, cliquez pour ouvrir sa fiche.
             </p>
@@ -110,7 +110,7 @@ function Carte() {
                       className="flex gap-3 p-4 transition-colors hover:bg-secondary/60"
                     >
                       <img
-                        src={s.image}
+                        src={s.image_url}
                         alt={s.nom}
                         loading="lazy"
                         className="media-warm size-14 shrink-0 rounded-md object-cover"

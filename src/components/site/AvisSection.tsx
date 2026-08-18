@@ -3,8 +3,20 @@ import { Link } from "@tanstack/react-router";
 import { Star, MessageSquare, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface Avis {
@@ -84,6 +96,7 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
     try {
       await supabase.from("avis_plats").delete().eq("id", id);
       await fetchAvis();
+      toast.success("Avis supprimé");
     } catch {
       /* table avis_plats pas encore créée */
     }
@@ -152,14 +165,34 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
               {monAvis ? "Mettre à jour" : "Publier"}
             </Button>
             {monAvis && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => supprimer(monAvis.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="size-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Supprimer votre avis ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Votre avis sera définitivement supprimé. Cette action est irréversible.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction
+                      className={buttonVariants({ variant: "destructive" })}
+                      onClick={() => supprimer(monAvis.id)}
+                    >
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
@@ -224,12 +257,32 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
                 <p className="mt-3 text-sm leading-relaxed text-foreground/80">{a.commentaire}</p>
               )}
               {user?.id === a.user_id && (
-                <button
-                  onClick={() => supprimer(a.id)}
-                  className="mt-2 text-xs text-destructive hover:underline"
-                >
-                  Supprimer
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="mt-2 text-xs text-destructive hover:underline"
+                    >
+                      Supprimer
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Supprimer cet avis ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cet avis sera définitivement supprimé. Cette action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        className={buttonVariants({ variant: "destructive" })}
+                        onClick={() => supprimer(a.id)}
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           ))}

@@ -3,7 +3,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead, Rule, SectionTitle } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
-import { images } from "@/lib/data";
+import museum from "@/assets/museum.jpg";
 
 export const Route = createFileRoute("/a-propos")({
   head: () => ({
@@ -65,7 +65,7 @@ function APropos() {
           <Reveal variant="left">
             <div className="relative overflow-hidden rounded-2xl">
               <img
-                src={images.museum}
+                src={museum}
                 alt="Salle de musée présentant des objets du patrimoine béninois"
                 loading="lazy"
                 className="aspect-4/3 w-full object-cover"

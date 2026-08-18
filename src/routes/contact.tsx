@@ -1,12 +1,15 @@
 ﻿import { createFileRoute } from "@tanstack/react-router";
 import { Check, Mail, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSendContact } from "@/hooks/use-data";
+import { contactSchema } from "@/lib/validations";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -41,6 +44,8 @@ const sujets = [
 
 function Contact() {
   const [envoye, setEnvoye] = useState(false);
+  const sendContact = useSendContact();
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <SiteShell>
@@ -68,26 +73,48 @@ function Contact() {
             </div>
           ) : (
             <form
+              ref={formRef}
               className="space-y-5"
               onSubmit={(e) => {
                 e.preventDefault();
-                setEnvoye(true);
+                const fd = new FormData(e.currentTarget);
+                const parsed = contactSchema.safeParse({
+                  nom: fd.get("nom") as string,
+                  email: fd.get("email") as string,
+                  sujet: fd.get("sujet") as string,
+                  message: fd.get("message") as string,
+                });
+                if (!parsed.success) {
+                  const firstError = parsed.error.errors[0];
+                  toast.error("Erreur de validation", {
+                    description: firstError?.message ?? "Veuillez vérifier vos informations.",
+                  });
+                  return;
+                }
+                sendContact.mutate(parsed.data, { onSuccess: () => setEnvoye(true) });
               }}
             >
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="nom">Nom complet</Label>
-                  <Input id="nom" required placeholder="Ayaba Dossou" />
+                  <Input id="nom" name="nom" required placeholder="Ayaba Dossou" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" required placeholder="vous@email.com" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="vous@email.com"
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="sujet">Sujet</Label>
                 <select
                   id="sujet"
+                  name="sujet"
                   className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring"
                 >
                   {sujets.map((s) => (
@@ -97,10 +124,28 @@ function Contact() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="message">Message</Label>
-                <Textarea id="message" required rows={6} placeholder="Décrivez votre demande…" />
+                <Textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={6}
+                  placeholder="Décrivez votre demande…"
+                />
               </div>
-              <Button type="submit" variant="gold" className="w-full sm:w-auto">
-                Envoyer le message
+              <Button
+                type="submit"
+                variant="gold"
+                className="w-full sm:w-auto"
+                disabled={sendContact.isPending}
+              >
+                {sendContact.isPending ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Envoi en cours…
+                  </span>
+                ) : (
+                  "Envoyer le message"
+                )}
               </Button>
             </form>
           )}

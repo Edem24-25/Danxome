@@ -6,6 +6,7 @@ import { ProfilShell } from "@/components/site/ProfilShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth";
 
 export const Route = createFileRoute("/profil/details")({
@@ -36,8 +37,17 @@ function ProfilDetails() {
   if (loading || !user || !profile) {
     return (
       <ProfilShell title="Mes informations" crumbs={[{ label: "Mon profil", to: "/profil" }]}>
-        <div className="flex items-center justify-center py-12">
-          <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="space-y-4 py-4">
+          <Skeleton className="h-4 w-32" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
+          <Skeleton className="h-10 w-32" />
         </div>
       </ProfilShell>
     );

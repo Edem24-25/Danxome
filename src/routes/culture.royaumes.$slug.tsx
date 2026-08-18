@@ -1,46 +1,52 @@
 ﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { royaumes } from "@/lib/data";
+import { useRoyaume } from "@/hooks/use-data";
 
 export const Route = createFileRoute("/culture/royaumes/$slug")({
-  loader: ({ params }) => {
-    const royaume = royaumes.find((r) => r.slug === params.slug);
-    if (!royaume) throw notFound();
-    return { royaume };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [{ title: "Royaume introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
-      };
-    }
-    const { royaume } = loaderData;
-    return {
-      meta: [
-        { title: `${royaume.nom} — DanXomè` },
-        { name: "description", content: royaume.resume },
-        { property: "og:title", content: `${royaume.nom} — DanXomè` },
-        { property: "og:description", content: royaume.resume },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Royaume — DanXomè" },
+      { name: "description", content: "Découvrez les royaumes du Bénin." },
+    ],
+  }),
   component: RoyaumeDetail,
 });
 
 function RoyaumeDetail() {
-  const { royaume } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const { data: royaume, isLoading, isError } = useRoyaume(slug);
+
+  useEffect(() => {
+    if (!isLoading && isError) notFound();
+  }, [isLoading, isError]);
+
+  if (isLoading) {
+    return (
+      <SiteShell>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <p className="text-muted-foreground">Chargement…</p>
+        </div>
+      </SiteShell>
+    );
+  }
+
+  if (!royaume) return null;
 
   return (
     <SiteShell>
       <section className="relative isolate flex min-h-[62vh] items-end overflow-hidden">
         <img
-          src={royaume.image}
+          src={royaume.image_url}
           alt={royaume.nom}
           className="media-warm absolute inset-0 size-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/placeholder.svg";
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-forest-deep via-forest-deep/60 to-forest-deep/20" />
         <div className="relative mx-auto w-full max-w-4xl px-4 pt-28 pb-14 sm:px-6">

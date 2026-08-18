@@ -12,12 +12,14 @@ import { DashboardShell } from "@/components/site/DashboardShell";
 import { SectionTitle, StatCard } from "@/components/site/Bits";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { artistes, evenements, oeuvres, sites } from "@/lib/data";
+import { useEvenements, useSites } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { createClient } from "@/lib/supabase/client";
+import { requireRole } from "@/lib/auth-guard";
 import type { Profile } from "@/lib/types/user";
 
 export const Route = createFileRoute("/admin/")({
+  beforeLoad: () => requireRole(["admin"]),
   head: () => ({
     meta: [
       { title: "Back-office institutionnel — DanXomè" },
@@ -47,6 +49,8 @@ const items = [
 function Admin() {
   const { profile, loading, user } = useAuth();
   const navigate = useNavigate();
+  const { data: evenements = [], isLoading: evenementsLoading } = useEvenements();
+  const { data: sites = [], isLoading: sitesLoading } = useSites();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
 
@@ -120,7 +124,7 @@ function Admin() {
         />
         <StatCard
           label="Événements planifiés"
-          value={String(evenements.length)}
+          value={evenementsLoading ? "…" : String(evenements.length)}
           icon={<CalendarDays className="size-4" />}
         />
       </div>
@@ -161,7 +165,9 @@ function Admin() {
                   <td className="px-4 py-3 text-muted-foreground">Cotonou</td>
                   <td className="px-4 py-3 text-right">
                     <Button asChild variant="outline" size="sm">
-                      <Link to="/culture/musees/fondation-vallee">Examiner</Link>
+                      <Link to="/culture/musees/$slug" params={{ slug: "fondation-vallee" }}>
+                        Examiner
+                      </Link>
                     </Button>
                   </td>
                 </tr>
@@ -173,7 +179,9 @@ function Admin() {
                   <td className="px-4 py-3 text-muted-foreground">Porto-Novo</td>
                   <td className="px-4 py-3 text-right">
                     <Button asChild variant="outline" size="sm">
-                      <Link to="/evenements/zangbeto">Examiner</Link>
+                      <Link to="/evenements/$slug" params={{ slug: "zangbeto" }}>
+                        Examiner
+                      </Link>
                     </Button>
                   </td>
                 </tr>
@@ -183,20 +191,29 @@ function Admin() {
 
           <SectionTitle eyebrow="Fréquentation" title="Visites par site (30 jours)" />
           <div className="mt-5 space-y-4 rounded-lg border border-border bg-card p-6">
-            {sites.map((s, i) => {
-              const part = 100 - i * 18;
-              return (
-                <div key={s.slug}>
-                  <div className="flex items-baseline justify-between text-sm">
-                    <span className="font-semibold text-forest-deep">{s.nom}</span>
-                    <span className="text-muted-foreground">{s.avis * 4} visiteurs</span>
+            {sitesLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="size-6 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+              </div>
+            ) : (
+              sites.map((s, i) => {
+                const part = 100 - i * 18;
+                return (
+                  <div key={s.slug}>
+                    <div className="flex items-baseline justify-between text-sm">
+                      <span className="font-semibold text-forest-deep">{s.nom}</span>
+                      <span className="text-muted-foreground">{s.avis_count * 4} visiteurs</span>
+                    </div>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full rounded-full bg-forest"
+                        style={{ width: `${part}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-forest" style={{ width: `${part}%` }} />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 

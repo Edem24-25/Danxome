@@ -1,43 +1,66 @@
 ﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Heart, MapPin, Sparkles } from "lucide-react";
+import { useEffect } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule, SectionTitle, StatCard } from "@/components/site/Bits";
 import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { artistes, formatFcfa, oeuvres } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useArtiste, useOeuvres, formatFcfa } from "@/hooks/use-data";
 
 export const Route = createFileRoute("/art/artistes/$slug")({
-  loader: ({ params }) => {
-    const artiste = artistes.find((a) => a.slug === params.slug);
-    if (!artiste) throw notFound();
-    return { artiste };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [{ title: "Artiste introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
-      };
-    }
-    const { artiste } = loaderData;
-    return {
-      meta: [
-        { title: `${artiste.nom}, ${artiste.metier} — DanXomè` },
-        { name: "description", content: artiste.bio },
-        { property: "og:title", content: `${artiste.nom} — ${artiste.metier} | DanXomè` },
-        { property: "og:description", content: artiste.bio },
-        { property: "og:type", content: "profile" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [{ title: "Artiste — DanXomè" }],
+  }),
   component: ArtisteDetail,
 });
 
 function ArtisteDetail() {
-  const { artiste } = Route.useLoaderData();
-  const siennes = oeuvres.filter((o) => o.artisteSlug === artiste.slug);
+  const { slug } = Route.useParams();
+  const { data: artiste, isLoading, isError } = useArtiste(slug);
+  const { data: oeuvres } = useOeuvres();
+
+  useEffect(() => {
+    if (!isLoading && (isError || !artiste)) {
+      throw notFound();
+    }
+  }, [isLoading, isError, artiste]);
+
+  useEffect(() => {
+    if (artiste) {
+      document.title = `${artiste.nom}, ${artiste.metier} — DanXomè`;
+    }
+  }, [artiste]);
+
+  if (isLoading || !artiste) {
+    return (
+      <SiteShell>
+        <div className="mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-6 sm:pb-16 lg:px-8">
+          <div className="flex gap-2">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+            <Skeleton className="aspect-square w-full rounded-lg" />
+            <div className="space-y-4">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-10 w-64" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-20 w-full" />
+              <div className="flex gap-3">
+                <Skeleton className="h-10 w-48" />
+                <Skeleton className="h-10 w-40" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </SiteShell>
+    );
+  }
+
+  const siennes = (oeuvres ?? []).filter((o) => o.artiste_id === artiste.id);
 
   return (
     <SiteShell>
@@ -47,9 +70,12 @@ function ArtisteDetail() {
           <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
             <div className="overflow-hidden rounded-lg border border-border">
               <img
-                src={artiste.image}
+                src={artiste.image_url}
                 alt={artiste.nom}
                 className="media-warm aspect-square w-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/placeholder.svg";
+                }}
               />
             </div>
             <div className="min-w-0">
@@ -99,7 +125,7 @@ function ArtisteDetail() {
               <ContentCard
                 to="/art/oeuvres/$slug"
                 params={{ slug: o.slug }}
-                image={o.image}
+                image={o.image_url}
                 titre={o.titre}
                 meta={o.categorie}
                 resume={o.description}

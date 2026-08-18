@@ -5,7 +5,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead, Rule } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
-import { langues } from "@/lib/data";
+import { useLangues } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/culture/langues")({
@@ -26,6 +26,7 @@ export const Route = createFileRoute("/culture/langues")({
 
 function Langues() {
   const [joue, setJoue] = useState<string | null>(null);
+  const { data: langues = [], isLoading } = useLangues();
 
   return (
     <SiteShell>
@@ -38,7 +39,9 @@ function Langues() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {langues.map((l, i) => {
+          {isLoading ? (
+            <p className="text-muted-foreground">Chargement des langues…</p>
+          ) : langues.map((l, i) => {
             const actif = joue === l.nom;
             return (
               <Reveal key={l.nom} delay={i * 70}>

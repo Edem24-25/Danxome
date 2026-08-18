@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Star, ArrowUpRight } from "lucide-react";
+import { Star, ArrowUpRight, ImageIcon } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,8 @@ export function ContentCard({
   ratio = "paysage",
   className,
 }: Props) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <Link
       to={to}
@@ -48,12 +51,19 @@ export function ContentCard({
       )}
     >
       <div className={cn("relative overflow-hidden", ratios[ratio])}>
-        <img
-          src={image}
-          alt={titre}
-          loading="lazy"
-          className="media-warm size-full object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
-        />
+        {imgError ? (
+          <div className="flex size-full items-center justify-center bg-muted">
+            <ImageIcon className="size-10 text-muted-foreground/40" />
+          </div>
+        ) : (
+          <img
+            src={image}
+            alt={titre}
+            loading="lazy"
+            onError={() => setImgError(true)}
+            className="media-warm size-full object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+          />
+        )}
         {/* Overlay gradient enrichi */}
         <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/80 via-forest-deep/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
 

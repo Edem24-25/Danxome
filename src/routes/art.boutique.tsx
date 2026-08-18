@@ -6,8 +6,9 @@ import { EmptyState, PageHead } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatFcfa, oeuvres } from "@/lib/data";
-import { usePanier } from "@/lib/cart";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { useOeuvres, formatFcfa, usePanier, useAddToCart } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { cn } from "@/lib/utils";
 
@@ -32,24 +33,55 @@ export const Route = createFileRoute("/art/boutique")({
   component: Boutique,
 });
 
-const categories = ["Toutes", ...Array.from(new Set(oeuvres.map((o) => o.categorie)))];
 const tris = ["Nouveautés", "Prix croissant", "Prix décroissant"] as const;
 
 function Boutique() {
-  const { ajouter, nombre } = usePanier();
+  const { data: panierData } = usePanier();
+  const addToCart = useAddToCart();
   const { peutCommander } = useAuth();
+  const nombre = (panierData ?? []).reduce((s, i) => s + i.qte, 0);
+  const { data: oeuvres, isLoading } = useOeuvres();
   const [cat, setCat] = useState("Toutes");
   const [max, setMax] = useState(350000);
   const [tri, setTri] = useState<(typeof tris)[number]>("Nouveautés");
 
+  const categories = useMemo(
+    () => ["Toutes", ...Array.from(new Set((oeuvres ?? []).map((o) => o.categorie)))],
+    [oeuvres],
+  );
+
   const liste = useMemo(() => {
-    const filtres = oeuvres.filter(
+    const filtres = (oeuvres ?? []).filter(
       (o) => (cat === "Toutes" || o.categorie === cat) && o.prix <= max,
     );
     if (tri === "Prix croissant") return [...filtres].sort((a, b) => a.prix - b.prix);
     if (tri === "Prix décroissant") return [...filtres].sort((a, b) => b.prix - a.prix);
     return filtres;
-  }, [cat, max, tri]);
+  }, [cat, max, tri, oeuvres]);
+
+  if (isLoading) {
+    return (
+      <SiteShell>
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="mt-3 h-4 w-96" />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="overflow-hidden rounded-xl border border-border">
+                <Skeleton className="aspect-[4/5] w-full" />
+                <div className="space-y-3 p-5">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </SiteShell>
+    );
+  }
 
   return (
     <SiteShell>
@@ -170,7 +202,7 @@ function Boutique() {
                         className="group block overflow-hidden"
                       >
                         <img
-                          src={o.image}
+                          src={o.image_url}
                           alt={o.titre}
                           loading="lazy"
                           className="media-warm aspect-[3/4] w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.06]"
@@ -185,7 +217,7 @@ function Boutique() {
                             {o.titre}
                           </Link>
                         </h3>
-                        <p className="mt-1 text-xs text-muted-foreground">{o.artiste}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{o.artiste?.nom ?? ""}</p>
                         <p className="mt-4 font-display text-xl text-forest-deep">
                           {formatFcfa(o.prix)}
                         </p>
@@ -193,7 +225,10 @@ function Boutique() {
                           asChild={!peutCommander}
                           variant="outline"
                           className="mt-4 w-full"
-                          onClick={peutCommander ? () => ajouter(o.slug) : undefined}
+                          onClick={peutCommander ? () => {
+                            addToCart.mutate({ oeuvreId: o.id });
+                            toast.success("Ajouté au panier");
+                          } : undefined}
                         >
                           {peutCommander ? (
                             <>

@@ -6,6 +6,7 @@ import { DashboardShell } from "@/components/site/DashboardShell";
 import { SectionTitle, StatCard } from "@/components/site/Bits";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -24,12 +25,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { formatFcfa } from "@/lib/data";
+import {
+  useAddOeuvre,
+  useMesOeuvres,
+  useOeuvre,
+  formatFcfa,
+  statutLabel,
+  useCommandes,
+} from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
-import { statutLabel, useCommandes } from "@/lib/commandes";
-import { imageParDefaut, useMesOeuvres } from "@/lib/oeuvres";
+import { requireRole } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/artiste/")({
+  beforeLoad: () => requireRole(["artiste", "artisan", "admin"]),
   head: () => ({
     meta: [
       { title: "Espace artiste — DanXomè" },
@@ -67,6 +75,8 @@ const versements = [
   { mois: "Décembre 2025", montant: 45000, statut: "Payé" },
 ];
 
+const IMAGE_PAR_DEFAUT = "/art-bronze.jpg";
+
 function EspaceArtiste() {
   const { profile, loading, user } = useAuth();
   const navigate = useNavigate();
@@ -74,8 +84,11 @@ function EspaceArtiste() {
   const [detailOuvert, setDetailOuvert] = useState(false);
   const [categorie, setCategorie] = useState("Sculpture");
   const [ajoutEnCours, setAjoutEnCours] = useState(false);
-  const { publiees, ajouter: ajouterOeuvrePersistee } = useMesOeuvres();
-  const { commandes } = useCommandes();
+  const { data: mesOeuvres, isLoading: loadingOeuvres } = useMesOeuvres();
+  const addOeuvre = useAddOeuvre();
+  const { data: commandes = [] } = useCommandes();
+
+  const publiees = (mesOeuvres ?? []).filter((o) => o.statut === "publiee");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -85,10 +98,37 @@ function EspaceArtiste() {
     }
   }, [loading, user, profile, navigate]);
 
-  if (loading || !profile) {
+  if (loading || !profile || loadingOeuvres) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="w-full max-w-4xl space-y-6 p-6">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-border p-5">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="mt-2 h-8 w-24" />
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl border border-border">
+            <div className="border-b border-border p-4">
+              <Skeleton className="h-5 w-48" />
+            </div>
+            <div className="p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 border-b border-border py-3 last:border-0"
+                >
+                  <Skeleton className="h-10 w-10 rounded" />
+                  <Skeleton className="h-4 flex-1" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -107,22 +147,33 @@ function EspaceArtiste() {
       return;
     }
     const prix = Number(form.get("prix")) || 0;
-    ajouterOeuvrePersistee({
-      slug: `oeuvre-${Date.now()}`,
-      titre,
-      artiste: nomAtelier,
-      artisteSlug: "kossi-adanou",
-      categorie,
-      region: (form.get("region") as string)?.trim() || "Zou",
-      prix,
-      image: imageParDefaut,
-      description: (form.get("description") as string)?.trim() || "Nouvelle œuvre publiée.",
-    });
-    setAjoutOuvert(false);
-    setCategorie("Sculpture");
-    e.currentTarget.reset();
-    setAjoutEnCours(false);
-    toast.success("Œuvre publiée", { description: `« ${titre} » est maintenant en ligne.` });
+
+    addOeuvre.mutate(
+      {
+        slug: `oeuvre-${Date.now()}`,
+        titre,
+        artiste_id: profile.id,
+        categorie,
+        region: (form.get("region") as string)?.trim() || "Zou",
+        prix,
+        image_url: IMAGE_PAR_DEFAUT,
+        description: (form.get("description") as string)?.trim() || "Nouvelle œuvre publiée.",
+        statut: "publiee",
+      },
+      {
+        onSuccess: () => {
+          setAjoutOuvert(false);
+          setCategorie("Sculpture");
+          e.currentTarget.reset();
+          setAjoutEnCours(false);
+          toast.success("Œuvre publiée", { description: `« ${titre} » est maintenant en ligne.` });
+        },
+        onError: () => {
+          setAjoutEnCours(false);
+          toast.error("Erreur", { description: "Impossible de publier l'œuvre." });
+        },
+      },
+    );
   };
 
   return (
@@ -169,7 +220,7 @@ function EspaceArtiste() {
             {publiees.map((o) => (
               <li key={o.slug} className="flex flex-wrap items-center gap-4 p-4">
                 <img
-                  src={o.image}
+                  src={o.image_url}
                   alt={o.titre}
                   loading="lazy"
                   className="size-16 rounded-md object-cover"
@@ -215,8 +266,8 @@ function EspaceArtiste() {
                 {commandes.slice(0, 3).map((c) => (
                   <tr key={c.ref}>
                     <td className="px-4 py-3 font-mono text-xs">{c.ref}</td>
-                    <td className="px-4 py-3">{c.client}</td>
-                    <td className="px-4 py-3">{c.piece}</td>
+                    <td className="px-4 py-3">{c.client_nom}</td>
+                    <td className="px-4 py-3">{c.oeuvre_titre}</td>
                     <td className="px-4 py-3">
                       <Badge variant={c.statut === "livree" ? "quiet" : "default"}>
                         {statutLabel(c.statut)}

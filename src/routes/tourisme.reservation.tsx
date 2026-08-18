@@ -1,13 +1,16 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, CreditCard, Minus, Plus, ShieldCheck, Ticket } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatFcfa, sites } from "@/lib/data";
+import { useSites, useCreateReservation, formatFcfa } from "@/hooks/use-data";
+import { useAuth } from "@/contexts/auth";
+import { reservationSchema } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
 type Search = { site?: string };
@@ -39,19 +42,26 @@ const creneaux = ["08 h 00", "10 h 30", "14 h 00", "16 h 30"];
 const etapes = ["Visite", "Date & personnes", "Coordonnées"];
 
 function Reservation() {
+  const { data: sites = [] } = useSites();
   const { site: siteParam } = Route.useSearch();
+  const { user } = useAuth();
+  const createReservation = useCreateReservation();
   const [etape, setEtape] = useState(0);
-  const [slug, setSlug] = useState(siteParam ?? sites[0]!.slug);
+  const [slug, setSlug] = useState(siteParam ?? "");
   const [date, setDate] = useState("");
   const [creneau, setCreneau] = useState(creneaux[1]!);
   const [personnes, setPersonnes] = useState(2);
   const [envoye, setEnvoye] = useState(false);
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
 
-  const site = sites.find((s) => s.slug === slug) ?? sites[0]!;
-  const sousTotal = site.prix * personnes;
+  const site = useMemo(() => sites.find((s) => s.slug === slug) ?? sites[0], [sites, slug]);
+  const currentSlug = useMemo(() => site?.slug ?? sites[0]?.slug ?? "", [site, sites]);
+  const sousTotal = (site?.prix ?? 0) * personnes;
   const frais = Math.round(sousTotal * 0.04);
 
-  if (envoye) {
+  if (envoye && site) {
     return (
       <SiteShell>
         <PageHead
@@ -128,13 +138,13 @@ function Reservation() {
                       onClick={() => setSlug(s.slug)}
                       className={cn(
                         "flex w-full items-center gap-4 rounded-lg border p-3 text-left transition-colors",
-                        s.slug === slug
+                        s.slug === currentSlug
                           ? "border-accent bg-accent/10"
                           : "border-border hover:border-accent/50",
                       )}
                     >
                       <img
-                        src={s.image}
+                        src={s.image_url}
                         alt={s.nom}
                         loading="lazy"
                         className="media-warm size-16 shrink-0 rounded-md object-cover"
@@ -221,19 +231,38 @@ function Reservation() {
                 <div className="mt-6 grid gap-5 sm:grid-cols-2">
                   <div>
                     <Label htmlFor="nom">Nom complet</Label>
-                    <Input id="nom" className="mt-2" placeholder="Aïssatou Dossou" />
+                    <Input
+                      id="nom"
+                      className="mt-2"
+                      placeholder="Aïssatou Dossou"
+                      value={nom}
+                      onChange={(e) => setNom(e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="email">E-mail</Label>
-                    <Input id="email" type="email" className="mt-2" placeholder="vous@exemple.bj" />
+                    <Input
+                      id="email"
+                      type="email"
+                      className="mt-2"
+                      placeholder="vous@exemple.bj"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="tel">Téléphone</Label>
-                    <Input id="tel" className="mt-2" placeholder="+229 …" />
+                    <Input
+                      id="tel"
+                      className="mt-2"
+                      placeholder="+229 …"
+                      value={telephone}
+                      onChange={(e) => setTelephone(e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="langue">Langue du guide</Label>
-                    <Input id="langue" className="mt-2" defaultValue="Français" />
+                    <Input id="langue" className="mt-2" defaultValue="Français" disabled />
                   </div>
                 </div>
                 <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
@@ -256,7 +285,52 @@ function Reservation() {
                   Continuer
                 </Button>
               ) : (
-                <Button variant="gold" onClick={() => setEnvoye(true)}>
+                <Button
+                  variant="gold"
+                  disabled={createReservation.isPending}
+                  onClick={async () => {
+                    if (!site) return;
+
+                    const parsed = reservationSchema.safeParse({
+                      siteId: site.id,
+                      date,
+                      creneau,
+                      personnes,
+                      nom,
+                      email,
+                      telephone,
+                    });
+
+                    if (!parsed.success) {
+                      const firstError = parsed.error.errors[0];
+                      toast.error("Erreur de validation", {
+                        description: firstError?.message ?? "Veuillez remplir tous les champs.",
+                      });
+                      return;
+                    }
+
+                    try {
+                      await createReservation.mutateAsync({
+                        site_id: site.id,
+                        site_nom: site.nom,
+                        date,
+                        creneau,
+                        personnes,
+                        sous_total: sousTotal,
+                        frais,
+                        montant_total: sousTotal + frais,
+                        nom_contact: nom,
+                        email_contact: email,
+                        telephone_contact: telephone,
+                      });
+                      setEnvoye(true);
+                    } catch {
+                      toast.error("Erreur", {
+                        description: "Impossible d'enregistrer la réservation. Réessayez.",
+                      });
+                    }
+                  }}
+                >
                   <CreditCard /> Confirmer la réservation
                 </Button>
               )}
@@ -264,37 +338,39 @@ function Reservation() {
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-lg border border-border bg-card">
-              <img
-                src={site.image}
-                alt={site.nom}
-                className="media-warm aspect-[4/3] w-full object-cover"
-              />
-              <div className="p-6">
-                <Badge variant="quiet">{site.type}</Badge>
-                <h3 className="mt-3 font-display text-xl text-forest-deep">{site.nom}</h3>
-                <dl className="mt-5 space-y-2.5 text-sm">
-                  <Ligne label="Date" value={date || "—"} />
-                  <Ligne label="Créneau" value={creneau} />
-                  <Ligne
-                    label={`${formatFcfa(site.prix)} × ${personnes}`}
-                    value={formatFcfa(sousTotal)}
-                  />
-                  <Ligne label="Frais de service" value={formatFcfa(frais)} />
-                </dl>
-                <div className="mt-5 flex items-baseline justify-between border-t border-border pt-4">
-                  <span className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-                    Total
-                  </span>
-                  <span className="font-display text-2xl text-forest-deep">
-                    {formatFcfa(sousTotal + frais)}
-                  </span>
+            {site && (
+              <div className="overflow-hidden rounded-lg border border-border bg-card">
+                <img
+                  src={site.image_url}
+                  alt={site.nom}
+                  className="media-warm aspect-[4/3] w-full object-cover"
+                />
+                <div className="p-6">
+                  <Badge variant="quiet">{site.type}</Badge>
+                  <h3 className="mt-3 font-display text-xl text-forest-deep">{site.nom}</h3>
+                  <dl className="mt-5 space-y-2.5 text-sm">
+                    <Ligne label="Date" value={date || "—"} />
+                    <Ligne label="Créneau" value={creneau} />
+                    <Ligne
+                      label={`${formatFcfa(site.prix)} × ${personnes}`}
+                      value={formatFcfa(sousTotal)}
+                    />
+                    <Ligne label="Frais de service" value={formatFcfa(frais)} />
+                  </dl>
+                  <div className="mt-5 flex items-baseline justify-between border-t border-border pt-4">
+                    <span className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+                      Total
+                    </span>
+                    <span className="font-display text-2xl text-forest-deep">
+                      {formatFcfa(sousTotal + frais)}
+                    </span>
+                  </div>
+                  <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Ticket className="size-4 text-accent" /> Entrée et guide francophone inclus
+                  </p>
                 </div>
-                <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                  <Ticket className="size-4 text-accent" /> Entrée et guide francophone inclus
-                </p>
               </div>
-            </div>
+            )}
           </aside>
         </div>
       </section>

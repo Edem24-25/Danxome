@@ -1,7 +1,7 @@
 ﻿import { Link } from "@tanstack/react-router";
 import { Menu, Search, ShoppingCart, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import { usePanier } from "@/lib/cart";
+import { usePanier } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -37,7 +37,8 @@ export function Wordmark({ dark = false }: { dark?: boolean }) {
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const { nombre } = usePanier();
+  const { data: panierData } = usePanier();
+  const nombre = (panierData ?? []).reduce((s, i) => s + i.qte, 0);
   const { user, profile, loading, peutCommander } = useAuth();
   const accueil = "/profil";
 

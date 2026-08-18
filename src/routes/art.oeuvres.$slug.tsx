@@ -1,51 +1,71 @@
 ﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Check, Heart, Info, Ruler, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule, SectionTitle } from "@/components/site/Bits";
 import { ContentCard } from "@/components/site/ContentCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { artistes, formatFcfa, oeuvres } from "@/lib/data";
-import { usePanier } from "@/lib/cart";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useOeuvre, useOeuvres, formatFcfa, useAddToCart, useFavoris, useToggleFavori } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
-import { useFavoris } from "@/lib/favoris";
 
 export const Route = createFileRoute("/art/oeuvres/$slug")({
-  loader: ({ params }) => {
-    const oeuvre = oeuvres.find((o) => o.slug === params.slug);
-    if (!oeuvre) throw notFound();
-    return { oeuvre };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [{ title: "Œuvre introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
-      };
-    }
-    const { oeuvre } = loaderData;
-    return {
-      meta: [
-        { title: `${oeuvre.titre} par ${oeuvre.artiste} — DanXomè` },
-        { name: "description", content: oeuvre.description },
-        { property: "og:title", content: `${oeuvre.titre} — ${oeuvre.artiste} | DanXomè` },
-        { property: "og:description", content: oeuvre.description },
-        { property: "og:type", content: "product" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [{ title: "Œuvre — DanXomè" }],
+  }),
   component: OeuvreDetail,
 });
 
 function OeuvreDetail() {
-  const { oeuvre } = Route.useLoaderData();
-  const { ajouter } = usePanier();
+  const { slug } = Route.useParams();
+  const { data: oeuvre, isLoading, isError } = useOeuvre(slug);
+  const { data: oeuvres } = useOeuvres();
+  const addToCart = useAddToCart();
   const { peutCommander } = useAuth();
-  const { basculer, estFavori } = useFavoris();
+  const { data: favorisData } = useFavoris();
+  const toggleFavori = useToggleFavori();
   const [ajoute, setAjoute] = useState(false);
-  const artiste = artistes.find((a) => a.slug === oeuvre.artisteSlug);
-  const similaires = oeuvres
+
+  useEffect(() => {
+    if (!isLoading && (isError || !oeuvre)) {
+      throw notFound();
+    }
+  }, [isLoading, isError, oeuvre]);
+
+  useEffect(() => {
+    if (oeuvre) {
+      document.title = `${oeuvre.titre} par ${oeuvre.artiste?.nom ?? "Artiste"} — DanXomè`;
+    }
+  }, [oeuvre]);
+
+  if (isLoading || !oeuvre) {
+    return (
+      <SiteShell>
+        <div className="mx-auto max-w-7xl px-4 pt-8 pb-14 sm:px-6 lg:px-8">
+          <div className="flex gap-2">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+            <Skeleton className="aspect-[4/5] w-full rounded-lg" />
+            <div className="space-y-4">
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-10 w-48" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
+      </SiteShell>
+    );
+  }
+
+  const artiste = oeuvre.artiste;
+  const similaires = (oeuvres ?? [])
     .filter((o) => o.slug !== oeuvre.slug && o.categorie === oeuvre.categorie)
     .slice(0, 3);
 
@@ -63,9 +83,12 @@ function OeuvreDetail() {
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <div className="overflow-hidden rounded-lg border border-border bg-secondary/40">
             <img
-              src={oeuvre.image}
+              src={oeuvre.image_url}
               alt={oeuvre.titre}
               className="media-warm aspect-[4/5] w-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/placeholder.svg";
+              }}
             />
           </div>
 
@@ -81,9 +104,12 @@ function OeuvreDetail() {
                 className="mt-4 inline-flex items-center gap-3 rounded-md border border-border bg-card p-2.5 pr-4 transition-colors hover:border-accent"
               >
                 <img
-                  src={artiste.image}
+                  src={artiste.image_url}
                   alt={artiste.nom}
                   className="media-warm size-10 rounded-md object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                  }}
                 />
                 <span>
                   <span className="block text-sm font-semibold text-forest-deep">
@@ -110,7 +136,7 @@ function OeuvreDetail() {
                   variant="gold"
                   size="lg"
                   onClick={() => {
-                    ajouter(oeuvre.slug);
+                    addToCart.mutate({ oeuvreId: oeuvre.id });
                     setAjoute(true);
                   }}
                 >
@@ -124,12 +150,12 @@ function OeuvreDetail() {
                   variant="ghost"
                   size="icon"
                   aria-label={
-                    estFavori(oeuvre.slug) ? "Retirer des favoris" : "Ajouter aux favoris"
+                    favorisData?.some(f => f.oeuvre_id === oeuvre.id) ? "Retirer des favoris" : "Ajouter aux favoris"
                   }
-                  onClick={() => basculer(oeuvre.slug)}
+                  onClick={() => toggleFavori.mutate(oeuvre.id)}
                 >
                   <Heart
-                    className={estFavori(oeuvre.slug) ? "fill-terracotta text-terracotta" : ""}
+                    className={favorisData?.some(f => f.oeuvre_id === oeuvre.id) ? "fill-terracotta text-terracotta" : ""}
                   />
                 </Button>
               </div>
@@ -169,9 +195,9 @@ function OeuvreDetail() {
                   key={o.slug}
                   to="/art/oeuvres/$slug"
                   params={{ slug: o.slug }}
-                  image={o.image}
+                  image={o.image_url}
                   titre={o.titre}
-                  meta={`${o.categorie} · ${o.artiste}`}
+                  meta={`${o.categorie} · ${o.artiste?.nom ?? ""}`}
                   ratio="portrait"
                   footer={formatFcfa(o.prix)}
                 />

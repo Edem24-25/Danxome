@@ -11,14 +11,6 @@ import type { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile, ProfilType } from "@/lib/types/user";
 
-const LS_KEYS = [
-  "dahome.panier",
-  "dahome:achats",
-  "dahome.commandes",
-  "dahome:favoris",
-  "dahome.mes-oeuvres",
-] as const;
-
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -176,11 +168,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     await supabase.auth.signOut();
-    try {
-      for (const key of LS_KEYS) localStorage.removeItem(key);
-    } catch {
-      /* localStorage indisponible */
-    }
   }, [supabase]);
 
   const resetPassword = useCallback(
@@ -216,11 +203,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut({ scope: "global" });
       setSession(null);
       setProfile(null);
-      try {
-        for (const key of LS_KEYS) localStorage.removeItem(key);
-      } catch {
-        /* localStorage indisponible */
-      }
       return {};
     },
     [supabase],
@@ -232,11 +214,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) return { error: error.message };
     setSession(null);
     setProfile(null);
-    try {
-      for (const key of LS_KEYS) localStorage.removeItem(key);
-    } catch {
-      /* localStorage indisponible */
-    }
     return {};
   }, [supabase, session?.user]);
 

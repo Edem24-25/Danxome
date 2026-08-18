@@ -9,7 +9,8 @@ import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { sites } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSites } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/tourisme/")({
@@ -31,14 +32,15 @@ export const Route = createFileRoute("/tourisme/")({
   component: Tourisme,
 });
 
-const types = ["Tous", ...Array.from(new Set(sites.map((s) => s.type)))];
-const regions = ["Toutes", ...Array.from(new Set(sites.map((s) => s.region)))];
-
 function Tourisme() {
+  const { data: sites = [], isLoading } = useSites();
   const [q, setQ] = useState("");
   const [type, setType] = useState("Tous");
   const [region, setRegion] = useState("Toutes");
   const [virtuelOnly, setVirtuelOnly] = useState(false);
+
+  const types = useMemo(() => ["Tous", ...Array.from(new Set(sites.map((s) => s.type)))], [sites]);
+  const regions = useMemo(() => ["Toutes", ...Array.from(new Set(sites.map((s) => s.region)))], [sites]);
 
   const resultats = useMemo(
     () =>
@@ -50,8 +52,32 @@ function Tourisme() {
           (q.trim() === "" ||
             `${s.nom} ${s.region} ${s.resume}`.toLowerCase().includes(q.trim().toLowerCase())),
       ),
-    [q, type, region, virtuelOnly],
+    [q, type, region, virtuelOnly, sites],
   );
+
+  if (isLoading) {
+    return (
+      <SiteShell>
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <Skeleton className="h-10 w-72" />
+          <Skeleton className="mt-3 h-4 w-96" />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="overflow-hidden rounded-xl border border-border">
+                <Skeleton className="aspect-[16/10] w-full" />
+                <div className="space-y-3 p-5">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-3/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </SiteShell>
+    );
+  }
 
   return (
     <SiteShell>
@@ -150,7 +176,7 @@ function Tourisme() {
                 <ContentCard
                   to="/tourisme/sites/$slug"
                   params={{ slug: s.slug }}
-                  image={s.image}
+                  image={s.image_url}
                   titre={s.nom}
                   meta={`${s.region} · ${s.type}`}
                   resume={s.resume}
@@ -198,7 +224,7 @@ function Tourisme() {
             </div>
           </Reveal>
           <Reveal variant="right" delay={120}>
-            <BeninMap className="aspect-[4/5] w-full" />
+            <BeninMap sites={sites} className="aspect-[4/5] w-full" />
           </Reveal>
         </div>
       </section>

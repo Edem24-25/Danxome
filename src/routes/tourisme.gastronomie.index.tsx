@@ -7,7 +7,7 @@ import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { plats } from "@/lib/data";
+import { usePlats } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/tourisme/gastronomie/")({
@@ -29,13 +29,14 @@ export const Route = createFileRoute("/tourisme/gastronomie/")({
   component: GastronomieIndex,
 });
 
-const categories = ["Tous", ...Array.from(new Set(plats.map((p) => p.categorie)))];
-const regions = ["Toutes", ...Array.from(new Set(plats.map((p) => p.region)))];
-
 function GastronomieIndex() {
+  const { data: plats = [] } = usePlats();
   const [q, setQ] = useState("");
   const [categorie, setCategorie] = useState("Tous");
   const [region, setRegion] = useState("Toutes");
+
+  const categories = useMemo(() => ["Tous", ...Array.from(new Set(plats.map((p) => p.categorie)))], [plats]);
+  const regions = useMemo(() => ["Toutes", ...Array.from(new Set(plats.map((p) => p.region)))], [plats]);
 
   const resultats = useMemo(
     () =>
@@ -46,7 +47,7 @@ function GastronomieIndex() {
           (q.trim() === "" ||
             `${p.nom} ${p.region} ${p.resume}`.toLowerCase().includes(q.trim().toLowerCase())),
       ),
-    [q, categorie, region],
+    [q, categorie, region, plats],
   );
 
   return (
@@ -104,7 +105,7 @@ function GastronomieIndex() {
               <ContentCard
                 to="/tourisme/gastronomie/$slug"
                 params={{ slug: p.slug }}
-                image={p.image}
+                image={p.image_url}
                 titre={p.nom}
                 meta={`${p.region} · ${p.categorie}`}
                 resume={p.resume}

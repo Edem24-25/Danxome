@@ -17,45 +17,28 @@ import { AvisSection } from "@/components/site/AvisSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { plats } from "@/lib/data";
+import { usePlat, usePlats } from "@/hooks/use-data";
 
 const FAV_KEY = "dahome:favoris";
 
 export const Route = createFileRoute("/tourisme/gastronomie/$slug")({
-  loader: ({ params }) => {
-    const plat = plats.find((p) => p.slug === params.slug);
-    if (!plat) throw notFound();
-    return { plat };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [
-          { title: "Plat introuvable — DanXomè" },
-          { name: "robots", content: "noindex" },
-        ],
-      };
-    }
-    const { plat } = loaderData;
-    return {
-      meta: [
-        { title: `${plat.nom} — Gastronomie béninoise | DanXomè` },
-        { name: "description", content: plat.resume },
-        { property: "og:title", content: `${plat.nom} — DanXomè` },
-        { property: "og:description", content: plat.resume },
-        { property: "og:type", content: "article" },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Plat — DanXomè" },
+      { name: "description", content: "Découvrez ce plat de la gastronomie béninoise." },
+    ],
+  }),
   component: PlatDetail,
 });
 
 function PlatDetail() {
-  const { plat } = Route.useLoaderData();
-  const autres = plats.filter((p) => p.slug !== plat.slug).slice(0, 3);
+  const { slug } = Route.useParams();
+  const { data: plat, isLoading } = usePlat(slug);
+  const { data: allPlats = [] } = usePlats();
+  const autres = allPlats.filter((p) => p.slug !== slug).slice(0, 3);
 
   const [favoris, setFavoris] = useState<string[]>([]);
-  const isFav = favoris.includes(plat.slug);
+  const isFav = plat ? favoris.includes(plat.slug) : false;
 
   useEffect(() => {
     try {
@@ -67,6 +50,7 @@ function PlatDetail() {
   }, []);
 
   const toggleFav = useCallback(() => {
+    if (!plat) return;
     setFavoris((prev) => {
       const next = isFav
         ? prev.filter((s) => s !== plat.slug)
@@ -78,16 +62,31 @@ function PlatDetail() {
       }
       return next;
     });
-  }, [isFav, plat.slug]);
+  }, [isFav, plat?.slug]);
 
   const partager = useCallback(() => {
+    if (!plat) return;
     const url = window.location.href;
     if (navigator.share) {
       navigator.share({ title: `${plat.nom} — DanXomè`, url });
     } else {
       navigator.clipboard.writeText(url);
     }
-  }, [plat.nom]);
+  }, [plat?.nom]);
+
+  if (isLoading) {
+    return (
+      <SiteShell>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        </div>
+      </SiteShell>
+    );
+  }
+
+  if (!plat) {
+    throw notFound();
+  }
 
   return (
     <SiteShell>
@@ -95,9 +94,12 @@ function PlatDetail() {
       <section className="relative">
         <div className="absolute inset-0">
           <img
-            src={plat.image}
+            src={plat.image_url}
             alt={plat.nom}
             className="media-warm size-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-forest-deep via-forest-deep/70 to-forest-deep/30" />
         </div>
@@ -258,7 +260,7 @@ function PlatDetail() {
               <ContentCard
                 to="/tourisme/gastronomie/$slug"
                 params={{ slug: p.slug }}
-                image={p.image}
+                image={p.image_url}
                 titre={p.nom}
                 meta={`${p.region} · ${p.categorie}`}
                 resume={p.resume}

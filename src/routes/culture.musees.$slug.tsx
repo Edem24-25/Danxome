@@ -1,39 +1,46 @@
 ﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Accessibility, Clock, MapPin } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
-import { images, musees } from "@/lib/data";
+import { useMusee } from "@/hooks/use-data";
+import museum from "@/assets/museum.jpg";
+import bronze from "@/assets/art-bronze.jpg";
+import heroAbomey from "@/assets/hero-abomey.jpg";
 
 export const Route = createFileRoute("/culture/musees/$slug")({
-  loader: ({ params }) => {
-    const musee = musees.find((m) => m.slug === params.slug);
-    if (!musee) throw notFound();
-    return { musee };
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {
-        meta: [{ title: "Musée introuvable — DanXomè" }, { name: "robots", content: "noindex" }],
-      };
-    }
-    const { musee } = loaderData;
-    return {
-      meta: [
-        { title: `${musee.nom} — DanXomè` },
-        { name: "description", content: musee.resume },
-        { property: "og:title", content: `${musee.nom} — DanXomè` },
-        { property: "og:description", content: musee.resume },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Musée — DanXomè" },
+      { name: "description", content: "Découvrez les musées du Bénin." },
+    ],
+  }),
   component: MuseeDetail,
 });
 
 function MuseeDetail() {
-  const { musee } = Route.useLoaderData();
-  const galerie = [musee.image, images.museum, images.bronze, images.heroAbomey];
+  const { slug } = Route.useParams();
+  const { data: musee, isLoading, isError } = useMusee(slug);
+
+  useEffect(() => {
+    if (!isLoading && isError) notFound();
+  }, [isLoading, isError]);
+
+  if (isLoading) {
+    return (
+      <SiteShell>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <p className="text-muted-foreground">Chargement…</p>
+        </div>
+      </SiteShell>
+    );
+  }
+
+  if (!musee) return null;
+
+  const galerie = [musee.image_url, museum, bronze, heroAbomey];
 
   return (
     <SiteShell>
@@ -54,6 +61,9 @@ function MuseeDetail() {
                   alt={`${musee.nom} — vue ${i + 1}`}
                   loading="lazy"
                   className="media-warm size-full min-h-[180px] object-cover transition-transform duration-700 hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                  }}
                 />
               </div>
             </Reveal>

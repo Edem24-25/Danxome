@@ -5,7 +5,8 @@ import { PageHead, Rule, SectionTitle } from "@/components/site/Bits";
 import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
-import { images, musees, royaumes } from "@/lib/data";
+import { useRoyaumes, useMusees } from "@/hooks/use-data";
+import museum from "@/assets/museum.jpg";
 
 export const Route = createFileRoute("/culture/")({
   head: () => ({
@@ -60,6 +61,9 @@ const piliers = [
 ];
 
 function Culture() {
+  const { data: royaumes = [], isLoading: loadingRoyaumes } = useRoyaumes();
+  const { data: musees = [], isLoading: loadingMusees } = useMusees();
+
   return (
     <SiteShell>
       <PageHead
@@ -115,19 +119,23 @@ function Culture() {
           <SectionTitle eyebrow="Royaumes" title="Les dynasties et leurs territoires" />
         </Reveal>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {royaumes.map((r, i) => (
-            <Reveal key={r.slug} variant="up" delay={i * 90}>
-              <ContentCard
-                to="/culture/royaumes/$slug"
-                params={{ slug: r.slug }}
-                image={r.image}
-                titre={r.nom}
-                meta={r.periode}
-                resume={r.resume}
-                ratio="paysage"
-              />
-            </Reveal>
-          ))}
+          {loadingRoyaumes ? (
+            <p className="text-muted-foreground">Chargement des royaumes…</p>
+          ) : (
+            royaumes.map((r, i) => (
+              <Reveal key={r.slug} variant="up" delay={i * 90}>
+                <ContentCard
+                  to="/culture/royaumes/$slug"
+                  params={{ slug: r.slug }}
+                  image={r.image_url}
+                  titre={r.nom}
+                  meta={r.periode}
+                  resume={r.resume}
+                  ratio="paysage"
+                />
+              </Reveal>
+            ))
+          )}
         </div>
       </section>
 
@@ -146,18 +154,22 @@ function Culture() {
             />
           </Reveal>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {musees.map((m, i) => (
-              <Reveal key={m.slug} variant="up" delay={i * 90}>
-                <ContentCard
-                  to="/culture/musees/$slug"
-                  params={{ slug: m.slug }}
-                  image={m.image}
-                  titre={m.nom}
-                  meta={m.ville}
-                  resume={m.resume}
-                />
-              </Reveal>
-            ))}
+            {loadingMusees ? (
+              <p className="text-muted-foreground">Chargement des musées…</p>
+            ) : (
+              musees.map((m, i) => (
+                <Reveal key={m.slug} variant="up" delay={i * 90}>
+                  <ContentCard
+                    to="/culture/musees/$slug"
+                    params={{ slug: m.slug }}
+                    image={m.image_url}
+                    titre={m.nom}
+                    meta={m.ville}
+                    resume={m.resume}
+                  />
+                </Reveal>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -165,7 +177,7 @@ function Culture() {
       {/* ═══ DOSSIER DU MOIS ═══ */}
       <section className="relative isolate mt-20 overflow-hidden">
         <img
-          src={images.museum}
+          src={museum}
           alt="Salle d'exposition de statuaire royale"
           loading="lazy"
           className="media-warm absolute inset-0 size-full object-cover"

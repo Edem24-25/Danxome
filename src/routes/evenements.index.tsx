@@ -1,12 +1,13 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead, Rule, SectionTitle, EmptyState } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { evenements } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEvenements } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/evenements/")({
@@ -28,12 +29,19 @@ export const Route = createFileRoute("/evenements/")({
   component: Evenements,
 });
 
-const categories = ["Toutes", ...Array.from(new Set(evenements.map((e) => e.categorie)))];
-
 function Evenements() {
+  const { data: evenements, isLoading } = useEvenements();
   const [cat, setCat] = useState("Toutes");
-  const liste = evenements.filter((e) => cat === "Toutes" || e.categorie === cat);
-  const une = evenements[0];
+
+  const categories = useMemo(
+    () => ["Toutes", ...Array.from(new Set((evenements ?? []).map((e) => e.categorie)))],
+    [evenements],
+  );
+  const liste = useMemo(
+    () => (evenements ?? []).filter((e) => cat === "Toutes" || e.categorie === cat),
+    [evenements, cat],
+  );
+  const une = evenements?.[0];
 
   return (
     <SiteShell>
@@ -45,21 +53,33 @@ function Evenements() {
         aside={
           <div className="rounded-xl border border-border bg-card p-5 text-sm shadow-sm">
             <p className="eyebrow">Saison 2026</p>
-            <p className="mt-2 font-display text-4xl text-forest-deep">
-              {evenements.length} temps forts
-            </p>
+            {isLoading ? (
+              <Skeleton className="mt-2 h-10 w-48" />
+            ) : (
+              <p className="mt-2 font-display text-4xl text-forest-deep">
+                {evenements?.length ?? 0} temps forts
+              </p>
+            )}
             <p className="mt-1 text-muted-foreground">répartis sur 6 départements</p>
           </div>
         }
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-[26rem] w-full rounded-2xl" />
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+        ) : (
+          <>
         {/* ═══ ÉVÉNEMENT À LA UNE ═══ */}
         {une && (
           <Reveal variant="up">
             <article className="relative overflow-hidden rounded-2xl border border-border">
               <img
-                src={une.image}
+                src={une.image_url}
                 alt={`${une.titre} à ${une.lieu}`}
                 className="media-warm h-[22rem] w-full object-cover sm:h-[26rem]"
                 loading="lazy"
@@ -143,7 +163,7 @@ function Evenements() {
                         <span className="mt-1 text-[10px] tracking-[0.2em]">{e.mois}</span>
                       </div>
                       <img
-                        src={e.image}
+                        src={e.image_url}
                         alt={e.titre}
                         loading="lazy"
                         className="hidden h-20 w-32 rounded-xl object-cover transition-transform duration-300 group-hover:scale-105 sm:block"
@@ -168,6 +188,8 @@ function Evenements() {
             </ul>
           )}
         </div>
+        </>
+        )}
       </section>
     </SiteShell>
   );

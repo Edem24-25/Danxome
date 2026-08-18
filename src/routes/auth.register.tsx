@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/auth";
 import { useRateLimit } from "@/lib/rate-limit";
+import { registerSchema } from "@/lib/validations";
 
 export const Route = createFileRoute("/auth/register")({
   head: () => ({
@@ -47,29 +48,22 @@ function Register() {
     }
 
     const formData = new FormData(e.currentTarget);
-    const prenom = (formData.get("prenom") as string)?.trim();
-    const nom = (formData.get("nom") as string)?.trim();
-    const email = (formData.get("mail") as string)?.trim();
-    const password = formData.get("mdp") as string;
+    const parsed = registerSchema.safeParse({
+      prenom: (formData.get("prenom") as string)?.trim(),
+      nom: (formData.get("nom") as string)?.trim(),
+      email: (formData.get("mail") as string)?.trim(),
+      password: formData.get("mdp") as string,
+    });
 
-    if (!password || password.length < 8) {
-      toast.error("Mot de passe trop court", {
-        description: "Le mot de passe doit contenir au moins 8 caractères.",
+    if (!parsed.success) {
+      const firstError = parsed.error.errors[0];
+      toast.error("Erreur de validation", {
+        description: firstError?.message ?? "Veuillez vérifier vos informations.",
       });
       return;
     }
 
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-
-    if (!hasUpper || !hasLower || !hasNumber) {
-      toast.error("Mot de passe trop simple", {
-        description:
-          "Le mot de passe doit inclure au moins une majuscule, une minuscule et un chiffre.",
-      });
-      return;
-    }
+    const { email, password, prenom, nom } = parsed.data;
 
     setLoading(true);
     const { error } = await signUp({ email, password, prenom, nom, profil: "visiteur" });

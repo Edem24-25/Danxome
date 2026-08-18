@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { images } from "@/lib/data";
+import heroAbomey from "@/assets/hero-abomey.jpg";
 import { Wordmark } from "./Header";
 
 export function AuthLayout({
@@ -21,7 +21,7 @@ export function AuthLayout({
       {/* Colonne image — parallax immersif avec animations */}
       <div className="relative hidden isolate flex-col justify-between overflow-hidden p-10 lg:flex">
         <img
-          src={images.heroAbomey}
+          src={heroAbomey}
           alt="Bas-reliefs du palais royal d'Abomey"
           className="media-warm absolute inset-0 size-full object-cover animate-[scale_20s_ease-in-out_infinite_alternate]"
         />

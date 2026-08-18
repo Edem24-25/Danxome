@@ -6,6 +6,7 @@ import { ProfilShell } from "@/components/site/ProfilShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth";
 
 export const Route = createFileRoute("/profil/mot-de-passe")({
@@ -32,8 +33,17 @@ function ProfilMotDePasse() {
         title="Mot de passe"
         crumbs={[{ label: "Mon profil", to: "/profil" }, { label: "Mot de passe" }]}
       >
-        <div className="flex items-center justify-center py-12">
-          <div className="size-8 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+        <div className="space-y-4 py-4">
+          <Skeleton className="h-4 w-32" />
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <Skeleton className="h-10 w-40" />
         </div>
       </ProfilShell>
     );

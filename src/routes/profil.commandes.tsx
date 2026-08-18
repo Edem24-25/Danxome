@@ -1,10 +1,11 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, ShoppingBag, Truck } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { ProfilShell } from "@/components/site/ProfilShell";
 import { EmptyState, SectionTitle } from "@/components/site/Bits";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatFcfa } from "@/lib/data";
-import { lireAchats } from "@/lib/achats";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatFcfa, useCommandesClient, statutLabel } from "@/hooks/use-data";
 
 export const Route = createFileRoute("/profil/commandes")({
   head: () => ({
@@ -24,8 +25,16 @@ const dateFr = (iso: string) =>
     year: "numeric",
   }).format(new Date(iso));
 
+const badgeVariant: Record<string, "default" | "gold" | "forest" | "secondary" | "quiet"> = {
+  recue: "default",
+  validee: "gold",
+  en_cours: "forest",
+  expediee: "secondary",
+  livree: "quiet",
+};
+
 function ProfilCommandes() {
-  const achats = lireAchats();
+  const { data: commandes = [], isLoading } = useCommandesClient();
 
   return (
     <ProfilShell
@@ -34,9 +43,22 @@ function ProfilCommandes() {
     >
       <SectionTitle
         eyebrow="Historique"
-        title={`${achats.length} commande${achats.length > 1 ? "s" : ""} passée${achats.length > 1 ? "s" : ""}`}
+        title={`${commandes.length} commande${commandes.length > 1 ? "s" : ""} passée${commandes.length > 1 ? "s" : ""}`}
       />
-      {achats.length === 0 ? (
+      {isLoading ? (
+        <div className="space-y-4 py-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+              <Skeleton className="h-5 w-20 rounded-full" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+          ))}
+        </div>
+      ) : commandes.length === 0 ? (
         <EmptyState
           icon={<ShoppingBag className="size-5" />}
           title="Aucune commande pour l'instant"
@@ -48,53 +70,19 @@ function ProfilCommandes() {
           }
         />
       ) : (
-        <div className="mt-6 space-y-6">
-          {achats.map((a) => (
-            <div key={a.reference} className="rounded-lg border border-border bg-card">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
-                <div>
-                  <p className="font-display text-lg text-forest-deep">{a.reference}</p>
-                  <p className="text-xs text-muted-foreground">{dateFr(a.date)}</p>
-                </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
-                  <CheckCircle2 className="size-3.5" /> Payée
-                </span>
+        <div className="mt-6 space-y-4">
+          {commandes.map((c) => (
+            <div key={c.ref} className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card p-4">
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-forest-deep">{c.oeuvre_titre}</p>
+                <p className="text-xs text-muted-foreground">
+                  {c.artiste_nom} · {dateFr(c.date)}
+                </p>
               </div>
-              <ul className="divide-y divide-border px-5">
-                {a.articles.map((art, i) => (
-                  <li key={`${a.reference}-${i}`} className="flex items-center gap-4 py-3">
-                    <img
-                      src={art.image}
-                      alt={art.titre}
-                      loading="lazy"
-                      className="size-14 rounded-md object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-forest-deep">{art.titre}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {art.artiste} · {art.quantite} × {formatFcfa(art.prix)}
-                      </p>
-                    </div>
-                    <p className="font-display text-forest-deep">
-                      {formatFcfa(art.prix * art.quantite)}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-              <div className="border-t border-border bg-secondary/40 px-5 py-4">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Truck className="size-4" /> Livraison
-                  </span>
-                  <span>{formatFcfa(a.livraison)}</span>
-                </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="font-semibold text-forest-deep">Total</span>
-                  <span className="font-display text-xl text-forest-deep">
-                    {formatFcfa(a.total + a.livraison)}
-                  </span>
-                </div>
-              </div>
+              <p className="font-display text-forest-deep">{formatFcfa(c.montant)}</p>
+              <Badge variant={badgeVariant[c.statut] ?? "default"}>
+                {statutLabel(c.statut)}
+              </Badge>
             </div>
           ))}
         </div>

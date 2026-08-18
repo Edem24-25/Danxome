@@ -6,14 +6,21 @@ import { AuthLayout } from "@/components/site/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/auth";
 import { accueilProfil } from "@/lib/types/user";
 import { useRateLimit } from "@/lib/rate-limit";
 
+function sanitizeRedirect(path: string | undefined): string | undefined {
+  if (!path) return undefined;
+  if (!path.startsWith("/") || path.includes("://") || path.startsWith("//")) {
+    return undefined;
+  }
+  return path;
+}
+
 export const Route = createFileRoute("/auth/login")({
   validateSearch: (search: Record<string, unknown>) => ({
-    from: (search["from"] as string) || undefined,
+    from: sanitizeRedirect(search["from"] as string | undefined),
   }),
   head: () => ({
     meta: [
@@ -135,13 +142,6 @@ function Login() {
             />
           </div>
         </div>
-
-        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer group">
-          <Checkbox className="transition-all duration-200 group-hover:border-terracotta" />
-          <span className="group-hover:text-forest-deep transition-colors">
-            Rester connecté 30 jours
-          </span>
-        </label>
 
         <Button
           variant="gold"
