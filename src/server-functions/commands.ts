@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { checkRateLimit } from "@/lib/rate-limit-server";
 
 function getServerSupabase() {
   const url = process.env["VITE_SUPABASE_URL"];
@@ -61,6 +62,11 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data }) => {
+    const rl = checkRateLimit(`order:${data.client_id}`, 5, 60_000);
+    if (!rl.allowed) {
+      throw new Error("Trop de requêtes. Réessayez dans une minute.");
+    }
+
     const supabase = getServerSupabase();
 
     // 1. Fetch real oeuvre data from DB (source of truth for prices)

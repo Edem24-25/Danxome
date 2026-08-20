@@ -1,19 +1,27 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { BackToTop } from "./BackToTop";
 
 export function SiteShell({ children }: { children: ReactNode }) {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const rafRef = useRef<number>(0);
 
-  useEffect(() => {
-    const onScroll = () => {
+  const onScroll = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
       const total = document.documentElement.scrollHeight - window.innerHeight;
       setScrollProgress(total > 0 ? window.scrollY / total : 0);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    });
   }, []);
+
+  useEffect(() => {
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [onScroll]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

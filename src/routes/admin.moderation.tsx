@@ -3,15 +3,18 @@ import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   CalendarDays,
+  CheckCircle,
   Eye,
   LayoutDashboard,
   MessageSquare,
   Package,
   Palette as PaletteIcon,
+  ShieldCheck,
   Star,
   Trash2,
   UserRound,
   Users,
+  XCircle,
 } from "lucide-react";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +35,7 @@ import {
   useAdminUpdateCommandeStatut,
   useAdminProfiles,
   useAdminUpdateRole,
+  useAdminUpdateProfilStatut,
   statutsCommandes,
   statutLabel,
   formatFcfa,
@@ -131,6 +135,21 @@ function Moderation() {
     }
   };
 
+  // --- Validation profils ---
+  const updateProfilStatut = useAdminUpdateProfilStatut();
+
+  const handleValidateProfil = async (id: string, statut: "valide" | "rejete") => {
+    try {
+      await updateProfilStatut.mutateAsync({ id, statut });
+      showFeedback(
+        "success",
+        statut === "valide" ? "Profil validé et activé." : "Profil rejeté.",
+      );
+    } catch {
+      showFeedback("error", "Erreur lors de la validation du profil.");
+    }
+  };
+
   if (loading || !profile || profile.profil !== "admin") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -212,6 +231,9 @@ function Moderation() {
             </TabsTrigger>
             <TabsTrigger value="commandes" className="gap-1.5">
               <Package className="size-3.5" /> Commandes
+            </TabsTrigger>
+            <TabsTrigger value="validation" className="gap-1.5">
+              <ShieldCheck className="size-3.5" /> Validation
             </TabsTrigger>
             <TabsTrigger value="utilisateurs" className="gap-1.5">
               <Users className="size-3.5" /> Utilisateurs
@@ -339,6 +361,109 @@ function Moderation() {
                   ))}
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* ======================== VALIDATION ======================== */}
+          <TabsContent value="validation">
+            <div className="rounded-lg border border-border bg-card p-6">
+              <h2 className="font-display text-lg text-forest-deep">Validation des comptes</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Validez ou rejetez les comptes artistes et artisans en attente.
+              </p>
+
+              {loadingProfiles ? (
+                <div className="flex justify-center py-12">
+                  <div className="size-6 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+                </div>
+              ) : (() => {
+                const enAttente = profiles.filter(
+                  (p) =>
+                    (p.profil === "artiste" || p.profil === "artisan") &&
+                    p.statut === "en_attente",
+                );
+                return enAttente.length === 0 ? (
+                  <p className="py-12 text-center text-sm text-muted-foreground">
+                    Aucun compte en attente de validation.
+                  </p>
+                ) : (
+                  <div className="mt-6 space-y-3">
+                    {enAttente.map((p) => (
+                      <div
+                        key={p.id}
+                        className="flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-forest-deep">
+                              {p.prenom} {p.nom}
+                            </p>
+                            <Badge variant="outline" className="border-amber-300 text-amber-700">
+                              {p.profil}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{p.email}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 border-green-300 text-green-700 hover:bg-green-100"
+                            onClick={() => handleValidateProfil(p.id, "valide")}
+                            disabled={updateProfilStatut.isPending}
+                          >
+                            <CheckCircle className="size-4" /> Valider
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 border-red-300 text-red-700 hover:bg-red-100"
+                            onClick={() => handleValidateProfil(p.id, "rejete")}
+                            disabled={updateProfilStatut.isPending}
+                          >
+                            <XCircle className="size-4" /> Rejeter
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Profils rejetés */}
+              {(() => {
+                const rejects = profiles.filter(
+                  (p) =>
+                    (p.profil === "artiste" || p.profil === "artisan") &&
+                    p.statut === "rejete",
+                );
+                return rejects.length > 0 ? (
+                  <div className="mt-8">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Rejetés</h3>
+                    <div className="mt-3 space-y-2">
+                      {rejects.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center justify-between rounded-lg border border-border p-3 opacity-60"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-forest-deep">
+                              {p.prenom} {p.nom}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{p.email}</p>
+                          </div>
+                          <Badge variant="outline" className="border-red-200 text-red-600">
+                            Rejeté
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
             </div>
           </TabsContent>
 

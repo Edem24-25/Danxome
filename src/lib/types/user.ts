@@ -1,4 +1,5 @@
 export type ProfilType = "visiteur" | "artiste" | "artisan" | "admin";
+export type ProfilStatut = "en_attente" | "valide" | "rejete";
 
 export function accueilProfil(
   profil: ProfilType | null | undefined,
@@ -14,6 +15,7 @@ export interface Profile {
   prenom: string;
   nom: string;
   profil: ProfilType;
+  statut: ProfilStatut;
   avatar_url: string | null;
   telephone: string | null;
   adresse: string | null;

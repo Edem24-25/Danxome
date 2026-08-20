@@ -197,7 +197,7 @@ function Culture() {
               conservateurs de Cotonou et les descendants de la cour.
             </p>
             <Button asChild variant="gold" size="lg" className="mt-8 rounded-full">
-              <Link to="/culture/royaumes/$slug" params={{ slug: "abomey" }}>
+              <Link to="/culture/dossiers/$slug" params={{ slug: "tresors-restitues-abomey" }}>
                 Lire le dossier
               </Link>
             </Button>

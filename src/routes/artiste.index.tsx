@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image, LayoutDashboard, Package, Plus, TrendingUp, UserRound, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/site/DashboardShell";
@@ -35,6 +35,7 @@ import {
 } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { requireRole } from "@/lib/auth-guard";
+import { createClient } from "@/lib/supabase/client";
 
 export const Route = createFileRoute("/artiste/")({
   beforeLoad: () => requireRole(["artiste", "artisan", "admin"]),
@@ -84,6 +85,9 @@ function EspaceArtiste() {
   const [detailOuvert, setDetailOuvert] = useState(false);
   const [categorie, setCategorie] = useState("Sculpture");
   const [ajoutEnCours, setAjoutEnCours] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: mesOeuvres, isLoading: loadingOeuvres } = useMesOeuvres();
   const addOeuvre = useAddOeuvre();
   const { data: commandes = [] } = useCommandes();
@@ -136,7 +140,7 @@ function EspaceArtiste() {
   const nomAtelier = `${profile.prenom} ${profile.nom}`;
   const revenus = publiees.reduce((s, o) => s + o.prix, 0);
 
-  const ajouterOeuvre = (e: React.FormEvent<HTMLFormElement>) => {
+  const ajouterOeuvre = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setAjoutEnCours(true);
     const form = new FormData(e.currentTarget);
@@ -148,6 +152,23 @@ function EspaceArtiste() {
     }
     const prix = Number(form.get("prix")) || 0;
 
+    let imageUrl = IMAGE_PAR_DEFAUT;
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop() ?? "jpg";
+      const path = `${profile.id}/${Date.now()}.${ext}`;
+      const supabase = createClient();
+      const { error: uploadError } = await supabase.storage
+        .from("oeuvres")
+        .upload(path, imageFile, { contentType: imageFile.type, upsert: true });
+      if (uploadError) {
+        setAjoutEnCours(false);
+        toast.error("Erreur image", { description: "Impossible d'envoyer la photo." });
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("oeuvres").getPublicUrl(path);
+      imageUrl = urlData.publicUrl;
+    }
+
     addOeuvre.mutate(
       {
         slug: `oeuvre-${Date.now()}`,
@@ -156,7 +177,7 @@ function EspaceArtiste() {
         categorie,
         region: (form.get("region") as string)?.trim() || "Zou",
         prix,
-        image_url: IMAGE_PAR_DEFAUT,
+        image_url: imageUrl,
         description: (form.get("description") as string)?.trim() || "Nouvelle œuvre publiée.",
         statut: "publiee",
       },
@@ -164,6 +185,8 @@ function EspaceArtiste() {
         onSuccess: () => {
           setAjoutOuvert(false);
           setCategorie("Sculpture");
+          setImageFile(null);
+          setImagePreview(null);
           e.currentTarget.reset();
           setAjoutEnCours(false);
           toast.success("Œuvre publiée", { description: `« ${titre} » est maintenant en ligne.` });
@@ -322,6 +345,58 @@ function EspaceArtiste() {
                 maxLength={120}
                 placeholder="Masque de l'aube"
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Photo de l'œuvre</Label>
+              <div
+                className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-6 transition-colors hover:border-terracotta/50 hover:bg-terracotta/5"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Aperçu"
+                    className="h-32 w-full rounded-md object-cover"
+                  />
+                ) : (
+                  <>
+                    <Image className="size-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Cliquez pour ajouter une photo
+                    </p>
+                    <p className="text-xs text-muted-foreground/70">JPG, PNG — max 5 Mo</p>
+                  </>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast.error("Fichier trop volumineux", { description: "5 Mo maximum." });
+                    return;
+                  }
+                  setImageFile(file);
+                  setImagePreview(URL.createObjectURL(file));
+                }}
+              />
+              {imageFile && (
+                <button
+                  type="button"
+                  className="text-xs text-destructive hover:underline"
+                  onClick={() => {
+                    setImageFile(null);
+                    setImagePreview(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                >
+                  Supprimer la photo
+                </button>
+              )}
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

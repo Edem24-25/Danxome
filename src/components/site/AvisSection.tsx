@@ -87,7 +87,7 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
       setCommentaire("");
       await fetchAvis();
     } catch {
-      /* table avis_plats pas encore créée */
+      toast.error("Erreur", { description: "Impossible de sauvegarder l'avis." });
     }
     setSending(false);
   };
@@ -98,7 +98,7 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
       await fetchAvis();
       toast.success("Avis supprimé");
     } catch {
-      /* table avis_plats pas encore créée */
+      toast.error("Erreur", { description: "Impossible de supprimer l'avis." });
     }
   };
 

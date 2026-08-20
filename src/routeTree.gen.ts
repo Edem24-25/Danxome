@@ -47,6 +47,7 @@ import { Route as ArtArtistesSlugRouteImport } from './routes/art.artistes.$slug
 import { Route as ArtCommandeErreurRouteImport } from './routes/art.commande.erreur'
 import { Route as ArtCommandeSuccesRouteImport } from './routes/art.commande.succes'
 import { Route as ArtOeuvresSlugRouteImport } from './routes/art.oeuvres.$slug'
+import { Route as CultureDossiersSlugRouteImport } from './routes/culture.dossiers.$slug'
 import { Route as CultureMuseesSlugRouteImport } from './routes/culture.musees.$slug'
 import { Route as CultureRoyaumesSlugRouteImport } from './routes/culture.royaumes.$slug'
 import { Route as TourismeGastronomieIndexRouteImport } from './routes/tourisme.gastronomie.index'
@@ -243,6 +244,11 @@ const ArtOeuvresSlugRoute = ArtOeuvresSlugRouteImport.update({
   path: '/art/oeuvres/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CultureDossiersSlugRoute = CultureDossiersSlugRouteImport.update({
+  id: '/culture/dossiers/$slug',
+  path: '/culture/dossiers/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CultureMuseesSlugRoute = CultureMuseesSlugRouteImport.update({
   id: '/culture/musees/$slug',
   path: '/culture/musees/$slug',
@@ -309,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/art/commande/erreur': typeof ArtCommandeErreurRoute
   '/art/commande/succes': typeof ArtCommandeSuccesRoute
   '/art/oeuvres/$slug': typeof ArtOeuvresSlugRoute
+  '/culture/dossiers/$slug': typeof CultureDossiersSlugRoute
   '/culture/musees/$slug': typeof CultureMuseesSlugRoute
   '/culture/royaumes/$slug': typeof CultureRoyaumesSlugRoute
   '/tourisme/gastronomie/$slug': typeof TourismeGastronomieSlugRoute
@@ -353,6 +360,7 @@ export interface FileRoutesByTo {
   '/art/commande/erreur': typeof ArtCommandeErreurRoute
   '/art/commande/succes': typeof ArtCommandeSuccesRoute
   '/art/oeuvres/$slug': typeof ArtOeuvresSlugRoute
+  '/culture/dossiers/$slug': typeof CultureDossiersSlugRoute
   '/culture/musees/$slug': typeof CultureMuseesSlugRoute
   '/culture/royaumes/$slug': typeof CultureRoyaumesSlugRoute
   '/tourisme/gastronomie/$slug': typeof TourismeGastronomieSlugRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/art/commande/erreur': typeof ArtCommandeErreurRoute
   '/art/commande/succes': typeof ArtCommandeSuccesRoute
   '/art/oeuvres/$slug': typeof ArtOeuvresSlugRoute
+  '/culture/dossiers/$slug': typeof CultureDossiersSlugRoute
   '/culture/musees/$slug': typeof CultureMuseesSlugRoute
   '/culture/royaumes/$slug': typeof CultureRoyaumesSlugRoute
   '/tourisme/gastronomie/$slug': typeof TourismeGastronomieSlugRoute
@@ -446,6 +455,7 @@ export interface FileRouteTypes {
     | '/art/commande/erreur'
     | '/art/commande/succes'
     | '/art/oeuvres/$slug'
+    | '/culture/dossiers/$slug'
     | '/culture/musees/$slug'
     | '/culture/royaumes/$slug'
     | '/tourisme/gastronomie/$slug'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/art/commande/erreur'
     | '/art/commande/succes'
     | '/art/oeuvres/$slug'
+    | '/culture/dossiers/$slug'
     | '/culture/musees/$slug'
     | '/culture/royaumes/$slug'
     | '/tourisme/gastronomie/$slug'
@@ -535,6 +546,7 @@ export interface FileRouteTypes {
     | '/art/commande/erreur'
     | '/art/commande/succes'
     | '/art/oeuvres/$slug'
+    | '/culture/dossiers/$slug'
     | '/culture/musees/$slug'
     | '/culture/royaumes/$slug'
     | '/tourisme/gastronomie/$slug'
@@ -581,6 +593,7 @@ export interface RootRouteChildren {
   ArtCommandeErreurRoute: typeof ArtCommandeErreurRoute
   ArtCommandeSuccesRoute: typeof ArtCommandeSuccesRoute
   ArtOeuvresSlugRoute: typeof ArtOeuvresSlugRoute
+  CultureDossiersSlugRoute: typeof CultureDossiersSlugRoute
   CultureMuseesSlugRoute: typeof CultureMuseesSlugRoute
   CultureRoyaumesSlugRoute: typeof CultureRoyaumesSlugRoute
   TourismeSitesSlugRoute: typeof TourismeSitesSlugRoute
@@ -854,6 +867,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtOeuvresSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/culture/dossiers/$slug': {
+      id: '/culture/dossiers/$slug'
+      path: '/culture/dossiers/$slug'
+      fullPath: '/culture/dossiers/$slug'
+      preLoaderRoute: typeof CultureDossiersSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/culture/musees/$slug': {
       id: '/culture/musees/$slug'
       path: '/culture/musees/$slug'
@@ -944,6 +964,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArtCommandeErreurRoute: ArtCommandeErreurRoute,
   ArtCommandeSuccesRoute: ArtCommandeSuccesRoute,
   ArtOeuvresSlugRoute: ArtOeuvresSlugRoute,
+  CultureDossiersSlugRoute: CultureDossiersSlugRoute,
   CultureMuseesSlugRoute: CultureMuseesSlugRoute,
   CultureRoyaumesSlugRoute: CultureRoyaumesSlugRoute,
   TourismeSitesSlugRoute: TourismeSitesSlugRoute,

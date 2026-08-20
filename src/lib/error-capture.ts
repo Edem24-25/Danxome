@@ -1,11 +1,20 @@
 // Captures the original Error out-of-band so server.ts can recover the stack
 // when h3 has already swallowed the throw into a generic 500 Response.
 
-let lastCapturedError: { error: unknown; at: number } | undefined;
+type ErrorSeverity = "error" | "warn" | "info";
+
+interface CapturedError {
+  error: unknown;
+  at: number;
+  severity: ErrorSeverity;
+  context?: string;
+}
+
+let lastCapturedError: CapturedError | undefined;
 const TTL_MS = 5_000;
 
-function record(error: unknown) {
-  lastCapturedError = { error, at: Date.now() };
+function record(error: unknown, severity: ErrorSeverity = "error", context?: string) {
+  lastCapturedError = { error, at: Date.now(), severity, context };
 }
 
 // h3's HTTPError serializes to {"status":500,"unhandled":true,"message":"HTTPError"} —
@@ -49,6 +58,12 @@ function isErrorLike(value: unknown): value is Error {
   return value instanceof Error;
 }
 
+function formatLogEntry(severity: ErrorSeverity, message: string, context?: string): string {
+  const ts = new Date().toISOString();
+  const ctx = context ? ` [${context}]` : "";
+  return `[${ts}] [${severity.toUpperCase()}]${ctx} ${message}`;
+}
+
 // Wrap console.error so errors logged by any layer — including h3's internal
 // unhandled-error logging, which this file cannot hook directly — are both
 // recorded for consumeLastCapturedError and expanded before serialization.
@@ -62,11 +77,27 @@ console.error = (...args: unknown[]) => {
   originalConsoleError(...expanded);
 };
 
+const originalConsoleWarn = console.warn.bind(console);
+console.warn = (...args: unknown[]) => {
+  const expanded = args.map((arg) => {
+    if (!isErrorLike(arg)) return arg;
+    record(arg, "warn");
+    return describeError(arg);
+  });
+  originalConsoleWarn(...expanded);
+};
+
 if (typeof globalThis.addEventListener === "function") {
-  globalThis.addEventListener("error", (event) => record((event as ErrorEvent).error ?? event));
-  globalThis.addEventListener("unhandledrejection", (event) =>
-    record((event as PromiseRejectionEvent).reason),
-  );
+  globalThis.addEventListener("error", (event) => {
+    const err = (event as ErrorEvent).error ?? event;
+    record(err, "error", "window.onerror");
+    originalConsoleError(formatLogEntry("error", describeError(err), "window.onerror"));
+  });
+  globalThis.addEventListener("unhandledrejection", (event) => {
+    const reason = (event as PromiseRejectionEvent).reason;
+    record(reason, "error", "unhandledrejection");
+    originalConsoleError(formatLogEntry("error", describeError(reason), "unhandledrejection"));
+  });
 }
 
 export function consumeLastCapturedError(): unknown {

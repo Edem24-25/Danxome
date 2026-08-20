@@ -10,6 +10,9 @@ export const registerSchema = z.object({
     .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
     .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
     .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
+  profil: z.enum(["visiteur", "artiste", "artisan"], {
+    errorMap: () => ({ message: "Choisissez un type de compte" }),
+  }),
 });
 
 export const loginSchema = z.object({

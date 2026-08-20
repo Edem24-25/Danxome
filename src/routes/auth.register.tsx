@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { User, Mail, Lock, ArrowRight } from "lucide-react";
+import { User, Mail, Lock, ArrowRight, Eye, Palette, Hammer } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AuthLayout } from "@/components/site/AuthLayout";
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/auth";
 import { useRateLimit } from "@/lib/rate-limit";
 import { registerSchema } from "@/lib/validations";
+import type { ProfilType } from "@/lib/types/user";
 
 export const Route = createFileRoute("/auth/register")({
   head: () => ({
@@ -18,20 +19,51 @@ export const Route = createFileRoute("/auth/register")({
       {
         name: "description",
         content:
-          "Créez votre compte visiteur et accédez au patrimoine béninois : visites virtuelles, réservations et boutique artisanale.",
+          "Créez votre compte et accédez au patrimoine béninois : visites virtuelles, réservations et boutique artisanale.",
       },
       { property: "og:title", content: "Créer un compte — DanXomè" },
       {
         property: "og:description",
-        content: "Inscrivez-vous comme visiteur pour explorer le patrimoine du Bénin.",
+        content: "Inscrivez-vous pour explorer le patrimoine du Bénin.",
       },
     ],
   }),
   component: Register,
 });
 
+const profils: {
+  value: ProfilType;
+  label: string;
+  description: string;
+  icon: typeof Eye;
+  color: string;
+}[] = [
+  {
+    value: "visiteur",
+    label: "Visiteur",
+    description: "Explorer le patrimoine, réserver des visites, commander",
+    icon: Eye,
+    color: "text-forest",
+  },
+  {
+    value: "artiste",
+    label: "Artiste",
+    description: "Exposer vos œuvres, vendre, gérer votre portfolio",
+    icon: Palette,
+    color: "text-terracotta",
+  },
+  {
+    value: "artisan",
+    label: "Artisan",
+    description: "Vendre vos créations, gérer votre boutique",
+    icon: Hammer,
+    color: "text-amber-600",
+  },
+];
+
 function Register() {
   const [loading, setLoading] = useState(false);
+  const [selectedProfil, setSelectedProfil] = useState<ProfilType>("visiteur");
   const { signUp } = useAuth();
   const navigate = useNavigate();
   const registerRL = useRateLimit("register", 3, 60000);
@@ -53,6 +85,7 @@ function Register() {
       nom: (formData.get("nom") as string)?.trim(),
       email: (formData.get("mail") as string)?.trim(),
       password: formData.get("mdp") as string,
+      profil: selectedProfil,
     });
 
     if (!parsed.success) {
@@ -63,10 +96,10 @@ function Register() {
       return;
     }
 
-    const { email, password, prenom, nom } = parsed.data;
+    const { email, password, prenom, nom, profil } = parsed.data;
 
     setLoading(true);
-    const { error } = await signUp({ email, password, prenom, nom, profil: "visiteur" });
+    const { error } = await signUp({ email, password, prenom, nom, profil });
 
     if (error) {
       toast.error("Erreur lors de l'inscription", { description: error });
@@ -74,8 +107,11 @@ function Register() {
       return;
     }
 
+    const isArtisanOrArtiste = profil === "artiste" || profil === "artisan";
     toast.success("Compte créé avec succès", {
-      description: "Vérifiez votre boîte mail pour confirmer votre compte.",
+      description: isArtisanOrArtiste
+        ? "Votre compte sera examiné par un administrateur avant activation."
+        : "Vérifiez votre boîte mail pour confirmer votre compte.",
     });
     navigate({ to: "/auth/login", search: { from: undefined } });
   };
@@ -84,7 +120,7 @@ function Register() {
     <AuthLayout
       eyebrow="Inscription"
       titre="Rejoindre DanXomè"
-      intro="Créez votre compte visiteur pour explorer le patrimoine béninois."
+      intro="Créez votre compte pour explorer le patrimoine béninois."
       footer={
         <Link
           to="/auth/login"
@@ -97,6 +133,66 @@ function Register() {
       }
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Sélection du profil */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-forest-deep">Type de compte</Label>
+          <div className="grid gap-3">
+            {profils.map((p) => {
+              const Icon = p.icon;
+              const isSelected = selectedProfil === p.value;
+              return (
+                <button
+                  key={p.value}
+                  type="button"
+                  onClick={() => setSelectedProfil(p.value)}
+                  className={`flex items-center gap-3 rounded-lg border-2 p-3 text-left transition-all duration-200 ${
+                    isSelected
+                      ? "border-terracotta bg-terracotta/5 shadow-sm"
+                      : "border-border bg-background hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <div
+                    className={`flex size-9 items-center justify-center rounded-full ${
+                      isSelected ? "bg-terracotta/10" : "bg-muted"
+                    }`}
+                  >
+                    <Icon className={`size-4 ${isSelected ? p.color : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`text-sm font-semibold ${
+                        isSelected ? "text-forest-deep" : "text-foreground"
+                      }`}
+                    >
+                      {p.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{p.description}</p>
+                  </div>
+                  <div
+                    className={`size-4 rounded-full border-2 ${
+                      isSelected
+                        ? "border-terracotta bg-terracotta"
+                        : "border-muted-foreground/30"
+                    }`}
+                  >
+                    {isSelected && (
+                      <div className="flex size-full items-center justify-center">
+                        <div className="size-1.5 rounded-full bg-white" />
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          {(selectedProfil === "artiste" || selectedProfil === "artisan") && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <span className="inline-block size-1.5 rounded-full bg-amber-500" />
+              Votre compte sera examiné par un administrateur avant activation.
+            </p>
+          )}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="prenom" className="text-sm font-medium text-forest-deep">

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   to: string;
-  params?: Record<string, string>;
+  params?: Record<string, string> | undefined;
   image: string;
   titre: string;
   meta: string;
@@ -43,7 +43,7 @@ export function ContentCard({
   return (
     <Link
       to={to}
-      params={params as never}
+      params={params}
       className={cn(
         "group block overflow-hidden rounded-xl border border-border bg-card transition-all duration-500",
         "hover:-translate-y-1 hover:shadow-cultural hover:border-accent/30",

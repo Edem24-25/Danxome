@@ -2,7 +2,8 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/Reveal";
-import { Heart } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+
 
 const columns = [
   {
@@ -87,13 +88,22 @@ export function Footer() {
 
                   {/* Réseaux sociaux */}
                   <div className="mt-8 flex gap-3">
-                    {["Facebook", "Instagram", "Twitter", "YouTube"].map((social) => (
-                      <span
-                        key={social}
-                        className="flex size-9 items-center justify-center rounded-full border border-ivory/15 text-xs text-ivory/50 transition-all duration-300 hover:border-accent/40 hover:text-accent hover:bg-accent/10 cursor-pointer"
+                    {[
+                      { icon: Facebook, label: "Facebook", href: "#" },
+                      { icon: Instagram, label: "Instagram", href: "#" },
+                      { icon: Twitter, label: "Twitter", href: "#" },
+                      { icon: Youtube, label: "YouTube", href: "#" },
+                    ].map(({ icon: Icon, label, href }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                        className="flex size-9 items-center justify-center rounded-full border border-ivory/15 text-ivory/50 transition-all duration-300 hover:border-accent/40 hover:text-accent hover:bg-accent/10"
                       >
-                        {social[0]}
-                      </span>
+                        <Icon className="size-4" />
+                      </a>
                     ))}
                   </div>
                 </div>
@@ -128,10 +138,8 @@ export function Footer() {
       {/* Barre inférieure */}
       <div className="bg-forest-darker border-t border-ivory/8">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-6 text-xs text-ivory/40 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p className="flex items-center gap-1.5">
-            © {new Date().getFullYear()} DanXomè · Fait avec
-            <Heart className="size-3 fill-terracotta text-terracotta" />
-            au Bénin
+          <p>
+            © {new Date().getFullYear()} DanXomè
           </p>
           <div className="flex flex-wrap gap-5">
             <Link to="/legal" className="transition-colors hover:text-accent">

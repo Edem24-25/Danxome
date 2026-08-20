@@ -58,19 +58,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const controller = new AbortController();
       profileAbortRef.current = controller;
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("profiles")
           .select(
-            "id, email, prenom, nom, profil, avatar_url, telephone, adresse, ville, pays, created_at, updated_at",
+            "id, email, prenom, nom, profil, statut, avatar_url, telephone, adresse, ville, pays, created_at, updated_at",
           )
           .eq("id", userId)
           .single();
         if (!controller.signal.aborted) {
-          setProfile(data as Profile | null);
+          if (error) {
+            setProfile(null);
+            setSession(null);
+            await supabase.auth.signOut();
+          } else {
+            setProfile(data as Profile | null);
+          }
         }
       } catch {
         if (!controller.signal.aborted) {
           setProfile(null);
+          setSession(null);
+          await supabase.auth.signOut();
         }
       }
     },
@@ -103,6 +111,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, [supabase, fetchProfile]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const { data: { session: s } } = await supabase.auth.getSession();
+      if (s) {
+        setSession(s);
+        await supabase.auth.refreshSession();
+      }
+    }, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [supabase]);
 
   const signUp = useCallback(
     async ({

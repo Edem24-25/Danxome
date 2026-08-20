@@ -1,6 +1,6 @@
 ﻿import { Link } from "@tanstack/react-router";
 import { Menu, Search, ShoppingCart, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePanier } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { Button } from "@/components/ui/button";
@@ -41,13 +41,23 @@ export function Header() {
   const nombre = (panierData ?? []).reduce((s, i) => s + i.qte, 0);
   const { user, profile, loading, peutCommander } = useAuth();
   const accueil = "/profil";
+  const rafRef = useRef<number>(0);
+
+  const onScroll = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      setScrolled(window.scrollY > 24);
+    });
+  }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [onScroll]);
 
   return (
     <header

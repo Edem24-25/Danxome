@@ -113,12 +113,33 @@ export type Plat = {
   curiosite: string;
 };
 
+export type DossierSection = {
+  titre: string;
+  contenu: string;
+  image_url?: string;
+};
+
+export type Dossier = {
+  id: string;
+  slug: string;
+  titre: string;
+  sous_titre: string | null;
+  image_url: string | null;
+  resume: string | null;
+  categorie: string;
+  auteur: string | null;
+  date_publication: string;
+  sections: DossierSection[];
+};
+
 // ============================================================
 // Helpers
 // ============================================================
 
 export const formatFcfa = (n: number) =>
   `${n.toLocaleString("fr-FR").replace(/\u202f/g, " ")} FCFA`;
+
+export const PAGE_SIZE = 20;
 
 // ============================================================
 // Sites
@@ -134,6 +155,23 @@ export function useSites() {
         .order("nom");
       if (error) throw error;
       return data as Site[];
+    },
+  });
+}
+
+export function useSitesPaginated(page = 1) {
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  return useQuery({
+    queryKey: ["sites", "paginated", page],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from("sites")
+        .select("*", { count: "exact" })
+        .order("nom")
+        .range(from, to);
+      if (error) throw error;
+      return { data: data as Site[], total: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) };
     },
   });
 }
@@ -254,6 +292,23 @@ export function useArtistes() {
         .order("nom");
       if (error) throw error;
       return data as Artiste[];
+    },
+  });
+}
+
+export function useArtistesPaginated(page = 1) {
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  return useQuery({
+    queryKey: ["artistes", "paginated", page],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from("artistes")
+        .select("*", { count: "exact" })
+        .order("nom")
+        .range(from, to);
+      if (error) throw error;
+      return { data: data as Artiste[], total: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) };
     },
   });
 }
@@ -529,7 +584,8 @@ export function useCommandesClient() {
   return useQuery({
     queryKey: ["commandes", "client"],
     queryFn: async () => {
-      const userId = (await supabase.auth.getUser()).data.user?.id ?? "";
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) return [] as Commande[];
       const { data, error } = await supabase
         .from("commandes")
         .select("*")
@@ -815,6 +871,39 @@ export function useCreateReservation() {
 }
 
 // ============================================================
+// Dossiers
+// ============================================================
+
+export function useDossiers() {
+  return useQuery({
+    queryKey: ["dossiers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dossiers")
+        .select("*")
+        .order("date_publication", { ascending: false });
+      if (error) throw error;
+      return data as Dossier[];
+    },
+  });
+}
+
+export function useDossier(slug: string) {
+  return useQuery({
+    queryKey: ["dossiers", slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dossiers")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+      if (error) throw error;
+      return data as Dossier;
+    },
+  });
+}
+
+// ============================================================
 // Admin – Avis
 // ============================================================
 
@@ -898,10 +987,26 @@ export function useAdminProfiles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, email, prenom, nom, profil, created_at")
+        .select("id, email, prenom, nom, profil, statut, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Profile[];
+    },
+  });
+}
+
+export function useAdminUpdateProfilStatut() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, statut }: { id: string; statut: "valide" | "rejete" }) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ statut })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
     },
   });
 }

@@ -1,6 +1,6 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CalendarDays, Compass, Play, Search } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import { Rule, SectionTitle } from "@/components/site/Bits";
 import { BeninMap } from "@/components/site/BeninMap";
 import { useSites, useArtistes, useEvenements, useMusees, useRoyaumes, usePlats, useOeuvres } from "@/hooks/use-data";
 import heroAbomey from "@/assets/hero-abomey.jpg";
+import siteGanvie from "@/assets/site-ganvie.jpg";
+import sitePendjari from "@/assets/site-pendjari.jpg";
 import museum from "@/assets/museum.jpg";
 
 export const Route = createFileRoute("/")({
@@ -36,13 +38,19 @@ export const Route = createFileRoute("/")({
 function Accueil() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const { data: sites = [] } = useSites();
-  const { data: artistes = [] } = useArtistes();
-  const { data: evenements = [] } = useEvenements();
-  const { data: musees = [] } = useMusees();
+  const { data: sites = [], isLoading: loadingSites } = useSites();
+  const { data: artistes = [], isLoading: loadingArtistes } = useArtistes();
+  const { data: evenements = [], isLoading: loadingEvents } = useEvenements();
+  const { data: musees = [], isLoading: loadingMusees } = useMusees();
   const { data: royaumes = [] } = useRoyaumes();
   const { data: plats = [] } = usePlats();
   const { data: oeuvres = [] } = useOeuvres();
+
+  const heroSlides = [
+    { src: heroAbomey, alt: "Palais royaux d'Abomey, patrimoine mondial UNESCO" },
+    { src: siteGanvie, alt: "Ganvié, la cité lacustre sur pilotis" },
+    { src: sitePendjari, alt: "Parc national de la Pendjari" },
+  ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,26 +82,39 @@ function Accueil() {
     }
   };
 
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
   return (
     <SiteShell>
-      {/* ═══ HERO ═══ */}
+      {/* ═══ HERO CAROUSEL ═══ */}
       <section className="relative isolate flex min-h-[92vh] items-end overflow-hidden">
-        <img
-          src={heroAbomey}
-          alt="Bas-reliefs des palais royaux d'Abomey au coucher du soleil"
-          width={1920}
-          height={1280}
-          className="media-warm absolute inset-0 size-full object-cover"
-        />
-        {/* Overlay enrichi multi-couche */}
-        <div className="absolute inset-0 hero-overlay" />
-        <div
-          className="pattern-fon absolute inset-0 opacity-[0.12] mix-blend-overlay"
-          aria-hidden
-        />
-        <div className="absolute inset-0 texture-grain" aria-hidden />
+        {heroSlides.map((slide, i) => (
+          <img
+            key={i}
+            src={slide.src}
+            alt={slide.alt}
+            width={1920}
+            height={1280}
+            className={`media-warm absolute inset-0 size-full object-cover transition-opacity duration-1000 ${
+              i === current ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
 
-        <div className="relative mx-auto w-full max-w-7xl px-4 pt-32 pb-20 text-center sm:px-6 sm:pb-24 lg:px-8">
+        {/* Overlay multi-couche (par-dessus le carrousel) */}
+        <div className="absolute inset-0 z-[1] hero-overlay" />
+        <div className="pattern-fon absolute inset-0 z-[1] opacity-[0.12] mix-blend-overlay" aria-hidden />
+        <div className="absolute inset-0 z-[1] texture-grain" aria-hidden />
+
+        {/* Contenu */}
+        <div className="relative z-[2] mx-auto w-full max-w-7xl px-4 pt-32 pb-20 text-center sm:px-6 sm:pb-24 lg:px-8">
           <Reveal variant="up" delay={100}>
             <Badge variant="onDark" className="mx-auto animate-bounce-in">
               Patrimoine mondial · Bénin
@@ -153,6 +174,22 @@ function Accueil() {
             </div>
           </Reveal>
         </div>
+
+        {/* Indicateurs de slide */}
+        <div className="absolute bottom-6 left-1/2 z-[2] flex -translate-x-1/2 gap-2 sm:bottom-8">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                current === i
+                  ? "w-8 bg-accent"
+                  : "w-1.5 bg-ivory/40 hover:bg-ivory/60"
+              }`}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
       </section>
 
       {/* ═══ CARTE INTERACTIVE ═══ */}
@@ -175,18 +212,22 @@ function Accueil() {
           <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
             <BeninMap sites={sites} className="min-h-[420px]" />
             <div className="grid gap-4 sm:grid-cols-2">
-              {sites.slice(0, 4).map((s) => (
-                <ContentCard
-                  key={s.slug}
-                  to="/tourisme/sites/$slug"
-                  params={{ slug: s.slug }}
-                  image={s.image_url}
-                  titre={s.nom}
-                  meta={`${s.region} · ${s.type}`}
-                  note={s.note}
-                  ratio="carre"
-                />
-              ))}
+              {loadingSites
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={`skel-site-${i}`} className="skeleton-cultural aspect-square rounded-xl" />
+                  ))
+                : sites.slice(0, 4).map((s) => (
+                    <ContentCard
+                      key={s.slug}
+                      to="/tourisme/sites/$slug"
+                      params={{ slug: s.slug }}
+                      image={s.image_url}
+                      titre={s.nom}
+                      meta={`${s.region} · ${s.type}`}
+                      note={s.note}
+                      ratio="carre"
+                    />
+                  ))}
             </div>
           </div>
         </Reveal>
@@ -204,7 +245,11 @@ function Accueil() {
           />
         </Reveal>
         <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {sites
+          {loadingSites
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div key={`skel-visite-${i}`} className="skeleton-cultural aspect-[4/3] rounded-xl" />
+              ))
+            : sites
             .filter((s) => s.virtuel)
             .slice(0, 3)
             .map((s, i) => (
@@ -255,7 +300,11 @@ function Accueil() {
             />
           </Reveal>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {artistes.map((a, i) => (
+            {loadingArtistes
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <div key={`skel-artiste-${i}`} className="skeleton-cultural aspect-[3/4] rounded-xl" />
+                ))
+              : artistes.map((a, i) => (
               <Reveal key={a.slug} variant="up" delay={i * 100}>
                 <ContentCard
                   to="/art/artistes/$slug"
@@ -288,7 +337,18 @@ function Accueil() {
           />
         </Reveal>
         <ol className="mt-12 border-l-2 border-border/60">
-          {evenements.map((e, i) => (
+          {loadingEvents
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <li key={`skel-event-${i}`} className="relative grid gap-4 py-7 pl-10 sm:grid-cols-[120px_1fr_auto] sm:items-center">
+                  <span className="absolute top-1/2 -left-[9px] size-4 -translate-y-1/2 rounded-full border-[3px] border-background bg-muted" />
+                  <div className="skeleton-cultural h-10 w-20 rounded-lg" />
+                  <div className="space-y-2">
+                    <div className="skeleton-cultural h-5 w-48 rounded" />
+                    <div className="skeleton-cultural h-4 w-64 rounded" />
+                  </div>
+                </li>
+              ))
+            : evenements.map((e, i) => (
             <Reveal key={e.slug} variant="left" delay={i * 80}>
               <li className="relative grid gap-4 py-7 pl-10 sm:grid-cols-[120px_1fr_auto] sm:items-center">
                 <span className="absolute top-1/2 -left-[9px] size-4 -translate-y-1/2 rounded-full border-[3px] border-background bg-accent shadow-gold" />
@@ -334,7 +394,16 @@ function Accueil() {
             />
           </Reveal>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {musees.map((m, i) => (
+            {loadingMusees
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <div key={`skel-musee-${i}`} className="rounded-xl border border-ivory/10 bg-ivory/5 p-6 backdrop-blur-sm">
+                    <div className="skeleton-cultural h-4 w-16 rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
+                    <div className="skeleton-cultural mt-3 h-6 w-32 rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
+                    <div className="skeleton-cultural mt-3 h-4 w-full rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
+                    <div className="skeleton-cultural mt-2 h-4 w-2/3 rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
+                  </div>
+                ))
+              : musees.map((m, i) => (
               <Reveal key={m.slug} variant="up" delay={i * 110}>
                 <Link
                   to="/culture/musees/$slug"
