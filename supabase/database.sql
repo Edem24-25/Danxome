@@ -1,4 +1,4 @@
--- ============================================================
+ -- ============================================================
 -- Database complète — DanXomè (Supabase)
 -- Ce fichier remplace tous les fichiers SQL individuels.
 -- Exécuter dans l'ordre : schéma → storage → seed → commandes → artistes → admin
@@ -40,6 +40,8 @@ DECLARE
   requested_profil TEXT;
   final_profil TEXT;
   final_statut TEXT;
+  nom_complet TEXT;
+  slug_base TEXT;
 BEGIN
   requested_profil := NEW.raw_user_meta_data->>'profil';
   IF requested_profil IN ('artiste', 'artisan') THEN
@@ -50,15 +52,39 @@ BEGIN
     final_statut := 'valide';
   END IF;
 
-  INSERT INTO public.profiles (id, email, prenom, nom, profil, statut)
+  nom_complet := TRIM(
+    COALESCE(NEW.raw_user_meta_data->>'prenom', '') || ' ' ||
+    COALESCE(NEW.raw_user_meta_data->>'nom', '')
+  );
+
+  INSERT INTO public.profiles (id, email, prenom, nom, profil, statut, telephone, ville)
   VALUES (
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'prenom', ''),
     COALESCE(NEW.raw_user_meta_data->>'nom', ''),
     final_profil,
-    final_statut
+    final_statut,
+    NULLIF(NEW.raw_user_meta_data->>'telephone', ''),
+    NULLIF(NEW.raw_user_meta_data->>'ville', '')
   );
+
+  IF final_profil IN ('artiste', 'artisan') AND nom_complet != '' THEN
+    slug_base := lower(nom_complet);
+    slug_base := regexp_replace(slug_base, '[^a-z0-9]+', '-', 'g');
+    slug_base := regexp_replace(slug_base, '(^-|-$)', '', 'g');
+
+    INSERT INTO public.artistes (slug, nom, metier, ville, bio, user_id)
+    VALUES (
+      slug_base || '-' || floor(extract(epoch from now()))::text,
+      nom_complet,
+      NULLIF(NEW.raw_user_meta_data->>'categorie', ''),
+      NULLIF(NEW.raw_user_meta_data->>'ville', ''),
+      NULLIF(NEW.raw_user_meta_data->>'description', ''),
+      NEW.id
+    );
+  END IF;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -253,6 +279,8 @@ CREATE TABLE IF NOT EXISTS artistes (
   ville TEXT,
   image_url TEXT,
   bio TEXT,
+  categorie TEXT,
+  portfolio_url TEXT,
   user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -755,7 +783,9 @@ INSERT INTO evenements (slug, titre, date, jour, mois, lieu, categorie, image_ur
 ('biennale-benin', 'Biennale de Cotonou', '3 mai – 30 juin', 3, 'MAI', 'Cotonou', 'Art contemporain', '/Biennale de cotonou_danxomè.jpg', 'Expositions dans toute la ville, ateliers ouverts et rencontres de commissaires.'),
 ('nonvitcha', 'Nonvitcha', '18 – 19 mai', 18, 'MAI', 'Grand-Popo', 'Rassemblement', '/Nonvitcha_danxomè.jpg', 'Grande retrouvaille de la communauté xwla, entre mer et lagune.'),
 ('fete-igname', 'Fête de l''igname', '15 août', 15, 'AOÛ', 'Savalou', 'Tradition', '/Fête de l''igname_danxomè.jpg', 'Bénédiction des nouvelles récoltes par le roi de Savalou.'),
-('quintessence', 'Festival Quintessence', '5 – 10 décembre', 5, 'DÉC', 'Ouidah', 'Cinéma', '/Festival de quintesence_danxomè.jpg', 'Compétition de films africains, projections en plein air et masterclasses.')
+('quintessence', 'Festival Quintessence', '5 – 10 décembre', 5, 'DÉC', 'Ouidah', 'Cinéma', '/Festival de quintesence_danxomè.jpg', 'Compétition de films africains, projections en plein air et masterclasses.'),
+('jistna', 'JISTNA', '22 – 23 août', 22, 'AOÛ', 'Ouidah', 'Commémoration', '/JISTNA_danxomè.webp', 'Journée Internationale du Souvenir de la Traite Négrière et de son Abolition. Cérémonies face à l''océan, hommages aux ancêtres et concerts.'),
+('weloveya', 'WeLovEya Festival', '26 – 27 décembre', 26, 'DÉC', 'Place de l''Amazone, Cotonou', 'Festival', '/Weloveya_danxomè.jpg', 'Plus grand festival afro-urbain et afrobeat du Bénin. Deux jours de concerts, de culture et de fête à la Place de l''Amazone.')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================================

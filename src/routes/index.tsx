@@ -11,7 +11,7 @@ import { Rule, SectionTitle } from "@/components/site/Bits";
 import { BeninMap } from "@/components/site/BeninMap";
 import { useSites, useArtistes, useEvenements, useMusees, useRoyaumes, usePlats, useOeuvres } from "@/hooks/use-data";
 import heroAbomey from "@/assets/hero-abomey.jpg";
-import siteGanvie from "@/assets/site-ganvie.jpg";
+import artBronze from "@/assets/art-bronze.jpg";
 import sitePendjari from "@/assets/site-pendjari.jpg";
 import museum from "@/assets/museum.jpg";
 
@@ -48,7 +48,7 @@ function Accueil() {
 
   const heroSlides = [
     { src: heroAbomey, alt: "Palais royaux d'Abomey, patrimoine mondial UNESCO" },
-    { src: siteGanvie, alt: "Ganvié, la cité lacustre sur pilotis" },
+    { src: artBronze, alt: "Artisanat en bronze du Bénin" },
     { src: sitePendjari, alt: "Parc national de la Pendjari" },
   ];
 
@@ -175,21 +175,7 @@ function Accueil() {
           </Reveal>
         </div>
 
-        {/* Indicateurs de slide */}
-        <div className="absolute bottom-6 left-1/2 z-[2] flex -translate-x-1/2 gap-2 sm:bottom-8">
-          {heroSlides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                current === i
-                  ? "w-8 bg-accent"
-                  : "w-1.5 bg-ivory/40 hover:bg-ivory/60"
-              }`}
-              aria-label={`Slide ${i + 1}`}
-            />
-          ))}
-        </div>
+
       </section>
 
       {/* ═══ CARTE INTERACTIVE ═══ */}

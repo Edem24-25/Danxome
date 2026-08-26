@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   CheckCircle2,
@@ -9,6 +9,8 @@ import {
   Globe,
   ArrowLeft,
   Save,
+  Camera,
+  Trash2,
 } from "lucide-react";
 import { ProfilShell } from "@/components/site/ProfilShell";
 import { ProfilBadge } from "@/components/site/ProfilBadge";
@@ -18,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth";
+import { createClient } from "@/lib/supabase/client";
 
 export const Route = createFileRoute("/profil/details")({
   head: () => ({
@@ -43,6 +46,10 @@ function ProfilDetails() {
   const [adresse, setAdresse] = useState("");
   const [ville, setVille] = useState("");
   const [pays, setPays] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (profile) {
@@ -56,7 +63,7 @@ function ProfilDetails() {
   }, [profile]);
 
   const initiales = useMemo(
-    () => `${(prenom?.[0] ?? "")}${(nom?.[0] ?? "")}`.toUpperCase() || "D",
+    () => `${prenom?.[0] ?? ""}${nom?.[0] ?? ""}`.toUpperCase() || "D",
     [prenom, nom],
   );
 
@@ -80,7 +87,8 @@ function ProfilDetails() {
     return e;
   }, [prenom, nom, telephone]);
 
-  const isValid = prenom.trim().length >= 2 && nom.trim().length >= 2 && Object.keys(errors).length === 0;
+  const isValid =
+    prenom.trim().length >= 2 && nom.trim().length >= 2 && Object.keys(errors).length === 0;
 
   if (loading || !user || !profile) {
     return (
@@ -124,6 +132,84 @@ function ProfilDetails() {
     navigate({ to: "/profil" });
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux", { description: "5 Mo maximum." });
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Format non supporté", { description: "JPEG, PNG ou WebP uniquement." });
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleAvatarUpload = async () => {
+    if (!avatarFile || !profile) return;
+    setUploadingAvatar(true);
+
+    const ext = avatarFile.name.split(".").pop() ?? "jpg";
+    const path = `${profile.id}/${Date.now()}.${ext}`;
+    const supabase = createClient();
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, avatarFile, { contentType: avatarFile.type, upsert: true });
+
+    if (uploadError) {
+      setUploadingAvatar(false);
+      toast.error("Erreur lors de l'envoi", { description: "Impossible de charger l'image." });
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    const newAvatarUrl = urlData.publicUrl;
+    const { error: updateError } = await updateProfile({ avatar_url: newAvatarUrl });
+
+    if (updateError) {
+      setUploadingAvatar(false);
+      toast.error(updateError);
+      return;
+    }
+
+    // Sync to artistes.image_url if the user is an artist/artisan
+    if (profile.profil === "artiste" || profile.profil === "artisan") {
+      await supabase.from("artistes").update({ image_url: newAvatarUrl }).eq("user_id", profile.id);
+    }
+
+    setUploadingAvatar(false);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    toast.success("Photo de profil mise à jour");
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!profile?.avatar_url) return;
+    setUploadingAvatar(true);
+
+    const { error } = await updateProfile({ avatar_url: null });
+
+    if (error) {
+      setUploadingAvatar(false);
+      toast.error(error);
+      return;
+    }
+
+    // Sync to artistes.image_url if the user is an artist/artisan
+    if (profile.profil === "artiste" || profile.profil === "artisan") {
+      const supabase = createClient();
+      await supabase.from("artistes").update({ image_url: null }).eq("user_id", profile.id);
+    }
+
+    setUploadingAvatar(false);
+    toast.success("Photo de profil supprimée");
+  };
+
+  const currentAvatar = avatarPreview ?? profile.avatar_url;
+
   return (
     <ProfilShell
       title="Mes informations"
@@ -136,9 +222,9 @@ function ProfilDetails() {
             <div className="flex flex-col items-center gap-6 sm:flex-row">
               <div className="relative group">
                 <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-forest/10 font-display text-4xl text-forest ring-4 ring-background ring-offset-2 transition-transform group-hover:scale-105">
-                  {profile.avatar_url ? (
+                  {currentAvatar ? (
                     <img
-                      src={profile.avatar_url}
+                      src={currentAvatar}
                       alt={`${prenom} ${nom}`}
                       className="size-full object-cover"
                     />
@@ -146,8 +232,26 @@ function ProfilDetails() {
                     initiales
                   )}
                 </div>
-                <span className="absolute -right-1 -bottom-1 size-5 rounded-full bg-emerald-500 ring-2 ring-background" />
+
+                {/* Bouton camera */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute -right-1 -bottom-1 flex size-7 items-center justify-center rounded-full bg-forest text-foreground shadow-md transition-all hover:bg-forest-deep hover:scale-110"
+                  title="Changer la photo"
+                >
+                  <Camera className="size-3.5" />
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
               </div>
+
               <div className="text-center sm:text-left">
                 <h3 className="font-display text-2xl text-forest-deep">
                   {prenom || "Prénom"} {nom || "Nom"}
@@ -156,15 +260,53 @@ function ProfilDetails() {
                 <div className="mt-2">
                   <ProfilBadge profil={profile.profil} />
                 </div>
-                {!hasChanges && (
+
+                {/* Actions avatar */}
+                {avatarPreview && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="gold"
+                      onClick={handleAvatarUpload}
+                      disabled={uploadingAvatar}
+                    >
+                      {uploadingAvatar ? "Envoi…" : "Enregistrer la photo"}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setAvatarFile(null);
+                        setAvatarPreview(null);
+                      }}
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                )}
+
+                {profile.avatar_url && !avatarPreview && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="mt-2 text-destructive hover:text-destructive"
+                    onClick={handleAvatarRemove}
+                    disabled={uploadingAvatar}
+                  >
+                    <Trash2 className="size-3.5" /> Supprimer la photo
+                  </Button>
+                )}
+
+                {!hasChanges && !avatarPreview && (
                   <p className="mt-2 text-xs text-emerald-600 flex items-center gap-1 justify-center sm:justify-start">
                     <CheckCircle2 className="size-3" /> Profil à jour
                   </p>
                 )}
-                {hasChanges && (
-                  <p className="mt-2 text-xs text-amber-600">
-                    Modifications non enregistrées
-                  </p>
+                {(hasChanges || avatarPreview) && (
+                  <p className="mt-2 text-xs text-amber-600">Modifications non enregistrées</p>
                 )}
               </div>
             </div>
@@ -187,11 +329,11 @@ function ProfilDetails() {
                   required
                   maxLength={60}
                   placeholder="Votre prénom"
-                  className={errors.prenom ? "border-terracotta focus-visible:ring-terracotta/20" : ""}
+                  className={
+                    errors.prenom ? "border-terracotta focus-visible:ring-terracotta/20" : ""
+                  }
                 />
-                {errors.prenom && (
-                  <p className="text-xs text-terracotta">{errors.prenom}</p>
-                )}
+                {errors.prenom && <p className="text-xs text-terracotta">{errors.prenom}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="nom" className="flex items-center gap-1.5">
@@ -206,9 +348,7 @@ function ProfilDetails() {
                   placeholder="Votre nom"
                   className={errors.nom ? "border-terracotta focus-visible:ring-terracotta/20" : ""}
                 />
-                {errors.nom && (
-                  <p className="text-xs text-terracotta">{errors.nom}</p>
-                )}
+                {errors.nom && <p className="text-xs text-terracotta">{errors.nom}</p>}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="telephone" className="flex items-center gap-1.5">
@@ -221,11 +361,11 @@ function ProfilDetails() {
                   onChange={(e) => setTelephone(e.target.value)}
                   placeholder="+229 00 00 00 00"
                   maxLength={20}
-                  className={errors.telephone ? "border-terracotta focus-visible:ring-terracotta/20" : ""}
+                  className={
+                    errors.telephone ? "border-terracotta focus-visible:ring-terracotta/20" : ""
+                  }
                 />
-                {errors.telephone && (
-                  <p className="text-xs text-terracotta">{errors.telephone}</p>
-                )}
+                {errors.telephone && <p className="text-xs text-terracotta">{errors.telephone}</p>}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="adresse" className="flex items-center gap-1.5">

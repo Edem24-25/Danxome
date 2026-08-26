@@ -14,22 +14,14 @@ export const navLinks = [
   { to: "/evenements", label: "Événements" },
 ] as const;
 
-export function Wordmark({ dark = false }: { dark?: boolean }) {
+export function Wordmark() {
   return (
     <Link to="/" className="group flex items-center gap-2.5">
       <img
-        src="/logo.png"
+        src="/logo-danxome.svg"
         alt="DanXomè"
-        className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
+        className="h-10 w-auto transition-transform duration-300 group-hover:scale-105"
       />
-      <span
-        className={cn(
-          "font-display text-2xl leading-none tracking-tight transition-colors duration-300",
-          dark ? "text-ivory" : "text-forest-deep",
-        )}
-      >
-        DanXomè
-      </span>
     </Link>
   );
 }
@@ -189,7 +181,11 @@ export function Header() {
                 {/* Footer mobile */}
                 <div className="border-t border-border/50 px-6 py-6">
                   <Button asChild variant="gold" size="lg" className="w-full rounded-full">
-                    <Link to="/auth/login" search={{ from: undefined }} onClick={() => setOpen(false)}>
+                    <Link
+                      to="/auth/login"
+                      search={{ from: undefined }}
+                      onClick={() => setOpen(false)}
+                    >
                       Connexion
                     </Link>
                   </Button>

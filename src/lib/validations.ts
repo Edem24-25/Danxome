@@ -40,6 +40,14 @@ export const reservationSchema = z.object({
   telephone: z.string().min(8, "Téléphone invalide").max(20),
 });
 
+export const registerStep2Schema = z.object({
+  telephone: z.string().min(8, "Téléphone invalide").max(20).optional().or(z.literal("")),
+  ville: z.string().min(1, "Ville requise").max(100),
+  categorie: z.string().min(1, "Catégorie requise").max(100),
+  description: z.string().min(10, "La description doit contenir au moins 10 caractères").max(2000),
+  portfolio_url: z.string().url("URL invalide").optional().or(z.literal("")),
+});
+
 export const addOeuvreSchema = z.object({
   titre: z.string().min(1, "Titre requis").max(200),
   slug: z
@@ -55,6 +63,7 @@ export const addOeuvreSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterStep2Input = z.infer<typeof registerStep2Schema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ContactInput = z.infer<typeof contactSchema>;
 export type ReservationInput = z.infer<typeof reservationSchema>;

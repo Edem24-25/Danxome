@@ -49,15 +49,6 @@ export type Royaume = {
   visiter: VisiterLink[];
 };
 
-export type Langue = {
-  id: string;
-  nom: string;
-  locuteurs: string;
-  region: string;
-  salut: string;
-  sens: string;
-};
-
 export type Artiste = {
   id: string;
   slug: string;
@@ -149,10 +140,7 @@ export function useSites() {
   return useQuery({
     queryKey: ["sites"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sites")
-        .select("*")
-        .order("nom");
+      const { data, error } = await supabase.from("sites").select("*").order("nom");
       if (error) throw error;
       return data as Site[];
     },
@@ -171,7 +159,11 @@ export function useSitesPaginated(page = 1) {
         .order("nom")
         .range(from, to);
       if (error) throw error;
-      return { data: data as Site[], total: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) };
+      return {
+        data: data as Site[],
+        total: count ?? 0,
+        totalPages: Math.ceil((count ?? 0) / PAGE_SIZE),
+      };
     },
   });
 }
@@ -180,11 +172,7 @@ export function useSite(slug: string) {
   return useQuery({
     queryKey: ["sites", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sites")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+      const { data, error } = await supabase.from("sites").select("*").eq("slug", slug).single();
       if (error) throw error;
       return data as Site;
     },
@@ -200,10 +188,7 @@ export function useMusees() {
   return useQuery({
     queryKey: ["musees"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("musees")
-        .select("*")
-        .order("nom");
+      const { data, error } = await supabase.from("musees").select("*").order("nom");
       if (error) throw error;
       return data as Musee[];
     },
@@ -214,11 +199,7 @@ export function useMusee(slug: string) {
   return useQuery({
     queryKey: ["musees", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("musees")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+      const { data, error } = await supabase.from("musees").select("*").eq("slug", slug).single();
       if (error) throw error;
       return data as Musee;
     },
@@ -234,10 +215,7 @@ export function useRoyaumes() {
   return useQuery({
     queryKey: ["royaumes"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("royaumes")
-        .select("*")
-        .order("nom");
+      const { data, error } = await supabase.from("royaumes").select("*").order("nom");
       if (error) throw error;
       return data as Royaume[];
     },
@@ -248,11 +226,7 @@ export function useRoyaume(slug: string) {
   return useQuery({
     queryKey: ["royaumes", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("royaumes")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+      const { data, error } = await supabase.from("royaumes").select("*").eq("slug", slug).single();
       if (error) throw error;
       return data as Royaume;
     },
@@ -263,22 +237,6 @@ export function useRoyaume(slug: string) {
 // ============================================================
 // Langues
 // ============================================================
-
-export function useLangues() {
-  return useQuery({
-    queryKey: ["langues"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("langues")
-        .select("*")
-        .order("nom");
-      if (error) throw error;
-      return data as Langue[];
-    },
-  });
-}
-
-// ============================================================
 // Artistes
 // ============================================================
 
@@ -286,10 +244,7 @@ export function useArtistes() {
   return useQuery({
     queryKey: ["artistes"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("artistes")
-        .select("*")
-        .order("nom");
+      const { data, error } = await supabase.from("artistes").select("*").order("nom");
       if (error) throw error;
       return data as Artiste[];
     },
@@ -308,7 +263,11 @@ export function useArtistesPaginated(page = 1) {
         .order("nom")
         .range(from, to);
       if (error) throw error;
-      return { data: data as Artiste[], total: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) };
+      return {
+        data: data as Artiste[],
+        total: count ?? 0,
+        totalPages: Math.ceil((count ?? 0) / PAGE_SIZE),
+      };
     },
   });
 }
@@ -317,11 +276,7 @@ export function useArtiste(slug: string) {
   return useQuery({
     queryKey: ["artistes", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("artistes")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+      const { data, error } = await supabase.from("artistes").select("*").eq("slug", slug).single();
       if (error) throw error;
       return data as Artiste;
     },
@@ -401,11 +356,7 @@ export function useAddOeuvre() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (oeuvre: Omit<Oeuvre, "id" | "artiste"> & { artiste_id: string }) => {
-      const { data, error } = await supabase
-        .from("oeuvres")
-        .insert(oeuvre)
-        .select()
-        .single();
+      const { data, error } = await supabase.from("oeuvres").insert(oeuvre).select().single();
       if (error) throw error;
       return data;
     },
@@ -419,10 +370,7 @@ export function useUpdateOeuvreStatut() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: "publiee" | "brouillon" }) => {
-      const { error } = await supabase
-        .from("oeuvres")
-        .update({ statut })
-        .eq("id", id);
+      const { error } = await supabase.from("oeuvres").update({ statut }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -435,10 +383,7 @@ export function useDeleteOeuvre() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("oeuvres")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("oeuvres").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -455,10 +400,7 @@ export function useEvenements() {
   return useQuery({
     queryKey: ["evenements"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("evenements")
-        .select("*")
-        .order("jour");
+      const { data, error } = await supabase.from("evenements").select("*").order("jour");
       if (error) throw error;
       return data as Evenement[];
     },
@@ -489,10 +431,7 @@ export function usePlats(options?: { categorie?: string; region?: string }) {
   return useQuery({
     queryKey: ["plats", options],
     queryFn: async () => {
-      let query = supabase
-        .from("plats")
-        .select("*")
-        .order("nom");
+      let query = supabase.from("plats").select("*").order("nom");
 
       if (options?.categorie) {
         query = query.eq("categorie", options.categorie);
@@ -512,11 +451,7 @@ export function usePlat(slug: string) {
   return useQuery({
     queryKey: ["plats", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("plats")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+      const { data, error } = await supabase.from("plats").select("*").eq("slug", slug).single();
       if (error) throw error;
       return data as Plat;
     },
@@ -622,10 +557,7 @@ export function useUpdateCommandeStatut() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ ref, statut }: { ref: string; statut: CommandeStatut }) => {
-      const { error } = await supabase
-        .from("commandes")
-        .update({ statut })
-        .eq("ref", ref);
+      const { error } = await supabase.from("commandes").update({ statut }).eq("ref", ref);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -728,10 +660,7 @@ export function useClearCart() {
   return useMutation({
     mutationFn: async () => {
       const userId = (await supabase.auth.getUser()).data.user?.id ?? "";
-      const { error } = await supabase
-        .from("panier_items")
-        .delete()
-        .eq("user_id", userId);
+      const { error } = await supabase.from("panier_items").delete().eq("user_id", userId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -784,7 +713,9 @@ export function useToggleFavori() {
         if (error) throw error;
         return false;
       } else {
-        const { error } = await supabase.from("favoris").insert({ user_id: userId, oeuvre_id: oeuvreId });
+        const { error } = await supabase
+          .from("favoris")
+          .insert({ user_id: userId, oeuvre_id: oeuvreId });
         if (error) throw error;
         return true;
       }
@@ -801,10 +732,18 @@ export function useToggleFavori() {
 
 export function useSendContact() {
   return useMutation({
-    mutationFn: async ({ nom, email, sujet, message }: { nom: string; email: string; sujet: string; message: string }) => {
-      const { error } = await supabase
-        .from("contacts")
-        .insert({ nom, email, sujet, message });
+    mutationFn: async ({
+      nom,
+      email,
+      sujet,
+      message,
+    }: {
+      nom: string;
+      email: string;
+      sujet: string;
+      message: string;
+    }) => {
+      const { error } = await supabase.from("contacts").insert({ nom, email, sujet, message });
       if (error) throw error;
     },
   });
@@ -817,9 +756,7 @@ export function useSendContact() {
 export function useSubscribeNewsletter() {
   return useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase
-        .from("newsletter")
-        .insert({ email });
+      const { error } = await supabase.from("newsletter").insert({ email });
       if (error) throw error;
     },
   });
@@ -892,11 +829,7 @@ export function useDossier(slug: string) {
   return useQuery({
     queryKey: ["dossiers", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("dossiers")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+      const { data, error } = await supabase.from("dossiers").select("*").eq("slug", slug).single();
       if (error) throw error;
       return data as Dossier;
     },
@@ -965,10 +898,7 @@ export function useAdminUpdateCommandeStatut() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: CommandeStatut }) => {
-      const { error } = await supabase
-        .from("commandes")
-        .update({ statut })
-        .eq("id", id);
+      const { error } = await supabase.from("commandes").update({ statut }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -987,10 +917,10 @@ export function useAdminProfiles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, email, prenom, nom, profil, statut, created_at")
+        .select("id, email, prenom, nom, profil, statut, telephone, ville, pays, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as Profile[];
+      return data as (Profile & { telephone?: string | null; ville?: string | null })[];
     },
   });
 }
@@ -999,14 +929,76 @@ export function useAdminUpdateProfilStatut() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: "valide" | "rejete" }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ statut })
-        .eq("id", id);
+      const { error } = await supabase.from("profiles").update({ statut }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "artistes-en-attente"] });
+    },
+  });
+}
+
+export function useAdminArtistesEnAttente() {
+  return useQuery({
+    queryKey: ["admin", "artistes-en-attente"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, prenom, nom, profil, statut, telephone, ville, created_at")
+        .in("profil", ["artiste", "artisan"])
+        .eq("statut", "en_attente")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+
+      // Fetch linked artistes records
+      const profileIds = (data as Profile[]).map((p) => p.id);
+      if (profileIds.length === 0)
+        return {
+          profiles: data as Profile[],
+          artistes: {} as Record<
+            string,
+            {
+              categorie: string | null;
+              bio: string | null;
+              portfolio_url: string | null;
+              metier: string | null;
+              ville: string | null;
+            }
+          >,
+        };
+
+      const { data: artistesData } = await supabase
+        .from("artistes")
+        .select("user_id, metier, bio, categorie, portfolio_url, ville")
+        .in("user_id", profileIds);
+
+      const artistesMap: Record<
+        string,
+        {
+          categorie: string | null;
+          bio: string | null;
+          portfolio_url: string | null;
+          metier: string | null;
+          ville: string | null;
+        }
+      > = {};
+      for (const a of artistesData ?? []) {
+        if (a.user_id) {
+          artistesMap[a.user_id] = {
+            categorie: a.categorie,
+            bio: a.bio,
+            portfolio_url: a.portfolio_url,
+            metier: a.metier,
+            ville: a.ville,
+          };
+        }
+      }
+
+      return {
+        profiles: data as Profile[],
+        artistes: artistesMap,
+      };
     },
   });
 }
@@ -1015,10 +1007,7 @@ export function useAdminUpdateRole() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, profil }: { id: string; profil: ProfilType }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ profil })
-        .eq("id", id);
+      const { error } = await supabase.from("profiles").update({ profil }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

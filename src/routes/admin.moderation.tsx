@@ -36,6 +36,7 @@ import {
   useAdminProfiles,
   useAdminUpdateRole,
   useAdminUpdateProfilStatut,
+  useAdminArtistesEnAttente,
   statutsCommandes,
   statutLabel,
   formatFcfa,
@@ -137,14 +138,13 @@ function Moderation() {
 
   // --- Validation profils ---
   const updateProfilStatut = useAdminUpdateProfilStatut();
+  const { data: artistesEnAttente, isLoading: loadingArtistesAttente } =
+    useAdminArtistesEnAttente();
 
   const handleValidateProfil = async (id: string, statut: "valide" | "rejete") => {
     try {
       await updateProfilStatut.mutateAsync({ id, statut });
-      showFeedback(
-        "success",
-        statut === "valide" ? "Profil validé et activé." : "Profil rejeté.",
-      );
+      showFeedback("success", statut === "valide" ? "Profil validé et activé." : "Profil rejeté.");
     } catch {
       showFeedback("error", "Erreur lors de la validation du profil.");
     }
@@ -372,73 +372,135 @@ function Moderation() {
                 Validez ou rejetez les comptes artistes et artisans en attente.
               </p>
 
-              {loadingProfiles ? (
+              {loadingArtistesAttente ? (
                 <div className="flex justify-center py-12">
                   <div className="size-6 animate-spin rounded-full border-2 border-forest border-t-transparent" />
                 </div>
-              ) : (() => {
-                const enAttente = profiles.filter(
-                  (p) =>
-                    (p.profil === "artiste" || p.profil === "artisan") &&
-                    p.statut === "en_attente",
-                );
-                return enAttente.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">
-                    Aucun compte en attente de validation.
-                  </p>
-                ) : (
-                  <div className="mt-6 space-y-3">
-                    {enAttente.map((p) => (
-                      <div
-                        key={p.id}
-                        className="flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold text-forest-deep">
-                              {p.prenom} {p.nom}
-                            </p>
-                            <Badge variant="outline" className="border-amber-300 text-amber-700">
-                              {p.profil}
-                            </Badge>
+              ) : (
+                (() => {
+                  const enAttente = artistesEnAttente?.profiles ?? [];
+                  const artistesMap = artistesEnAttente?.artistes ?? {};
+                  return enAttente.length === 0 ? (
+                    <p className="py-12 text-center text-sm text-muted-foreground">
+                      Aucun compte en attente de validation.
+                    </p>
+                  ) : (
+                    <div className="mt-6 space-y-4">
+                      {enAttente.map((p) => {
+                        const artisteInfo = artistesMap[p.id];
+                        return (
+                          <div
+                            key={p.id}
+                            className="rounded-lg border border-amber-200 bg-amber-50 p-5"
+                          >
+                            {/* En-tête */}
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-semibold text-forest-deep">
+                                    {p.prenom} {p.nom}
+                                  </p>
+                                  <Badge
+                                    variant="outline"
+                                    className="border-amber-300 text-amber-700"
+                                  >
+                                    {p.profil}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground">{p.email}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 border-green-300 text-green-700 hover:bg-green-100"
+                                  onClick={() => handleValidateProfil(p.id, "valide")}
+                                  disabled={updateProfilStatut.isPending}
+                                >
+                                  <CheckCircle className="size-4" /> Valider
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 border-red-300 text-red-700 hover:bg-red-100"
+                                  onClick={() => handleValidateProfil(p.id, "rejete")}
+                                  disabled={updateProfilStatut.isPending}
+                                >
+                                  <XCircle className="size-4" /> Rejeter
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Détails du profil */}
+                            <div className="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
+                              {artisteInfo?.metier && (
+                                <div>
+                                  <span className="text-muted-foreground">Spécialité :</span>
+                                  <span className="ml-1 font-medium text-forest-deep">
+                                    {artisteInfo.metier}
+                                  </span>
+                                </div>
+                              )}
+                              {p.ville && (
+                                <div>
+                                  <span className="text-muted-foreground">Ville :</span>
+                                  <span className="ml-1 font-medium text-forest-deep">
+                                    {p.ville}
+                                  </span>
+                                </div>
+                              )}
+                              {p.telephone && (
+                                <div>
+                                  <span className="text-muted-foreground">Téléphone :</span>
+                                  <span className="ml-1 font-medium text-forest-deep">
+                                    {p.telephone}
+                                  </span>
+                                </div>
+                              )}
+                              <div>
+                                <span className="text-muted-foreground">Inscrit le :</span>
+                                <span className="ml-1 font-medium text-forest-deep">
+                                  {new Date(p.created_at).toLocaleDateString("fr-FR")}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Bio / Description */}
+                            {artisteInfo?.bio && (
+                              <div className="mt-3 rounded-md bg-white/60 p-3">
+                                <p className="text-xs font-medium text-muted-foreground mb-1">
+                                  Description :
+                                </p>
+                                <p className="text-sm text-forest-deep">{artisteInfo.bio}</p>
+                              </div>
+                            )}
+
+                            {/* Portfolio */}
+                            {artisteInfo?.portfolio_url && (
+                              <div className="mt-2">
+                                <a
+                                  href={artisteInfo.portfolio_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-terracotta hover:underline"
+                                >
+                                  Voir le portfolio →
+                                </a>
+                              </div>
+                            )}
                           </div>
-                          <p className="text-xs text-muted-foreground">{p.email}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR")}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1.5 border-green-300 text-green-700 hover:bg-green-100"
-                            onClick={() => handleValidateProfil(p.id, "valide")}
-                            disabled={updateProfilStatut.isPending}
-                          >
-                            <CheckCircle className="size-4" /> Valider
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1.5 border-red-300 text-red-700 hover:bg-red-100"
-                            onClick={() => handleValidateProfil(p.id, "rejete")}
-                            disabled={updateProfilStatut.isPending}
-                          >
-                            <XCircle className="size-4" /> Rejeter
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
+                        );
+                      })}
+                    </div>
+                  );
+                })()
+              )}
 
               {/* Profils rejetés */}
               {(() => {
                 const rejects = profiles.filter(
                   (p) =>
-                    (p.profil === "artiste" || p.profil === "artisan") &&
-                    p.statut === "rejete",
+                    (p.profil === "artiste" || p.profil === "artisan") && p.statut === "rejete",
                 );
                 return rejects.length > 0 ? (
                   <div className="mt-8">

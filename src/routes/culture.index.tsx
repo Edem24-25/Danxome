@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Crown, Languages, Landmark, ScrollText, Sparkles } from "lucide-react";
+import { ArrowRight, Crown, Landmark, ScrollText, Sparkles } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead, Rule, SectionTitle } from "@/components/site/Bits";
 import { ContentCard } from "@/components/site/ContentCard";
@@ -51,12 +51,6 @@ const piliers = [
     titre: "Histoire",
     texte: "Du DanXomè précolonial à la République : cinq siècles en récits longs.",
     to: "/culture/royaumes/abomey",
-  },
-  {
-    icon: Languages,
-    titre: "Langues",
-    texte: "Cinquante-cinq langues vivantes, six grandes familles, des archives sonores.",
-    to: "/culture/langues",
   },
 ];
 
@@ -143,15 +137,7 @@ function Culture() {
       <section className="mt-20 section-alt py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Reveal variant="up">
-            <SectionTitle
-              eyebrow="Musées"
-              title="Où voir les collections"
-              action={
-                <Button asChild variant="outlineGold" className="rounded-full">
-                  <Link to="/culture/langues">Langues nationales</Link>
-                </Button>
-              }
-            />
+            <SectionTitle eyebrow="Musées" title="Où voir les collections" />
           </Reveal>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {loadingMusees ? (

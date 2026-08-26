@@ -60,7 +60,7 @@ export function Footer() {
               <div className="grid gap-12 lg:grid-cols-[1.3fr_2fr]">
                 {/* Colonne gauche — Newsletter */}
                 <div>
-                  <img src="/logo.png" alt="DanXomè" className="h-10 w-auto mb-6" />
+                  <img src="/logo-danxome.svg" alt="DanXomè" className="h-14 w-auto mb-6" />
                   <p className="font-display text-3xl leading-tight text-ivory sm:text-4xl">
                     La mémoire du DanXomè,
                     <br />

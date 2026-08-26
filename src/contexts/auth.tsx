@@ -23,6 +23,11 @@ interface AuthContextType {
     prenom: string;
     nom: string;
     profil: ProfilType;
+    telephone?: string;
+    ville?: string;
+    categorie?: string;
+    description?: string;
+    portfolio_url?: string;
   }) => Promise<{ error?: string }>;
   signIn: (params: {
     email: string;
@@ -113,13 +118,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase, fetchProfile]);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const { data: { session: s } } = await supabase.auth.getSession();
-      if (s) {
-        setSession(s);
-        await supabase.auth.refreshSession();
-      }
-    }, 10 * 60 * 1000);
+    const interval = setInterval(
+      async () => {
+        const {
+          data: { session: s },
+        } = await supabase.auth.getSession();
+        if (s) {
+          setSession(s);
+          await supabase.auth.refreshSession();
+        }
+      },
+      10 * 60 * 1000,
+    );
     return () => clearInterval(interval);
   }, [supabase]);
 
@@ -130,19 +140,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       prenom,
       nom,
       profil,
+      telephone,
+      ville,
+      categorie,
+      description,
+      portfolio_url,
     }: {
       email: string;
       password: string;
       prenom: string;
       nom: string;
       profil: ProfilType;
+      telephone?: string;
+      ville?: string;
+      categorie?: string;
+      description?: string;
+      portfolio_url?: string;
     }) => {
+      const metadata: Record<string, string> = { prenom, nom, profil };
+      if (telephone) metadata["telephone"] = telephone;
+      if (ville) metadata["ville"] = ville;
+      if (categorie) metadata["categorie"] = categorie;
+      if (description) metadata["description"] = description;
+      if (portfolio_url) metadata["portfolio_url"] = portfolio_url;
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: { prenom, nom, profil },
-        },
+        options: { data: metadata },
       });
       if (error) return { error: "Erreur lors de l'inscription. Réessayez." };
       return {};

@@ -30,7 +30,6 @@ import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthUpdatePasswordRouteImport } from './routes/auth.update-password'
 import { Route as CultureIndexRouteImport } from './routes/culture.index'
-import { Route as CultureLanguesRouteImport } from './routes/culture.langues'
 import { Route as EvenementsIndexRouteImport } from './routes/evenements.index'
 import { Route as EvenementsSlugRouteImport } from './routes/evenements.$slug'
 import { Route as ProfilIndexRouteImport } from './routes/profil.index'
@@ -157,11 +156,6 @@ const AuthUpdatePasswordRoute = AuthUpdatePasswordRouteImport.update({
 const CultureIndexRoute = CultureIndexRouteImport.update({
   id: '/culture/',
   path: '/culture/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CultureLanguesRoute = CultureLanguesRouteImport.update({
-  id: '/culture/langues',
-  path: '/culture/langues',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EvenementsIndexRoute = EvenementsIndexRouteImport.update({
@@ -294,7 +288,6 @@ export interface FileRoutesByFullPath {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
-  '/culture/langues': typeof CultureLanguesRoute
   '/evenements/$slug': typeof EvenementsSlugRoute
   '/profil/commandes': typeof ProfilCommandesRoute
   '/profil/details': typeof ProfilDetailsRoute
@@ -340,7 +333,6 @@ export interface FileRoutesByTo {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
-  '/culture/langues': typeof CultureLanguesRoute
   '/evenements/$slug': typeof EvenementsSlugRoute
   '/profil/commandes': typeof ProfilCommandesRoute
   '/profil/details': typeof ProfilDetailsRoute
@@ -386,7 +378,6 @@ export interface FileRoutesById {
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
-  '/culture/langues': typeof CultureLanguesRoute
   '/evenements/$slug': typeof EvenementsSlugRoute
   '/profil/commandes': typeof ProfilCommandesRoute
   '/profil/details': typeof ProfilDetailsRoute
@@ -434,7 +425,6 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
-    | '/culture/langues'
     | '/evenements/$slug'
     | '/profil/commandes'
     | '/profil/details'
@@ -480,7 +470,6 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
-    | '/culture/langues'
     | '/evenements/$slug'
     | '/profil/commandes'
     | '/profil/details'
@@ -525,7 +514,6 @@ export interface FileRouteTypes {
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
-    | '/culture/langues'
     | '/evenements/$slug'
     | '/profil/commandes'
     | '/profil/details'
@@ -572,7 +560,6 @@ export interface RootRouteChildren {
   AuthRegisterRoute: typeof AuthRegisterRoute
   AuthResetRoute: typeof AuthResetRoute
   AuthUpdatePasswordRoute: typeof AuthUpdatePasswordRoute
-  CultureLanguesRoute: typeof CultureLanguesRoute
   EvenementsSlugRoute: typeof EvenementsSlugRoute
   ProfilCommandesRoute: typeof ProfilCommandesRoute
   ProfilDetailsRoute: typeof ProfilDetailsRoute
@@ -746,13 +733,6 @@ declare module '@tanstack/react-router' {
       path: '/culture'
       fullPath: '/culture/'
       preLoaderRoute: typeof CultureIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/culture/langues': {
-      id: '/culture/langues'
-      path: '/culture/langues'
-      fullPath: '/culture/langues'
-      preLoaderRoute: typeof CultureLanguesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evenements/': {
@@ -943,7 +923,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRegisterRoute: AuthRegisterRoute,
   AuthResetRoute: AuthResetRoute,
   AuthUpdatePasswordRoute: AuthUpdatePasswordRoute,
-  CultureLanguesRoute: CultureLanguesRoute,
   EvenementsSlugRoute: EvenementsSlugRoute,
   ProfilCommandesRoute: ProfilCommandesRoute,
   ProfilDetailsRoute: ProfilDetailsRoute,

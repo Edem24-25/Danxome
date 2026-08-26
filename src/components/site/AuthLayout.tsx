@@ -46,7 +46,7 @@ export function AuthLayout({
         </div>
 
         <div className="relative z-10">
-          <Wordmark dark />
+          <Wordmark />
         </div>
         <div className="relative z-10 max-w-md">
           <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-ivory/20 bg-ivory/10 backdrop-blur-sm">
