@@ -656,11 +656,19 @@ CREATE POLICY "Oeuvres lecture publique" ON storage.objects
 
 DROP POLICY IF EXISTS "Artistes uploadent oeuvres" ON storage.objects;
 CREATE POLICY "Artistes uploadent oeuvres" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'oeuvres' AND auth.role() = 'authenticated');
+  FOR INSERT WITH CHECK (
+    bucket_id = 'oeuvres'
+    AND auth.role() = 'authenticated'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
 
 DROP POLICY IF EXISTS "Artistes suppriment oeuvres" ON storage.objects;
 CREATE POLICY "Artistes suppriment oeuvres" ON storage.objects
-  FOR DELETE USING (bucket_id = 'oeuvres' AND auth.role() = 'authenticated');
+  FOR DELETE USING (
+    bucket_id = 'oeuvres'
+    AND auth.role() = 'authenticated'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
 
 -- Politiques storage — AVATARS
 DROP POLICY IF EXISTS "Avatars lecture publique" ON storage.objects;

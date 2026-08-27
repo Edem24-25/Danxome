@@ -825,8 +825,8 @@ window.pannellum = (function (E, g, p) {
   function Ba(s, l) {
     function oa() {
       var a = g.createElement("div");
-      a.innerHTML = "\x3c!--[if lte IE 9]><i></i><![endif]--\x3e";
-      if (1 == a.getElementsByTagName("i").length) K();
+      a.appendChild(g.createElement("i"));
+      if (a.getElementsByTagName("i").length === 1) K();
       else {
         ra = b.hfov;
         Ga = b.pitch;
@@ -892,7 +892,7 @@ window.pannellum = (function (E, g, p) {
               K(b.strings.fileAccessError.replace("%s", a.outerHTML));
             }
             Ba(this.response);
-            q.load.msg.innerHTML = "";
+            q.load.msg.textContent = "";
           };
           d.onprogress = function (a) {
             if (a.lengthComputable) {
@@ -905,7 +905,7 @@ window.pannellum = (function (E, g, p) {
                     (ea = (a.loaded / 1e3).toFixed(1)),
                     (a = (a.total / 1e3).toFixed(1)))
                   : ((b = "B"), (ea = a.loaded), (a = a.total));
-              q.load.msg.innerHTML = ea + " / " + a + " " + b;
+              q.load.msg.textContent = ea + " / " + a + " " + b;
             } else ((q.load.lbox.style.display = "block"), (q.load.lbar.style.display = "none"));
           };
           try {
@@ -1012,7 +1012,10 @@ window.pannellum = (function (E, g, p) {
     }
     function K(a) {
       a === p && (a = b.strings.genericWebGLError);
-      q.errorMsg.innerHTML = "<p>" + a + "</p>";
+      q.errorMsg.textContent = "";
+      const errP = g.createElement("p");
+      errP.textContent = a;
+      q.errorMsg.appendChild(errP);
       v.load.style.display = "none";
       q.load.box.style.display = "none";
       q.errorMsg.style.display = "table";
@@ -1555,7 +1558,7 @@ window.pannellum = (function (E, g, p) {
         ? f.className + (" " + a.cssClass)
         : f.className + (" pnlm-hotspot pnlm-sprite pnlm-" + D(a.type));
       var c = g.createElement("span");
-      a.text && (c.innerHTML = D(a.text));
+      a.text && (c.textContent = D(a.text));
       var e;
       if (a.video) {
         e = g.createElement("video");
@@ -1723,29 +1726,31 @@ window.pannellum = (function (E, g, p) {
       a &&
         ("previewTitle" in b && (b.title = b.previewTitle),
         "previewAuthor" in b && (b.author = b.previewAuthor));
-      b.hasOwnProperty("title") || (q.title.innerHTML = "");
-      b.hasOwnProperty("author") || (q.author.innerHTML = "");
+      b.hasOwnProperty("title") || (q.title.textContent = "");
+      b.hasOwnProperty("author") || (q.author.textContent = "");
       b.hasOwnProperty("title") ||
         b.hasOwnProperty("author") ||
         (q.container.style.display = "none");
-      v.load.innerHTML = "<p>" + b.strings.loadButtonLabel + "</p>";
-      q.load.boxp.innerHTML = b.strings.loadingLabel;
+      v.load.textContent = b.strings.loadButtonLabel;
+      q.load.boxp.textContent = b.strings.loadingLabel;
       for (var d in b)
         if (b.hasOwnProperty(d))
           switch (d) {
             case "title":
-              q.title.innerHTML = D(b[d]);
+              q.title.textContent = D(b[d]);
               q.container.style.display = "inline";
               break;
             case "author":
               var h = D(b[d]);
-              b.authorURL &&
-                ((h = g.createElement("a")),
-                (h.href = F(b.authorURL, !0)),
-                (h.target = "_blank"),
-                (h.innerHTML = D(b[d])),
-                (h = h.outerHTML));
-              q.author.innerHTML = b.strings.bylineLabel.replace("%s", h);
+              if (b.authorURL) {
+                const authorAnchor = g.createElement("a");
+                authorAnchor.href = F(b.authorURL, !0);
+                authorAnchor.target = "_blank";
+                authorAnchor.textContent = D(b[d]);
+                q.author.replaceChildren(authorAnchor);
+              } else {
+                q.author.textContent = b.strings.bylineLabel.replace("%s", h);
+              }
               q.container.style.display = "inline";
               break;
             case "fallback":
@@ -1757,7 +1762,7 @@ window.pannellum = (function (E, g, p) {
               k.textContent = "Your browser does not support WebGL.";
               k.appendChild(g.createElement("br"));
               k.appendChild(h);
-              q.errorMsg.innerHTML = "";
+              q.errorMsg.textContent = "";
               q.errorMsg.appendChild(k);
               break;
             case "hfov":
@@ -2094,7 +2099,13 @@ window.pannellum = (function (E, g, p) {
     J.appendChild(W);
     var fa = g.createElement("span");
     fa.className = "pnlm-about-msg";
-    fa.innerHTML = '<a href="https://pannellum.org/" target="_blank">Pannellum</a> 2.5.7';
+    fa.textContent = "";
+    const pnlLink = g.createElement("a");
+    pnlLink.href = "https://pannellum.org/";
+    pnlLink.target = "_blank";
+    pnlLink.textContent = "Pannellum";
+    fa.appendChild(pnlLink);
+    fa.appendChild(g.createTextNode(" 2.5.7"));
     J.appendChild(fa);
     W.addEventListener("contextmenu", ja);
     var q = {},
@@ -2117,7 +2128,9 @@ window.pannellum = (function (E, g, p) {
     q.load.box.appendChild(q.load.boxp);
     q.load.lbox = g.createElement("div");
     q.load.lbox.className = "pnlm-lbox";
-    q.load.lbox.innerHTML = '<div class="pnlm-loading"></div>';
+    const lboxLoading = g.createElement("div");
+    lboxLoading.className = "pnlm-loading";
+    q.load.lbox.appendChild(lboxLoading);
     q.load.box.appendChild(q.load.lbox);
     q.load.lbar = g.createElement("div");
     q.load.lbar.className = "pnlm-lbar";
@@ -2475,7 +2488,7 @@ window.pannellum = (function (E, g, p) {
         s.removeEventListener("keyup", R, !1),
         s.removeEventListener("blur", $, !1),
         g.removeEventListener("mouseleave", ma, !1));
-      s.innerHTML = "";
+      s.textContent = "";
       s.classList.remove("pnlm-container");
     };
   }

@@ -19,7 +19,12 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const NEW_PASSWORD = "Danxome229@";
+const NEW_PASSWORD = process.env["RESET_ARTIST_PASSWORD"] || getEnv(".env.server", "RESET_ARTIST_PASSWORD") || getEnv(".env", "RESET_ARTIST_PASSWORD");
+
+if (!NEW_PASSWORD) {
+  console.error("Variable d'environnement de réinitialisation requise manquante.");
+  process.exit(1);
+}
 
 const artistEmails = [
   "kossi.adanou@danxome.bj",

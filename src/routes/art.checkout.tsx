@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CreditCard, Lock, ShoppingBag, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -95,6 +95,11 @@ function Checkout() {
         return;
       }
 
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+
       // Server-side order creation: validates prices, generates ref, marks as sold, clears cart
       const { createOrderFromCart } = await import("@/server-functions/commands");
       const result = await createOrderFromCart({
@@ -104,6 +109,7 @@ function Checkout() {
           items: articles
             .filter((a) => a.oeuvre)
             .map((a) => ({ oeuvre_id: a.oeuvre!.id, qte: a.qte })),
+          auth_token: token || undefined,
         },
       });
 

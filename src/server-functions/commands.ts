@@ -41,7 +41,7 @@ type OrderResult = {
 };
 
 export const createOrderFromCart = createServerFn({ method: "POST" })
-  .validator((input: { client_id: string; client_nom: string; items: CartItemInput[] }) => {
+  .validator((input: { client_id: string; client_nom: string; items: CartItemInput[]; auth_token?: string | undefined }) => {
     if (!input.client_id || typeof input.client_id !== "string") {
       throw new Error("client_id invalide");
     }
@@ -62,12 +62,21 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data }) => {
+    const supabase = getServerSupabase();
+
+    // Authenticate caller identity
+    if (!data.auth_token) {
+      throw new Error("Authentification requise pour passer une commande.");
+    }
+    const { data: authData, error: authError } = await supabase.auth.getUser(data.auth_token);
+    if (authError || !authData.user || authData.user.id !== data.client_id) {
+      throw new Error("Action non autorisée. Session utilisateur invalide.");
+    }
+
     const rl = checkRateLimit(`order:${data.client_id}`, 5, 60_000);
     if (!rl.allowed) {
       throw new Error("Trop de requêtes. Réessayez dans une minute.");
     }
-
-    const supabase = getServerSupabase();
 
     // 1. Fetch real oeuvre data from DB (source of truth for prices)
     const oeuvreIds = data.items.map((i) => i.oeuvre_id);

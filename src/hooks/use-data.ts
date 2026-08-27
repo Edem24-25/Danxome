@@ -127,6 +127,11 @@ export type Dossier = {
 // Helpers
 // ============================================================
 
+export function sanitizeParam(val?: string): string {
+  if (!val || typeof val !== "string") return "";
+  return val.trim();
+}
+
 export const formatFcfa = (n: number) =>
   `${n.toLocaleString("fr-FR").replace(/\u202f/g, " ")} FCFA`;
 
@@ -169,14 +174,15 @@ export function useSitesPaginated(page = 1) {
 }
 
 export function useSite(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["sites", slug],
+    queryKey: ["sites", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("sites").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase.from("sites").select("*").eq("slug", safeSlug).single();
       if (error) throw error;
       return data as Site;
     },
-    enabled: !!slug,
+    enabled: !!safeSlug,
   });
 }
 
@@ -196,14 +202,15 @@ export function useMusees() {
 }
 
 export function useMusee(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["musees", slug],
+    queryKey: ["musees", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("musees").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase.from("musees").select("*").eq("slug", safeSlug).single();
       if (error) throw error;
       return data as Musee;
     },
-    enabled: !!slug,
+    enabled: !!safeSlug,
   });
 }
 
@@ -223,14 +230,15 @@ export function useRoyaumes() {
 }
 
 export function useRoyaume(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["royaumes", slug],
+    queryKey: ["royaumes", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("royaumes").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase.from("royaumes").select("*").eq("slug", safeSlug).single();
       if (error) throw error;
       return data as Royaume;
     },
-    enabled: !!slug,
+    enabled: !!safeSlug,
   });
 }
 
@@ -273,14 +281,15 @@ export function useArtistesPaginated(page = 1) {
 }
 
 export function useArtiste(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["artistes", slug],
+    queryKey: ["artistes", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("artistes").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase.from("artistes").select("*").eq("slug", safeSlug).single();
       if (error) throw error;
       return data as Artiste;
     },
-    enabled: !!slug,
+    enabled: !!safeSlug,
   });
 }
 
@@ -313,18 +322,19 @@ export function useOeuvres(options?: { categorie?: string; artisteId?: string })
 }
 
 export function useOeuvre(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["oeuvres", slug],
+    queryKey: ["oeuvres", safeSlug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("oeuvres")
         .select("*, artiste:artistes(*)")
-        .eq("slug", slug)
+        .eq("slug", safeSlug)
         .single();
       if (error) throw error;
       return data as Oeuvre;
     },
-    enabled: !!slug,
+    enabled: !!safeSlug,
   });
 }
 
@@ -408,18 +418,19 @@ export function useEvenements() {
 }
 
 export function useEvenement(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["evenements", slug],
+    queryKey: ["evenements", safeSlug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("evenements")
         .select("*")
-        .eq("slug", slug)
+        .eq("slug", safeSlug)
         .single();
       if (error) throw error;
       return data as Evenement;
     },
-    enabled: !!slug,
+    enabled: !!safeSlug,
   });
 }
 
@@ -448,14 +459,15 @@ export function usePlats(options?: { categorie?: string; region?: string }) {
 }
 
 export function usePlat(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["plats", slug],
+    queryKey: ["plats", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("plats").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase.from("plats").select("*").eq("slug", safeSlug).single();
       if (error) throw error;
       return data as Plat;
     },
-    enabled: !!slug,
+    enabled: !!safeSlug,
   });
 }
 
@@ -536,12 +548,14 @@ export function useCreateCommande() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (commande: Omit<Commande, "id" | "ref">) => {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
       const { createOrderFromCart } = await import("@/server-functions/commands");
       const result = await createOrderFromCart({
         data: {
           client_id: commande.client_id,
           client_nom: commande.client_nom,
           items: [{ oeuvre_id: commande.oeuvre_id, qte: 1 }],
+          auth_token: token || undefined,
         },
       });
       return result.commandes[0] as Commande;
@@ -826,13 +840,15 @@ export function useDossiers() {
 }
 
 export function useDossier(slug: string) {
+  const safeSlug = sanitizeParam(slug);
   return useQuery({
-    queryKey: ["dossiers", slug],
+    queryKey: ["dossiers", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("dossiers").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase.from("dossiers").select("*").eq("slug", safeSlug).single();
       if (error) throw error;
       return data as Dossier;
     },
+    enabled: !!safeSlug,
   });
 }
 

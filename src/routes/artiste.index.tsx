@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Image, LayoutDashboard, Package, Plus, TrendingUp, UserRound, Wallet } from "lucide-react";
 import { toast } from "sonner";
@@ -155,7 +155,8 @@ function EspaceArtiste() {
     let imageUrl = IMAGE_PAR_DEFAUT;
     if (imageFile) {
       const ext = imageFile.name.split(".").pop() ?? "jpg";
-      const path = `${profile.id}/${Date.now()}.${ext}`;
+      const userId = user?.id ?? profile.id;
+      const path = `${userId}/${Date.now()}.${ext}`;
       const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from("oeuvres")

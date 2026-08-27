@@ -139,21 +139,26 @@ function Accueil() {
           <Reveal variant="up" delay={550}>
             <form
               onSubmit={handleSearch}
-              className="mx-auto mt-10 flex max-w-2xl flex-col gap-2 rounded-full border border-ivory/20 bg-ivory/10 p-2 backdrop-blur-xl sm:flex-row"
+              className="mx-auto mt-10 flex max-w-2xl gap-1.5 rounded-full border border-ivory/20 bg-ivory/10 p-1.5 backdrop-blur-xl sm:gap-2 sm:p-2"
               role="search"
             >
-              <div className="flex min-w-0 flex-1 items-center gap-2 px-4">
+              <div className="flex min-w-0 flex-1 items-center gap-2 px-3 sm:px-4">
                 <Search className="size-4 shrink-0 text-accent" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Un site, un royaume, un artisan, une fête…"
-                  className="border-0 bg-transparent text-ivory shadow-none placeholder:text-ivory/50 focus-visible:ring-0"
+                  className="h-8 border-0 bg-transparent text-sm text-ivory shadow-none placeholder:text-ivory/50 focus-visible:ring-0 sm:h-9 sm:text-base"
                   aria-label="Rechercher sur DanXomè"
                 />
               </div>
-              <Button variant="gold" size="lg" type="submit" className="rounded-full">
-                Explorer
+              <Button
+                variant="gold"
+                type="submit"
+                className="size-9 shrink-0 rounded-full sm:h-12 sm:w-auto sm:px-8"
+              >
+                <Search className="size-4 sm:hidden" />
+                <span className="hidden text-sm sm:inline">Explorer</span>
               </Button>
             </form>
           </Reveal>
