@@ -423,6 +423,9 @@ CREATE TABLE IF NOT EXISTS commandes (
   montant INTEGER NOT NULL,
   date TIMESTAMPTZ DEFAULT NOW(),
   statut TEXT DEFAULT 'recue' CHECK (statut IN ('recue', 'validee', 'en_cours', 'expediee', 'livree', 'annulee')),
+  payment_id TEXT,
+  moyen_paiement TEXT DEFAULT 'momo',
+  payment_statut TEXT DEFAULT 'en_attente',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -595,6 +598,33 @@ CREATE TRIGGER on_reservations_updated
   BEFORE UPDATE ON reservations
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
+
+-- ============================================================
+-- Table payments (transactions Kkiapay)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS payments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  commande_id UUID REFERENCES commandes(id) ON DELETE CASCADE,
+  transaction_id TEXT UNIQUE NOT NULL,
+  amount INTEGER NOT NULL,
+  fees INTEGER DEFAULT 0,
+  method TEXT,
+  is_success BOOLEAN DEFAULT FALSE,
+  partner_id TEXT,
+  account TEXT,
+  performed_at TIMESTAMPTZ,
+  raw_json JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Client lit ses paiements" ON payments;
+CREATE POLICY "Client lit ses paiements" ON payments
+  FOR SELECT USING (
+    commande_id IN (SELECT id FROM commandes WHERE client_id = auth.uid())
+  );
+DROP POLICY IF EXISTS "Admins gèrent les paiements" ON payments;
+CREATE POLICY "Admins gèrent les paiements" ON payments FOR ALL USING (public.is_admin());
 
 -- ============================================================
 -- Table dossiers (articles éditoriaux longs)

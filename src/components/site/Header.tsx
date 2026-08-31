@@ -31,7 +31,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const { data: panierData } = usePanier();
   const nombre = (panierData ?? []).reduce((s, i) => s + i.qte, 0);
-  const { user, profile, loading, peutCommander } = useAuth();
+  const { user, loading, peutCommander } = useAuth();
   const accueil = "/profil";
   const rafRef = useRef<number>(0);
 

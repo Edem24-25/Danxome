@@ -7,7 +7,7 @@ interface CapturedError {
   error: unknown;
   at: number;
   severity: ErrorSeverity;
-  context?: string;
+  context?: string | undefined;
 }
 
 let lastCapturedError: CapturedError | undefined;

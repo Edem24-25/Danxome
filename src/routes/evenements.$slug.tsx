@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { CalendarDays, Clock, MapPin, Ticket, Users } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
 import { useMemo } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs, Rule, SectionTitle } from "@/components/site/Bits";

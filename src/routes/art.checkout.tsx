@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CreditCard, Lock, ShoppingBag, Smartphone } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useKKiaPay } from "kkiapay-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { EmptyState, PageHead } from "@/components/site/Bits";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatFcfa, usePanier } from "@/hooks/use-data";
@@ -43,10 +43,78 @@ function Checkout() {
   const { peutCommander, profile, user } = useAuth();
   const [moyen, setMoyen] = useState<string>("momo");
   const [enCours, setEnCours] = useState(false);
-  const [simuleErreur, setSimuleErreur] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
   const articles = data ?? [];
   const total = articles.reduce((s, i) => s + (i.oeuvre?.prix ?? 0) * i.qte, 0);
   const livraison = articles.length > 0 ? 12000 : 0;
+
+  const { openKkiapayWidget, addKkiapayListener, removeKkiapayListener } = useKKiaPay();
+
+  useEffect(() => {
+    const onSuccess = async (response: { transactionId: string }) => {
+      try {
+        if (!user?.id) return;
+
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+
+        const { createOrderFromCart } = await import("@/server-functions/commands");
+        const result = await createOrderFromCart({
+          data: {
+            client_id: user.id,
+            client_nom: `${profile?.prenom ?? ""} ${profile?.nom ?? ""}`.trim(),
+            items: articles
+              .filter((a) => a.oeuvre)
+              .map((a) => ({ oeuvre_id: a.oeuvre!.id, qte: a.qte })),
+            transaction_id: response.transactionId,
+            moyen_paiement: moyen,
+            auth_token: token || undefined,
+          },
+        });
+
+        toast.success("Commande confirmée !");
+        navigate({ to: "/art/commande/succes", search: { ref: result.ref } });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Erreur inconnue";
+        toast.error("Erreur de commande", { description: message });
+        setEnCours(false);
+      }
+    };
+
+    const onFailure = () => {
+      toast.error("Paiement refusé", { description: "Le paiement a échoué ou a été annulé." });
+      setEnCours(false);
+    };
+
+    addKkiapayListener("success", onSuccess);
+    addKkiapayListener("failed", onFailure);
+
+    return () => {
+      removeKkiapayListener("success");
+      removeKkiapayListener("failed");
+    };
+  }, [user, profile, articles, moyen, navigate, addKkiapayListener, removeKkiapayListener]);
+
+  const payer = () => {
+    if (enCours || !user?.id) {
+      toast.error("Erreur", { description: "Vous devez être connecté pour commander." });
+      return;
+    }
+    setEnCours(true);
+
+    openKkiapayWidget({
+      amount: total + livraison,
+      api_key: import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"],
+      sandbox: import.meta.env.MODE === "development",
+      ...(user.email ? { email: user.email } : {}),
+      ...(moyen === "momo" && phoneNumber ? { phone: phoneNumber } : {}),
+      paymentmethod: moyen === "momo" ? ["momo"] : ["card"],
+      data: JSON.stringify({ client_id: user.id, moyen }),
+      callback: `${window.location.origin}/art/commande/succes`,
+    });
+  };
 
   if (!peutCommander) {
     return (
@@ -75,52 +143,6 @@ function Checkout() {
       </SiteShell>
     );
   }
-
-  const payer = async () => {
-    if (enCours) return;
-    setEnCours(true);
-
-    try {
-      // Simulated payment delay
-      await new Promise((resolve) => setTimeout(resolve, 1800));
-
-      if (simuleErreur) {
-        navigate({ to: "/art/commande/erreur", search: { motif: "paiement-refuse" } });
-        return;
-      }
-
-      if (!user?.id) {
-        toast.error("Erreur", { description: "Vous devez être connecté pour commander." });
-        setEnCours(false);
-        return;
-      }
-
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-
-      // Server-side order creation: validates prices, generates ref, marks as sold, clears cart
-      const { createOrderFromCart } = await import("@/server-functions/commands");
-      const result = await createOrderFromCart({
-        data: {
-          client_id: user.id,
-          client_nom: `${profile?.prenom ?? ""} ${profile?.nom ?? ""}`.trim(),
-          items: articles
-            .filter((a) => a.oeuvre)
-            .map((a) => ({ oeuvre_id: a.oeuvre!.id, qte: a.qte })),
-          auth_token: token || undefined,
-        },
-      });
-
-      toast.success("Commande confirmée !");
-      navigate({ to: "/art/commande/succes", search: { ref: result.ref } });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Erreur inconnue";
-      toast.error("Erreur de commande", { description: message });
-      setEnCours(false);
-    }
-  };
 
   return (
     <SiteShell>
@@ -192,30 +214,21 @@ function Checkout() {
                     </button>
                   ))}
                 </div>
-                {moyen === "momo" ? (
+                {moyen === "momo" && (
                   <div className="mt-5">
                     <Label htmlFor="tel">Numéro Mobile Money</Label>
-                    <Input id="tel" className="mt-2" placeholder="+229 …" />
-                  </div>
-                ) : (
-                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                    <div className="sm:col-span-2">
-                      <Label htmlFor="carte">Numéro de carte</Label>
-                      <Input id="carte" className="mt-2" placeholder="4242 4242 4242 4242" />
-                    </div>
-                    <div>
-                      <Label htmlFor="exp">Expiration</Label>
-                      <Input id="exp" className="mt-2" placeholder="12 / 28" />
-                    </div>
-                    <div>
-                      <Label htmlFor="cvc">CVC</Label>
-                      <Input id="cvc" className="mt-2" placeholder="123" />
-                    </div>
+                    <Input
+                      id="tel"
+                      className="mt-2"
+                      placeholder="+229 97 00 00 00"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                    />
                   </div>
                 )}
                 <p className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
-                  <Lock className="size-3.5 text-forest" /> Démonstration : aucune donnée bancaire
-                  n'est transmise ni stockée.
+                  <Lock className="size-3.5 text-forest" /> Paiement sécurisé via Kkiapay — vos
+                  données bancaires ne sont jamais stockées.
                 </p>
               </div>
             </div>
@@ -275,13 +288,6 @@ function Checkout() {
                     <>Payer {formatFcfa(total + livraison)}</>
                   )}
                 </Button>
-                <label className="mt-4 flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-                  <Checkbox
-                    checked={simuleErreur}
-                    onCheckedChange={(v) => setSimuleErreur(Boolean(v))}
-                  />
-                  <span>Simuler un refus de paiement (démo)</span>
-                </label>
               </div>
             </aside>
           </div>

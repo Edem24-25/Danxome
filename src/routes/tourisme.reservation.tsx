@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSites, useCreateReservation, formatFcfa } from "@/hooks/use-data";
-import { useAuth } from "@/contexts/auth";
 import { reservationSchema } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +43,6 @@ const etapes = ["Visite", "Date & personnes", "Coordonnées"];
 function Reservation() {
   const { data: sites = [] } = useSites();
   const { site: siteParam } = Route.useSearch();
-  const { user } = useAuth();
   const createReservation = useCreateReservation();
   const [etape, setEtape] = useState(0);
   const [slug, setSlug] = useState(siteParam ?? "");

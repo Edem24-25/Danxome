@@ -81,9 +81,9 @@ function ProfilDetails() {
 
   const errors = useMemo(() => {
     const e: Record<string, string> = {};
-    if (prenom.trim().length > 0 && prenom.trim().length < 2) e.prenom = "2 caractères minimum";
-    if (nom.trim().length > 0 && nom.trim().length < 2) e.nom = "2 caractères minimum";
-    if (telephone && !/^[+\d\s()-]{6,20}$/.test(telephone)) e.telephone = "Numéro invalide";
+    if (prenom.trim().length > 0 && prenom.trim().length < 2) e["prenom"] = "2 caractères minimum";
+    if (nom.trim().length > 0 && nom.trim().length < 2) e["nom"] = "2 caractères minimum";
+    if (telephone && !/^[+\d\s()-]{6,20}$/.test(telephone)) e["telephone"] = "Numéro invalide";
     return e;
   }, [prenom, nom, telephone]);
 
@@ -330,10 +330,10 @@ function ProfilDetails() {
                   maxLength={60}
                   placeholder="Votre prénom"
                   className={
-                    errors.prenom ? "border-terracotta focus-visible:ring-terracotta/20" : ""
+                    errors["prenom"] ? "border-terracotta focus-visible:ring-terracotta/20" : ""
                   }
                 />
-                {errors.prenom && <p className="text-xs text-terracotta">{errors.prenom}</p>}
+                {errors["prenom"] && <p className="text-xs text-terracotta">{errors["prenom"]}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="nom" className="flex items-center gap-1.5">
@@ -346,9 +346,9 @@ function ProfilDetails() {
                   required
                   maxLength={60}
                   placeholder="Votre nom"
-                  className={errors.nom ? "border-terracotta focus-visible:ring-terracotta/20" : ""}
+                  className={errors["nom"] ? "border-terracotta focus-visible:ring-terracotta/20" : ""}
                 />
-                {errors.nom && <p className="text-xs text-terracotta">{errors.nom}</p>}
+                {errors["nom"] && <p className="text-xs text-terracotta">{errors["nom"]}</p>}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="telephone" className="flex items-center gap-1.5">
@@ -362,10 +362,10 @@ function ProfilDetails() {
                   placeholder="+229 00 00 00 00"
                   maxLength={20}
                   className={
-                    errors.telephone ? "border-terracotta focus-visible:ring-terracotta/20" : ""
+                    errors["telephone"] ? "border-terracotta focus-visible:ring-terracotta/20" : ""
                   }
                 />
-                {errors.telephone && <p className="text-xs text-terracotta">{errors.telephone}</p>}
+                {errors["telephone"] && <p className="text-xs text-terracotta">{errors["telephone"]}</p>}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="adresse" className="flex items-center gap-1.5">

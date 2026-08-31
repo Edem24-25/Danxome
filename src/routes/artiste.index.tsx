@@ -28,7 +28,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useAddOeuvre,
   useMesOeuvres,
-  useOeuvre,
   formatFcfa,
   statutLabel,
   useCommandes,

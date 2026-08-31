@@ -325,7 +325,7 @@ function VisiteVirtuelle() {
   const [infoOpen, setInfoOpen] = useState(true);
   const [audioOn, setAudioOn] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [_isFullscreen, setIsFullscreen] = useState(false);
   const [hotspotDetail, setHotspotDetail] = useState<HotspotData | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);

@@ -1,4 +1,5 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Check, ChevronRight, PackageCheck, ShoppingBag } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHead } from "@/components/site/Bits";
@@ -40,8 +41,15 @@ const etapes = [
 
 function Succes() {
   const { ref } = Route.useSearch();
-  const reference =
-    ref || `DAH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const [displayRef, setDisplayRef] = useState(ref || "");
+
+  useEffect(() => {
+    if (!ref) {
+      setDisplayRef(`DAH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`);
+    }
+  }, [ref]);
+
+  const reference = displayRef || "…";
 
   return (
     <SiteShell>

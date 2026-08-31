@@ -1,6 +1,6 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CalendarDays, Compass, Play, Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

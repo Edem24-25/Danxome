@@ -4,7 +4,7 @@ import { Star, MessageSquare, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import {
   AlertDialog,
   AlertDialogTrigger,

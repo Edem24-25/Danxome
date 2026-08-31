@@ -74,7 +74,7 @@ function DossierPage() {
       <PageHead
         eyebrow={dossier.categorie}
         title={dossier.titre}
-        intro={dossier.sous_titre ?? undefined}
+        {...(dossier.sous_titre ? { intro: dossier.sous_titre } : {})}
         crumbs={[
           { label: "Culture", to: "/culture" },
           { label: "Dossiers", to: "/culture" },

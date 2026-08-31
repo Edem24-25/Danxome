@@ -10,7 +10,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { ProfilShell } from "@/components/site/ProfilShell";
-import { EmptyState, SectionTitle, StatCard } from "@/components/site/Bits";
+import { EmptyState, StatCard } from "@/components/site/Bits";
 import { Reveal } from "@/components/site/Reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

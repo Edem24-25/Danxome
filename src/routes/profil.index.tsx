@@ -12,7 +12,6 @@ import {
   Clock,
   Star,
   CreditCard,
-  Package,
   Eye,
   AlertCircle,
 } from "lucide-react";
@@ -57,7 +56,7 @@ function getGreeting(): string {
   return "Bonsoir";
 }
 
-const badgeVariant: Record<string, "default" | "gold" | "forest" | "secondary" | "quiet"> = {
+const badgeVariant: Record<string, "default" | "gold" | "forest" | "secondary" | "quiet" | "destructive"> = {
   recue: "default",
   validee: "gold",
   en_cours: "forest",
@@ -211,7 +210,7 @@ function Profil() {
             <StatCard
               label="Commandes"
               value={String(achats.length)}
-              delta={commandesEnCours > 0 ? `${commandesEnCours} en cours` : undefined}
+              {...(commandesEnCours > 0 ? { delta: `${commandesEnCours} en cours` } : {})}
               icon={<ShoppingBag className="size-4" />}
             />
             <StatCard
@@ -226,7 +225,7 @@ function Profil() {
             />
             <StatCard
               label="Dernière commande"
-              value={achats.length > 0 ? dateFrFull(achats[0].date) : "—"}
+              value={achats.length > 0 ? dateFrFull(achats[0]!.date) : "—"}
               icon={<Clock className="size-4" />}
             />
           </div>
@@ -279,7 +278,7 @@ function Profil() {
                 />
               ) : (
                 <ul className="mt-5 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                  {achats.slice(0, 5).map((a, i) => (
+                  {achats.slice(0, 5).map((a) => (
                     <li
                       key={a.ref}
                       className="group flex items-center gap-4 p-4 transition-colors hover:bg-secondary/30"

@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/button";
 
 type Search = { motif?: string };
 
-const motifsConnus = [
-  "paiement-refuse",
-  "carte-sans-fonds",
-  "solde-insuffisant",
-  "annule",
-] as const;
-
 export const Route = createFileRoute("/art/commande/erreur")({
   validateSearch: (search: Record<string, unknown>): Search =>
     typeof search["motif"] === "string" ? { motif: search["motif"] } : {},

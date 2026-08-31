@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 
 interface RateLimitEntry {
   attempts: number;
@@ -21,8 +21,6 @@ function getEntry(key: string): RateLimitEntry {
  * Bloque après `maxAttempts` essais avec backoff exponentiel.
  */
 export function useRateLimit(key: string, maxAttempts = 5, baseDelayMs = 30000) {
-  const cooldownRef = useRef(0);
-
   const check = useCallback(() => {
     const entry = getEntry(key);
     const now = Date.now();

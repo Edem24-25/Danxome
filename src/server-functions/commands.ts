@@ -40,27 +40,68 @@ type OrderResult = {
   commandes: CommandeRecord[];
 };
 
+async function verifyKkiapayTransaction(transactionId: string): Promise<{
+  status: string;
+  amount: number;
+  fees: number;
+  source: string;
+  transactionId: string;
+  performedAt: string;
+}> {
+  const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
+
+  const privateKey = process.env["KKIAPAY_PRIVATE_KEY"];
+  const publicKey = process.env["KKIAPAY_PUBLIC_KEY"];
+  const secretKey = process.env["KKIAPAY_SECRET_KEY"];
+
+  if (!privateKey || !publicKey || !secretKey) {
+    throw new Error("Clés Kkiapay manquantes côté serveur (private, public, secret)");
+  }
+
+  const k = kkiapay({
+    privatekey: privateKey,
+    publickey: publicKey,
+    secretkey: secretKey,
+    sandbox: true,
+  });
+
+  const result = await k.verify(transactionId);
+  return result;
+}
+
 export const createOrderFromCart = createServerFn({ method: "POST" })
-  .validator((input: { client_id: string; client_nom: string; items: CartItemInput[]; auth_token?: string | undefined }) => {
-    if (!input.client_id || typeof input.client_id !== "string") {
-      throw new Error("client_id invalide");
-    }
-    if (!input.client_nom || typeof input.client_nom !== "string") {
-      throw new Error("client_nom invalide");
-    }
-    if (!Array.isArray(input.items) || input.items.length === 0) {
-      throw new Error("Panier vide");
-    }
-    for (const item of input.items) {
-      if (!item.oeuvre_id || typeof item.oeuvre_id !== "string") {
-        throw new Error("oeuvre_id invalide");
+  .validator(
+    (input: {
+      client_id: string;
+      client_nom: string;
+      items: CartItemInput[];
+      transaction_id?: string;
+      moyen_paiement?: string;
+      auth_token?: string | undefined;
+    }) => {
+      if (!input.client_id || typeof input.client_id !== "string") {
+        throw new Error("client_id invalide");
       }
-      if (!Number.isInteger(item.qte) || item.qte < 1 || item.qte > 10) {
-        throw new Error("Quantité invalide");
+      if (!input.client_nom || typeof input.client_nom !== "string") {
+        throw new Error("client_nom invalide");
       }
-    }
-    return input;
-  })
+      if (!Array.isArray(input.items) || input.items.length === 0) {
+        throw new Error("Panier vide");
+      }
+      for (const item of input.items) {
+        if (!item.oeuvre_id || typeof item.oeuvre_id !== "string") {
+          throw new Error("oeuvre_id invalide");
+        }
+        if (!Number.isInteger(item.qte) || item.qte < 1 || item.qte > 10) {
+          throw new Error("Quantité invalide");
+        }
+      }
+      if (!input.transaction_id || typeof input.transaction_id !== "string") {
+        throw new Error("transaction_id invalide — paiement requis");
+      }
+      return input;
+    },
+  )
   .handler(async ({ data }) => {
     const supabase = getServerSupabase();
 
@@ -76,6 +117,12 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
     const rl = checkRateLimit(`order:${data.client_id}`, 5, 60_000);
     if (!rl.allowed) {
       throw new Error("Trop de requêtes. Réessayez dans une minute.");
+    }
+
+    // Verify payment with Kkiapay before creating order
+    const transaction = await verifyKkiapayTransaction(data.transaction_id!);
+    if (transaction.status !== "SUCCESS") {
+      throw new Error("Paiement non confirmé par Kkiapay");
     }
 
     // 1. Fetch real oeuvre data from DB (source of truth for prices)
@@ -136,6 +183,9 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
           montant,
           date: now,
           statut: "recue",
+          payment_id: data.transaction_id,
+          moyen_paiement: data.moyen_paiement ?? "momo",
+          payment_statut: "reussi",
         })
         .select("id, oeuvre_titre, montant")
         .single();
@@ -144,12 +194,26 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
       commandes.push(commande as CommandeRecord);
     }
 
-    // 6. Mark oeuvres as sold
+    // 6. Record payment transaction
+    await supabase.from("payments").insert({
+      commande_id: commandes[0]?.id,
+      transaction_id: data.transaction_id,
+      amount: transaction.amount,
+      fees: transaction.fees,
+      method: transaction.source,
+      is_success: transaction.status === "SUCCESS",
+      partner_id: null,
+      account: null,
+      performed_at: transaction.performedAt,
+      raw_json: transaction,
+    });
+
+    // 7. Mark oeuvres as sold
     for (const item of data.items) {
       await supabase.from("oeuvres").update({ statut: "vendue" }).eq("id", item.oeuvre_id);
     }
 
-    // 7. Clear cart
+    // 8. Clear cart
     await supabase.from("panier_items").delete().eq("user_id", data.client_id);
 
     return { ref, commandes } satisfies OrderResult;
