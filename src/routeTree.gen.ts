@@ -26,6 +26,7 @@ import { Route as ArtisteCommandesRouteImport } from './routes/artiste.commandes
 import { Route as ArtisteVitrineRouteImport } from './routes/artiste.vitrine'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthMfaSetupRouteImport } from './routes/auth.mfa-setup'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthUpdatePasswordRouteImport } from './routes/auth.update-password'
@@ -136,6 +137,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthMfaSetupRoute = AuthMfaSetupRouteImport.update({
+  id: '/auth/mfa-setup',
+  path: '/auth/mfa-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/mfa-setup': typeof AuthMfaSetupRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByTo {
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/mfa-setup': typeof AuthMfaSetupRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/mfa-setup': typeof AuthMfaSetupRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
@@ -422,6 +431,7 @@ export interface FileRouteTypes {
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
+    | '/auth/mfa-setup'
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
@@ -467,6 +477,7 @@ export interface FileRouteTypes {
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
+    | '/auth/mfa-setup'
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
+    | '/auth/mfa-setup'
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
@@ -557,6 +569,7 @@ export interface RootRouteChildren {
   ArtisteVitrineRoute: typeof ArtisteVitrineRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthMfaSetupRoute: typeof AuthMfaSetupRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   AuthResetRoute: typeof AuthResetRoute
   AuthUpdatePasswordRoute: typeof AuthUpdatePasswordRoute
@@ -705,6 +718,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/mfa-setup': {
+      id: '/auth/mfa-setup'
+      path: '/auth/mfa-setup'
+      fullPath: '/auth/mfa-setup'
+      preLoaderRoute: typeof AuthMfaSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/register': {
@@ -920,6 +940,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArtisteVitrineRoute: ArtisteVitrineRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthMfaSetupRoute: AuthMfaSetupRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   AuthResetRoute: AuthResetRoute,
   AuthUpdatePasswordRoute: AuthUpdatePasswordRoute,

@@ -148,9 +148,9 @@ function Register() {
       }
 
       toast.success("Compte créé avec succès", {
-        description: "Vérifiez votre boîte mail pour confirmer votre compte.",
+        description: "Vous allez être redirigé vers la configuration de la sécurité.",
       });
-      navigate({ to: "/auth/login", search: { from: undefined } });
+      navigate({ to: "/auth/mfa-setup" as never });
       return;
     }
 
@@ -203,8 +203,11 @@ function Register() {
 
     setStep("success");
     toast.success("Demande d'inscription envoyée", {
-      description: "Votre profil sera examiné par notre équipe.",
+      description: "Vous allez être redirigé vers la configuration de la sécurité.",
     });
+    setTimeout(() => {
+      navigate({ to: "/auth/mfa-setup" as never });
+    }, 2000);
   };
 
   const profilChoisi =

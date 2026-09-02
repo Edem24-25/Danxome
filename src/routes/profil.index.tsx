@@ -433,11 +433,16 @@ function Profil() {
                 <Shield className="mr-1 inline size-3" /> Sécurité
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Protégez votre compte avec un mot de passe fort.
+                Protégez votre compte avec un mot de passe fort et la validation en deux étapes.
               </p>
-              <Button asChild variant="outline" size="sm" className="mt-4">
-                <Link to="/profil/mot-de-passe">Changer le mot de passe</Link>
-              </Button>
+              <div className="mt-4 space-y-2">
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link to="/profil/mot-de-passe">Changer le mot de passe</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link to="/auth/mfa-setup">Gérer la 2FA</Link>
+                </Button>
+              </div>
             </div>
           </Reveal>
         </aside>

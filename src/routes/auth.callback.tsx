@@ -19,7 +19,16 @@ function AuthCallback() {
           .select("profil")
           .eq("id", session.user.id)
           .single();
-        navigate({ to: accueilProfil(prof?.profil) });
+
+        const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+        if (mfaData?.nextLevel === "aal2" && mfaData?.currentLevel !== "aal2") {
+          navigate({ to: "/auth/login", search: { from: undefined } });
+        } else if (mfaData?.nextLevel === "aal1" && mfaData?.currentLevel === "aal1") {
+          navigate({ to: "/auth/mfa-setup" as never });
+        } else {
+          navigate({ to: accueilProfil(prof?.profil) });
+        }
       } else {
         navigate({ to: "/auth/login", search: { from: undefined } });
       }

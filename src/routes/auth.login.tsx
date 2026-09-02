@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth";
 import { accueilProfil } from "@/lib/types/user";
+import type { ProfilType } from "@/lib/types/user";
 import { useRateLimit } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/client";
+import { MfaGate } from "@/components/auth/mfa-gate";
 
 function sanitizeRedirect(path: string | undefined): string | undefined {
   if (!path) return undefined;
@@ -40,7 +43,9 @@ function Login() {
   const navigate = useNavigate();
   const { from } = Route.useSearch();
   const [loading, setLoading] = useState(false);
-  const { signIn, signInWithGoogle } = useAuth();
+  const [showMfa, setShowMfa] = useState(false);
+  const [profileAfterLogin, setProfileAfterLogin] = useState<{ profil: string } | null>(null);
+  const { signIn, signInWithGoogle, signOut } = useAuth();
   const loginRL = useRateLimit("login", 5, 30000);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,17 +77,61 @@ function Login() {
     }
 
     loginRL.reset();
+    setProfileAfterLogin({ profil: profil ?? "visiteur" });
+
+    const supabase = createClient();
+    const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+    if (data?.nextLevel === "aal2" && data?.currentLevel !== "aal2") {
+      setShowMfa(true);
+      setLoading(false);
+    } else if (data?.nextLevel === "aal1" && data?.currentLevel === "aal1") {
+      navigate({ to: "/auth/mfa-setup" as never });
+    } else {
+      toast.success("Connexion réussie");
+      if (from) {
+        navigate({ to: from });
+      } else {
+        navigate({ to: accueilProfil(profil) });
+      }
+    }
+  };
+
+  const handleMfaComplete = () => {
     toast.success("Connexion réussie");
     if (from) {
       navigate({ to: from });
+    } else if (profileAfterLogin) {
+      navigate({ to: accueilProfil(profileAfterLogin.profil as ProfilType) });
     } else {
-      navigate({ to: accueilProfil(profil) });
+      navigate({ to: "/profil" });
     }
+  };
+
+  const handleMfaLogout = async () => {
+    await signOut();
+    setShowMfa(false);
+    setProfileAfterLogin(null);
   };
 
   const handleGoogle = async () => {
     await signInWithGoogle();
   };
+
+  if (showMfa) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-ivory to-white p-4">
+        <div className="w-full max-w-md rounded-xl border border-border bg-white p-6 shadow-lg">
+          <MfaGate
+            onMfaComplete={handleMfaComplete}
+            onLogout={handleMfaLogout}
+          >
+            <></>
+          </MfaGate>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthLayout
