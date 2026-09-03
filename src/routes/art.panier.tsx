@@ -15,7 +15,13 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { usePanier, useUpdateCartQty, useRemoveFromCart, useClearCart, formatFcfa } from "@/hooks/use-data";
+import {
+  usePanier,
+  useUpdateCartQty,
+  useRemoveFromCart,
+  useClearCart,
+  formatFcfa,
+} from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 import { accueilProfil } from "@/lib/types/user";
 
@@ -109,90 +115,91 @@ function Panier() {
                 const oeuvre = item.oeuvre;
                 if (!oeuvre) return null;
                 return (
-                <div key={oeuvre.slug} className="flex gap-4 p-5">
-                  <Link
-                    to="/art/oeuvres/$slug"
-                    params={{ slug: oeuvre.slug }}
-                    className="shrink-0 overflow-hidden rounded-md"
-                  >
-                    <img
-                      src={oeuvre.image_url}
-                      alt={oeuvre.titre}
-                      className="media-warm size-24 object-cover"
-                    />
-                  </Link>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-display text-lg text-forest-deep">
-                      <Link to="/art/oeuvres/$slug" params={{ slug: oeuvre.slug }}>
-                        {oeuvre.titre}
-                      </Link>
-                    </h2>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {oeuvre.categorie} · {oeuvre.artiste?.nom}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          aria-label="Diminuer la quantité"
-                          onClick={() => updateQty.mutate({ oeuvreId: item.oeuvre_id, qte: item.qte - 1 })}
-                        >
-                          <Minus />
-                        </Button>
-                        <span className="w-6 text-center font-semibold">{item.qte}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          aria-label="Augmenter la quantité"
-                          onClick={() => updateQty.mutate({ oeuvreId: item.oeuvre_id, qte: item.qte + 1 })}
-                        >
-                          <Plus />
-                        </Button>
-                      </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <button
-                            className="flex items-center gap-1.5 text-xs font-semibold text-terracotta hover:underline"
+                  <div key={oeuvre.slug} className="flex gap-4 p-5">
+                    <Link
+                      to="/art/oeuvres/$slug"
+                      params={{ slug: oeuvre.slug }}
+                      className="shrink-0 overflow-hidden rounded-md"
+                    >
+                      <img
+                        src={oeuvre.image_url}
+                        alt={oeuvre.titre}
+                        className="media-warm size-24 object-cover"
+                      />
+                    </Link>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-display text-lg text-forest-deep">
+                        <Link to="/art/oeuvres/$slug" params={{ slug: oeuvre.slug }}>
+                          {oeuvre.titre}
+                        </Link>
+                      </h2>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {oeuvre.categorie} · {oeuvre.artiste?.nom}
+                      </p>
+                      <div className="mt-4 flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="Diminuer la quantité"
+                            onClick={() =>
+                              updateQty.mutate({ oeuvreId: item.oeuvre_id, qte: item.qte - 1 })
+                            }
                           >
-                            <Trash2 className="size-3.5" /> Retirer
-                          </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Retirer cet article ?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Êtes-vous sûr de vouloir retirer « {oeuvre.titre} » de votre panier ?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction
-                              className={buttonVariants({ variant: "destructive" })}
-                              onClick={() => {
-                                removeFromCart.mutate(item.oeuvre_id);
-                                toast.success("Article retiré du panier");
-                              }}
-                            >
-                              Retirer
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                            <Minus />
+                          </Button>
+                          <span className="w-6 text-center font-semibold">{item.qte}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="Augmenter la quantité"
+                            onClick={() =>
+                              updateQty.mutate({ oeuvreId: item.oeuvre_id, qte: item.qte + 1 })
+                            }
+                          >
+                            <Plus />
+                          </Button>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button className="flex items-center gap-1.5 text-xs font-semibold text-terracotta hover:underline">
+                              <Trash2 className="size-3.5" /> Retirer
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Retirer cet article ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Êtes-vous sûr de vouloir retirer « {oeuvre.titre} » de votre panier
+                                ?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction
+                                className={buttonVariants({ variant: "destructive" })}
+                                onClick={() => {
+                                  removeFromCart.mutate(item.oeuvre_id);
+                                  toast.success("Article retiré du panier");
+                                }}
+                              >
+                                Retirer
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
+                    <p className="shrink-0 font-display text-lg text-forest-deep">
+                      {formatFcfa(oeuvre.prix * item.qte)}
+                    </p>
                   </div>
-                  <p className="shrink-0 font-display text-lg text-forest-deep">
-                    {formatFcfa(oeuvre.prix * item.qte)}
-                  </p>
-                </div>
                 );
               })}
               <div className="p-5">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <button
-                      className="text-xs font-semibold text-muted-foreground hover:underline"
-                    >
+                    <button className="text-xs font-semibold text-muted-foreground hover:underline">
                       Vider le panier
                     </button>
                   </AlertDialogTrigger>
@@ -200,7 +207,8 @@ function Panier() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Vider le panier ?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Cette action supprimera tous les articles de votre panier. Cette action est irréversible.
+                        Cette action supprimera tous les articles de votre panier. Cette action est
+                        irréversible.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

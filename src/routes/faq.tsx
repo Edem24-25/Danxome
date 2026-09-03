@@ -6,7 +6,7 @@ import { PageHead } from "@/components/site/Bits";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const faq = [
+export const faq = [
   {
     q: "Comment découvrir les sites touristiques ?",
     r: "Explorez la rubrique Tourisme pour consulter les fiches détaillées de chaque site, avec photos, histoire et informations pratiques. La carte interactive vous permet de visualiser tous les sites par région.",

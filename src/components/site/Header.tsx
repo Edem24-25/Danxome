@@ -31,7 +31,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const { data: panierData } = usePanier();
   const nombre = (panierData ?? []).reduce((s, i) => s + i.qte, 0);
-  const { user, loading, peutCommander } = useAuth();
+  const { user, loading, peutCommander, signOut } = useAuth();
   const accueil = "/profil";
   const rafRef = useRef<number>(0);
 
@@ -167,28 +167,38 @@ export function Header() {
                     </Link>
                   )}
                   {user && !loading && (
-                    <Link
-                      to={accueil}
-                      onClick={() => setOpen(false)}
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        signOut();
+                      }}
                       className="group flex items-center gap-3 rounded-lg px-4 py-3.5 font-display text-lg text-forest-deep transition-all duration-300 hover:bg-forest/5 hover:pl-6"
                     >
                       <span className="size-1.5 rounded-full bg-accent opacity-0 transition-opacity group-hover:opacity-100" />
-                      Mon espace
-                    </Link>
+                      Déconnexion
+                    </button>
                   )}
                 </nav>
 
                 {/* Footer mobile */}
                 <div className="border-t border-border/50 px-6 py-6">
-                  <Button asChild variant="gold" size="lg" className="w-full rounded-full">
-                    <Link
-                      to="/auth/login"
-                      search={{ from: undefined }}
-                      onClick={() => setOpen(false)}
-                    >
-                      Connexion
-                    </Link>
-                  </Button>
+                  {!user && !loading ? (
+                    <Button asChild variant="gold" size="lg" className="w-full rounded-full">
+                      <Link
+                        to="/auth/login"
+                        search={{ from: undefined }}
+                        onClick={() => setOpen(false)}
+                      >
+                        Connexion
+                      </Link>
+                    </Button>
+                  ) : user ? (
+                    <Button asChild variant="gold" size="lg" className="w-full rounded-full">
+                      <Link to={accueil} onClick={() => setOpen(false)}>
+                        Mon espace
+                      </Link>
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             </SheetContent>

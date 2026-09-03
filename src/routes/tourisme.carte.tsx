@@ -61,7 +61,11 @@ function Carte() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]">
           <div className="order-2 lg:order-1">
-            <BeninMap sites={sites} actifs={actifs} className="min-h-[520px] w-full lg:min-h-[680px]" />
+            <BeninMap
+              sites={sites}
+              actifs={actifs}
+              className="min-h-[520px] w-full lg:min-h-[680px]"
+            />
             <p className="mt-3 text-xs text-muted-foreground">
               Survolez un repère pour afficher le nom du site, cliquez pour ouvrir sa fiche.
             </p>

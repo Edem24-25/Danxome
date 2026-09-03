@@ -23,6 +23,7 @@ export async function requireRole(allowedRoles: ProfilType[]) {
   const user = await requireAuth();
   const now = Date.now();
 
+  // Use cached profile if fresh
   if (cachedProfile && cachedProfile.id === user.id && now - cacheTimestamp < CACHE_TTL) {
     if (!allowedRoles.includes(cachedProfile.profil)) {
       throw redirect({ to: "/auth/login", search: { from: undefined } });
@@ -45,25 +46,4 @@ export async function requireRole(allowedRoles: ProfilType[]) {
   cacheTimestamp = now;
 
   return { user, profil: profile.profil };
-}
-
-export async function requireMfa() {
-  const user = await requireAuth();
-  const supabase = createClient();
-
-  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-
-  if (!data) {
-    throw redirect({ to: "/auth/login", search: { from: undefined } });
-  }
-
-  if (data.nextLevel === "aal2" && data.currentLevel !== "aal2") {
-    return { user, mfaVerified: false };
-  }
-
-  if (data.nextLevel === "aal1" && data.currentLevel === "aal1") {
-    throw redirect({ to: "/auth/mfa-setup" as never });
-  }
-
-  return { user, mfaVerified: true };
 }

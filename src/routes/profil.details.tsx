@@ -346,7 +346,9 @@ function ProfilDetails() {
                   required
                   maxLength={60}
                   placeholder="Votre nom"
-                  className={errors["nom"] ? "border-terracotta focus-visible:ring-terracotta/20" : ""}
+                  className={
+                    errors["nom"] ? "border-terracotta focus-visible:ring-terracotta/20" : ""
+                  }
                 />
                 {errors["nom"] && <p className="text-xs text-terracotta">{errors["nom"]}</p>}
               </div>
@@ -365,7 +367,9 @@ function ProfilDetails() {
                     errors["telephone"] ? "border-terracotta focus-visible:ring-terracotta/20" : ""
                   }
                 />
-                {errors["telephone"] && <p className="text-xs text-terracotta">{errors["telephone"]}</p>}
+                {errors["telephone"] && (
+                  <p className="text-xs text-terracotta">{errors["telephone"]}</p>
+                )}
               </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="adresse" className="flex items-center gap-1.5">

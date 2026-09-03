@@ -16,7 +16,13 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminEvenementsRouteImport } from './routes/admin.evenements'
 import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
+import { Route as AdminNewsletterRouteImport } from './routes/admin.newsletter'
+import { Route as AdminOeuvresRouteImport } from './routes/admin.oeuvres'
+import { Route as AdminSitesRouteImport } from './routes/admin.sites'
+import { Route as AdminStatsRouteImport } from './routes/admin.stats'
+import { Route as AdminUtilisateursRouteImport } from './routes/admin.utilisateurs'
 import { Route as ArtIndexRouteImport } from './routes/art.index'
 import { Route as ArtBoutiqueRouteImport } from './routes/art.boutique'
 import { Route as ArtCheckoutRouteImport } from './routes/art.checkout'
@@ -26,7 +32,6 @@ import { Route as ArtisteCommandesRouteImport } from './routes/artiste.commandes
 import { Route as ArtisteVitrineRouteImport } from './routes/artiste.vitrine'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
-import { Route as AuthMfaSetupRouteImport } from './routes/auth.mfa-setup'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthUpdatePasswordRouteImport } from './routes/auth.update-password'
@@ -89,9 +94,39 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEvenementsRoute = AdminEvenementsRouteImport.update({
+  id: '/admin/evenements',
+  path: '/admin/evenements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminModerationRoute = AdminModerationRouteImport.update({
   id: '/admin/moderation',
   path: '/admin/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminNewsletterRoute = AdminNewsletterRouteImport.update({
+  id: '/admin/newsletter',
+  path: '/admin/newsletter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOeuvresRoute = AdminOeuvresRouteImport.update({
+  id: '/admin/oeuvres',
+  path: '/admin/oeuvres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSitesRoute = AdminSitesRouteImport.update({
+  id: '/admin/sites',
+  path: '/admin/sites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStatsRoute = AdminStatsRouteImport.update({
+  id: '/admin/stats',
+  path: '/admin/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUtilisateursRoute = AdminUtilisateursRouteImport.update({
+  id: '/admin/utilisateurs',
+  path: '/admin/utilisateurs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtIndexRoute = ArtIndexRouteImport.update({
@@ -137,11 +172,6 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthMfaSetupRoute = AuthMfaSetupRouteImport.update({
-  id: '/auth/mfa-setup',
-  path: '/auth/mfa-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -283,7 +313,13 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/legal': typeof LegalRoute
+  '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
+  '/admin/oeuvres': typeof AdminOeuvresRoute
+  '/admin/sites': typeof AdminSitesRoute
+  '/admin/stats': typeof AdminStatsRoute
+  '/admin/utilisateurs': typeof AdminUtilisateursRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
@@ -291,7 +327,6 @@ export interface FileRoutesByFullPath {
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
-  '/auth/mfa-setup': typeof AuthMfaSetupRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
@@ -329,7 +364,13 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/legal': typeof LegalRoute
+  '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
+  '/admin/oeuvres': typeof AdminOeuvresRoute
+  '/admin/sites': typeof AdminSitesRoute
+  '/admin/stats': typeof AdminStatsRoute
+  '/admin/utilisateurs': typeof AdminUtilisateursRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
@@ -337,7 +378,6 @@ export interface FileRoutesByTo {
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
-  '/auth/mfa-setup': typeof AuthMfaSetupRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
@@ -375,7 +415,13 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/legal': typeof LegalRoute
+  '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/moderation': typeof AdminModerationRoute
+  '/admin/newsletter': typeof AdminNewsletterRoute
+  '/admin/oeuvres': typeof AdminOeuvresRoute
+  '/admin/sites': typeof AdminSitesRoute
+  '/admin/stats': typeof AdminStatsRoute
+  '/admin/utilisateurs': typeof AdminUtilisateursRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
@@ -383,7 +429,6 @@ export interface FileRoutesById {
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
-  '/auth/mfa-setup': typeof AuthMfaSetupRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/update-password': typeof AuthUpdatePasswordRoute
@@ -423,7 +468,13 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/legal'
+    | '/admin/evenements'
     | '/admin/moderation'
+    | '/admin/newsletter'
+    | '/admin/oeuvres'
+    | '/admin/sites'
+    | '/admin/stats'
+    | '/admin/utilisateurs'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
@@ -431,7 +482,6 @@ export interface FileRouteTypes {
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
-    | '/auth/mfa-setup'
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
@@ -469,7 +519,13 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/legal'
+    | '/admin/evenements'
     | '/admin/moderation'
+    | '/admin/newsletter'
+    | '/admin/oeuvres'
+    | '/admin/sites'
+    | '/admin/stats'
+    | '/admin/utilisateurs'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
@@ -477,7 +533,6 @@ export interface FileRouteTypes {
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
-    | '/auth/mfa-setup'
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
@@ -514,7 +569,13 @@ export interface FileRouteTypes {
     | '/contact'
     | '/faq'
     | '/legal'
+    | '/admin/evenements'
     | '/admin/moderation'
+    | '/admin/newsletter'
+    | '/admin/oeuvres'
+    | '/admin/sites'
+    | '/admin/stats'
+    | '/admin/utilisateurs'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
@@ -522,7 +583,6 @@ export interface FileRouteTypes {
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
-    | '/auth/mfa-setup'
     | '/auth/register'
     | '/auth/reset'
     | '/auth/update-password'
@@ -561,7 +621,13 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   LegalRoute: typeof LegalRoute
+  AdminEvenementsRoute: typeof AdminEvenementsRoute
   AdminModerationRoute: typeof AdminModerationRoute
+  AdminNewsletterRoute: typeof AdminNewsletterRoute
+  AdminOeuvresRoute: typeof AdminOeuvresRoute
+  AdminSitesRoute: typeof AdminSitesRoute
+  AdminStatsRoute: typeof AdminStatsRoute
+  AdminUtilisateursRoute: typeof AdminUtilisateursRoute
   ArtBoutiqueRoute: typeof ArtBoutiqueRoute
   ArtCheckoutRoute: typeof ArtCheckoutRoute
   ArtPanierRoute: typeof ArtPanierRoute
@@ -569,7 +635,6 @@ export interface RootRouteChildren {
   ArtisteVitrineRoute: typeof ArtisteVitrineRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
-  AuthMfaSetupRoute: typeof AuthMfaSetupRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   AuthResetRoute: typeof AuthResetRoute
   AuthUpdatePasswordRoute: typeof AuthUpdatePasswordRoute
@@ -650,11 +715,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/evenements': {
+      id: '/admin/evenements'
+      path: '/admin/evenements'
+      fullPath: '/admin/evenements'
+      preLoaderRoute: typeof AdminEvenementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/moderation': {
       id: '/admin/moderation'
       path: '/admin/moderation'
       fullPath: '/admin/moderation'
       preLoaderRoute: typeof AdminModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/newsletter': {
+      id: '/admin/newsletter'
+      path: '/admin/newsletter'
+      fullPath: '/admin/newsletter'
+      preLoaderRoute: typeof AdminNewsletterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/oeuvres': {
+      id: '/admin/oeuvres'
+      path: '/admin/oeuvres'
+      fullPath: '/admin/oeuvres'
+      preLoaderRoute: typeof AdminOeuvresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/sites': {
+      id: '/admin/sites'
+      path: '/admin/sites'
+      fullPath: '/admin/sites'
+      preLoaderRoute: typeof AdminSitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/stats': {
+      id: '/admin/stats'
+      path: '/admin/stats'
+      fullPath: '/admin/stats'
+      preLoaderRoute: typeof AdminStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/utilisateurs': {
+      id: '/admin/utilisateurs'
+      path: '/admin/utilisateurs'
+      fullPath: '/admin/utilisateurs'
+      preLoaderRoute: typeof AdminUtilisateursRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/art/': {
@@ -718,13 +825,6 @@ declare module '@tanstack/react-router' {
       path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/mfa-setup': {
-      id: '/auth/mfa-setup'
-      path: '/auth/mfa-setup'
-      fullPath: '/auth/mfa-setup'
-      preLoaderRoute: typeof AuthMfaSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/register': {
@@ -932,7 +1032,13 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   LegalRoute: LegalRoute,
+  AdminEvenementsRoute: AdminEvenementsRoute,
   AdminModerationRoute: AdminModerationRoute,
+  AdminNewsletterRoute: AdminNewsletterRoute,
+  AdminOeuvresRoute: AdminOeuvresRoute,
+  AdminSitesRoute: AdminSitesRoute,
+  AdminStatsRoute: AdminStatsRoute,
+  AdminUtilisateursRoute: AdminUtilisateursRoute,
   ArtBoutiqueRoute: ArtBoutiqueRoute,
   ArtCheckoutRoute: ArtCheckoutRoute,
   ArtPanierRoute: ArtPanierRoute,
@@ -940,7 +1046,6 @@ const rootRouteChildren: RootRouteChildren = {
   ArtisteVitrineRoute: ArtisteVitrineRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
-  AuthMfaSetupRoute: AuthMfaSetupRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   AuthResetRoute: AuthResetRoute,
   AuthUpdatePasswordRoute: AuthUpdatePasswordRoute,

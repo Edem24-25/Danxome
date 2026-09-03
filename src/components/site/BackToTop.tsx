@@ -24,9 +24,7 @@ export function BackToTop() {
         [&:not([data-visible='true'])]:pointer-events-none [&:not([data-visible='true'])]:scale-0 [&:not([data-visible='true'])]:opacity-0"
       data-visible={visible}
       style={{
-        animation: visible
-          ? "fadeInScale 0.3s ease-out forwards"
-          : "none",
+        animation: visible ? "fadeInScale 0.3s ease-out forwards" : "none",
         transform: visible ? undefined : "scale(0)",
         opacity: visible ? undefined : 0,
       }}

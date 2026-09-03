@@ -33,13 +33,19 @@ function ProfilFavoris() {
   const favorisIds = useMemo(() => (favorisData ?? []).map((f) => f.oeuvre_id), [favorisData]);
 
   const categories = useMemo(() => {
-    const cats = new Set(oeuvres.filter((o) => favorisIds.includes(o.id)).map((o) => o.categorie).filter(Boolean));
+    const cats = new Set(
+      oeuvres
+        .filter((o) => favorisIds.includes(o.id))
+        .map((o) => o.categorie)
+        .filter(Boolean),
+    );
     return ["toutes", ...Array.from(cats)];
   }, [oeuvres, favorisIds]);
 
   const liste = useMemo(() => {
     const items = oeuvres.filter((o) => favorisIds.includes(o.id));
-    const filtered = selectedCat === "toutes" ? items : items.filter((o) => o.categorie === selectedCat);
+    const filtered =
+      selectedCat === "toutes" ? items : items.filter((o) => o.categorie === selectedCat);
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
         case "prix-asc":
@@ -121,8 +127,10 @@ function ProfilFavoris() {
 
       {/* Chargement */}
       {oeuvresLoading ? (
-        <div className={`mt-2 gap-6 ${viewMode === "grid" ? "grid sm:grid-cols-2 xl:grid-cols-3" : "space-y-3"}`}>
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          className={`mt-2 gap-6 ${viewMode === "grid" ? "grid sm:grid-cols-2 xl:grid-cols-3" : "space-y-3"}`}
+        >
+          {Array.from({ length: 6 }).map((_, i) =>
             viewMode === "grid" ? (
               <div key={i} className="overflow-hidden rounded-xl border border-border bg-card">
                 <Skeleton className="aspect-[3/4] w-full" />
@@ -133,7 +141,10 @@ function ProfilFavoris() {
                 </div>
               </div>
             ) : (
-              <div key={i} className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
+              <div
+                key={i}
+                className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"
+              >
                 <Skeleton className="size-16 rounded-lg" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-32" />
@@ -141,8 +152,8 @@ function ProfilFavoris() {
                 </div>
                 <Skeleton className="h-5 w-24" />
               </div>
-            )
-          ))}
+            ),
+          )}
         </div>
       ) : liste.length === 0 ? (
         <EmptyState
@@ -242,7 +253,9 @@ function ProfilFavoris() {
                     {o.artiste?.nom} · {o.region}
                   </p>
                 </div>
-                <p className="shrink-0 font-display text-xl text-forest-deep">{formatFcfa(o.prix)}</p>
+                <p className="shrink-0 font-display text-xl text-forest-deep">
+                  {formatFcfa(o.prix)}
+                </p>
                 <div className="flex shrink-0 gap-2">
                   <Button asChild variant="ghost" size="sm">
                     <Link to="/art/oeuvres/$slug" params={{ slug: o.slug }}>

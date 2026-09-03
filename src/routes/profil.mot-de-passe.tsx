@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { KeyRound, Lock } from "lucide-react";
@@ -78,6 +78,8 @@ function ProfilMotDePasse() {
       crumbs={[{ label: "Mon profil", to: "/profil" }, { label: "Mot de passe" }]}
     >
       <form
+        method="post"
+        action="#"
         onSubmit={handleSubmit}
         className="max-w-md space-y-4 rounded-lg border border-border bg-card p-6"
       >

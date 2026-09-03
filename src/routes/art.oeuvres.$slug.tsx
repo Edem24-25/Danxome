@@ -7,7 +7,14 @@ import { ContentCard } from "@/components/site/ContentCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOeuvre, useOeuvres, formatFcfa, useAddToCart, useFavoris, useToggleFavori } from "@/hooks/use-data";
+import {
+  useOeuvre,
+  useOeuvres,
+  formatFcfa,
+  useAddToCart,
+  useFavoris,
+  useToggleFavori,
+} from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 
 export const Route = createFileRoute("/art/oeuvres/$slug")({
@@ -150,12 +157,18 @@ function OeuvreDetail() {
                   variant="ghost"
                   size="icon"
                   aria-label={
-                    favorisData?.some(f => f.oeuvre_id === oeuvre.id) ? "Retirer des favoris" : "Ajouter aux favoris"
+                    favorisData?.some((f) => f.oeuvre_id === oeuvre.id)
+                      ? "Retirer des favoris"
+                      : "Ajouter aux favoris"
                   }
                   onClick={() => toggleFavori.mutate(oeuvre.id)}
                 >
                   <Heart
-                    className={favorisData?.some(f => f.oeuvre_id === oeuvre.id) ? "fill-terracotta text-terracotta" : ""}
+                    className={
+                      favorisData?.some((f) => f.oeuvre_id === oeuvre.id)
+                        ? "fill-terracotta text-terracotta"
+                        : ""
+                    }
                   />
                 </Button>
               </div>

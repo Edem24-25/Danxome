@@ -1,9 +1,11 @@
 ﻿import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/Reveal";
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
-
+import { Facebook, Instagram, Twitter, Youtube, Check, Loader2 } from "lucide-react";
+import { useSubscribeNewsletter } from "@/hooks/use-data";
 
 const columns = [
   {
@@ -36,6 +38,21 @@ const columns = [
 ] as const;
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const subscribe = useSubscribeNewsletter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    try {
+      await subscribe.mutateAsync(email.trim());
+      toast.success("Inscription réussie !", { description: "Vous recevrez bientôt nos actualités." });
+      setEmail("");
+    } catch {
+      toast.error("Erreur", { description: "Cet email est peut-être déjà inscrit." });
+    }
+  };
+
   return (
     <footer className="mt-24">
       {/* Section principale */}
@@ -72,17 +89,26 @@ export function Footer() {
                   </p>
                   <form
                     className="mt-8 flex max-w-md gap-2"
-                    onSubmit={(e) => e.preventDefault()}
+                    onSubmit={handleSubmit}
                     aria-label="Inscription à la lettre"
                   >
                     <Input
                       type="email"
                       required
                       placeholder="votre@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="flex-1 border-ivory/15 bg-ivory/8 text-ivory placeholder:text-ivory/40 focus-visible:ring-accent"
+                      disabled={subscribe.isPending}
                     />
-                    <Button variant="gold" type="submit" className="rounded-full">
-                      S'abonner
+                    <Button variant="gold" type="submit" className="rounded-full" disabled={subscribe.isPending || !email.trim()}>
+                      {subscribe.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : subscribe.isSuccess ? (
+                        <Check className="size-4" />
+                      ) : (
+                        "S'abonner"
+                      )}
                     </Button>
                   </form>
 
@@ -138,9 +164,7 @@ export function Footer() {
       {/* Barre inférieure */}
       <div className="bg-forest-darker border-t border-ivory/8">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-6 text-xs text-ivory/40 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p>
-            © {new Date().getFullYear()} DanXomè
-          </p>
+          <p>© {new Date().getFullYear()} DanXomè</p>
           <div className="flex flex-wrap gap-5">
             <Link to="/legal" className="transition-colors hover:text-accent">
               Confidentialité

@@ -1,4 +1,4 @@
-﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Link,
   createRootRouteWithContext,
@@ -144,6 +144,47 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    // 1. Sécurité : Nettoyage immédiat des paramètres sensibles dans l'URL (ex: ?email=...&pass=...)
+    if (typeof window !== "undefined" && window.location.search) {
+      const urlParams = new URLSearchParams(window.location.search);
+      let updated = false;
+      const sensitiveKeys = ["email", "pass", "password", "token", "secret", "access_token"];
+
+      sensitiveKeys.forEach((key) => {
+        if (urlParams.has(key)) {
+          urlParams.delete(key);
+          updated = true;
+        }
+      });
+
+      if (updated) {
+        const cleanSearch = urlParams.toString();
+        const cleanUrl =
+          window.location.pathname + (cleanSearch ? `?${cleanSearch}` : "") + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+
+    // 2. Interception sécurisée des promesses rejetées (ex: erreurs JSON du SDK KKiaPay / widgets externes)
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      if (
+        event.reason &&
+        (event.reason.name === "SyntaxError" ||
+          event.reason.message?.includes("Unexpected end of JSON input") ||
+          event.reason.message?.includes("JSON"))
+      ) {
+        console.warn("Erreur JSON asynchrone interceptée avec succès :", event.reason);
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    return () => {
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

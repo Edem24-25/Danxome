@@ -3,8 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { checkRateLimit } from "@/lib/rate-limit-server";
 
 function getServerSupabase() {
-  const url = process.env["VITE_SUPABASE_URL"];
-  const key = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+  const url = import.meta.env["VITE_SUPABASE_URL"];
+  const key = import.meta.env["VITE_SUPABASE_SERVICE_ROLE_KEY"];
   if (!url || !key) throw new Error("Variables Supabase manquantes côté serveur");
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -40,35 +40,6 @@ type OrderResult = {
   commandes: CommandeRecord[];
 };
 
-async function verifyKkiapayTransaction(transactionId: string): Promise<{
-  status: string;
-  amount: number;
-  fees: number;
-  source: string;
-  transactionId: string;
-  performedAt: string;
-}> {
-  const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
-
-  const privateKey = process.env["KKIAPAY_PRIVATE_KEY"];
-  const publicKey = process.env["KKIAPAY_PUBLIC_KEY"];
-  const secretKey = process.env["KKIAPAY_SECRET_KEY"];
-
-  if (!privateKey || !publicKey || !secretKey) {
-    throw new Error("Clés Kkiapay manquantes côté serveur (private, public, secret)");
-  }
-
-  const k = kkiapay({
-    privatekey: privateKey,
-    publickey: publicKey,
-    secretkey: secretKey,
-    sandbox: true,
-  });
-
-  const result = await k.verify(transactionId);
-  return result;
-}
-
 export const createOrderFromCart = createServerFn({ method: "POST" })
   .validator(
     (input: {
@@ -96,16 +67,12 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
           throw new Error("Quantité invalide");
         }
       }
-      if (!input.transaction_id || typeof input.transaction_id !== "string") {
-        throw new Error("transaction_id invalide — paiement requis");
-      }
       return input;
     },
   )
   .handler(async ({ data }) => {
     const supabase = getServerSupabase();
 
-    // Authenticate caller identity
     if (!data.auth_token) {
       throw new Error("Authentification requise pour passer une commande.");
     }
@@ -114,18 +81,44 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
       throw new Error("Action non autorisée. Session utilisateur invalide.");
     }
 
-    const rl = checkRateLimit(`order:${data.client_id}`, 5, 60_000);
+    const rl = checkRateLimit(`order:${data.client_id}`, 10, 7_200_000);
     if (!rl.allowed) {
       throw new Error("Trop de requêtes. Réessayez dans une minute.");
     }
 
-    // Verify payment with Kkiapay before creating order
-    const transaction = await verifyKkiapayTransaction(data.transaction_id!);
-    if (transaction.status !== "SUCCESS") {
-      throw new Error("Paiement non confirmé par Kkiapay");
+    let transaction: {
+      status: string;
+      amount: number;
+      fees: number;
+      source: string;
+      performedAt: string;
+    } | null = null;
+
+    if (data.transaction_id) {
+      const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
+
+      const privateKey = import.meta.env["VITE_KKIAPAY_PRIVATE_KEY"];
+      const publicKey = import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"];
+      const secretKey = import.meta.env["VITE_KKIAPAY_SECRET_KEY"];
+
+      if (!privateKey || !publicKey || !secretKey) {
+        throw new Error("Clés Kkiapay manquantes côté serveur");
+      }
+
+      const k = kkiapay({
+        privatekey: privateKey,
+        publickey: publicKey,
+        secretkey: secretKey,
+        sandbox: import.meta.env["VITE_KKIAPAY_SANDBOX"] !== "false",
+      });
+
+      const result = await k.verify(data.transaction_id);
+      if (result.status !== "SUCCESS") {
+        throw new Error("Paiement non confirmé par Kkiapay");
+      }
+      transaction = result;
     }
 
-    // 1. Fetch real oeuvre data from DB (source of truth for prices)
     const oeuvreIds = data.items.map((i) => i.oeuvre_id);
     const { data: oeuvres, error: fetchError } = await supabase
       .from("oeuvres")
@@ -137,7 +130,6 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
       throw new Error("Certaines œuvres n'existent pas");
     }
 
-    // 2. Verify all oeuvres are available
     for (const oeuvre of oeuvres as OeuvreRecord[]) {
       if (oeuvre.statut !== "publiee") {
         throw new Error(`L'œuvre "${oeuvre.titre}" n'est plus disponible`);
@@ -147,7 +139,6 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
       }
     }
 
-    // 3. Fetch artiste names for each oeuvre
     const artisteIds = [
       ...new Set((oeuvres as OeuvreRecord[]).map((o) => o.artiste_id).filter(Boolean)),
     ] as string[];
@@ -158,23 +149,18 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
 
     const artisteMap = new Map(((artistes as ArtisteRecord[]) ?? []).map((a) => [a.id, a.nom]));
 
-    // 4. Generate unique ref server-side
-    const ref = `DAH-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const orderRef = `DAH-${Date.now()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
     const now = new Date().toISOString();
 
-    // 5. Create orders with server-computed amounts
-    const commandes: CommandeRecord[] = [];
+    const commandInserts = data.items
+      .map((item, index) => {
+        const oeuvre = (oeuvres as OeuvreRecord[]).find((o) => o.id === item.oeuvre_id);
+        if (!oeuvre) return null;
 
-    for (const item of data.items) {
-      const oeuvre = (oeuvres as OeuvreRecord[]).find((o) => o.id === item.oeuvre_id);
-      if (!oeuvre) continue;
+        const montant = oeuvre.prix * item.qte;
 
-      const montant = oeuvre.prix * item.qte;
-
-      const { data: commande, error: insertError } = await supabase
-        .from("commandes")
-        .insert({
-          ref,
+        return {
+          ref: `${orderRef}-${String(index + 1).padStart(2, "0")}`,
           client_id: data.client_id,
           client_nom: data.client_nom,
           oeuvre_id: oeuvre.id,
@@ -183,38 +169,42 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
           montant,
           date: now,
           statut: "recue",
-          payment_id: data.transaction_id,
+          payment_id: data.transaction_id ?? null,
           moyen_paiement: data.moyen_paiement ?? "momo",
-          payment_statut: "reussi",
-        })
-        .select("id, oeuvre_titre, montant")
-        .single();
+          payment_statut: transaction ? "reussi" : "en_attente",
+        };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null);
 
-      if (insertError) throw new Error("Erreur création commande");
-      commandes.push(commande as CommandeRecord);
+    const { data: insertedCommandes, error: batchInsertError } = await supabase
+      .from("commandes")
+      .insert(commandInserts)
+      .select("id, oeuvre_titre, montant");
+
+    if (batchInsertError) {
+      console.error("Supabase insert error:", batchInsertError);
+      throw new Error(`Erreur création commandes: ${batchInsertError.message}`);
+    }
+    const commandes = (insertedCommandes ?? []) as CommandeRecord[];
+
+    if (transaction && data.transaction_id) {
+      await supabase.from("payments").insert({
+        commande_id: commandes[0]?.id,
+        transaction_id: data.transaction_id,
+        amount: transaction.amount,
+        fees: transaction.fees,
+        method: transaction.source,
+        is_success: transaction.status === "SUCCESS",
+        partner_id: null,
+        account: null,
+        performed_at: transaction.performedAt,
+        raw_json: transaction,
+      });
     }
 
-    // 6. Record payment transaction
-    await supabase.from("payments").insert({
-      commande_id: commandes[0]?.id,
-      transaction_id: data.transaction_id,
-      amount: transaction.amount,
-      fees: transaction.fees,
-      method: transaction.source,
-      is_success: transaction.status === "SUCCESS",
-      partner_id: null,
-      account: null,
-      performed_at: transaction.performedAt,
-      raw_json: transaction,
-    });
+    await supabase.from("oeuvres").update({ statut: "vendue" }).in("id", oeuvreIds);
 
-    // 7. Mark oeuvres as sold
-    for (const item of data.items) {
-      await supabase.from("oeuvres").update({ statut: "vendue" }).eq("id", item.oeuvre_id);
-    }
-
-    // 8. Clear cart
     await supabase.from("panier_items").delete().eq("user_id", data.client_id);
 
-    return { ref, commandes } satisfies OrderResult;
+    return { ref: orderRef, commandes } satisfies OrderResult;
   });

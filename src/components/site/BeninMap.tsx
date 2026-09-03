@@ -5,7 +5,15 @@ import type { Site } from "@/hooks/use-data";
 import { cn } from "@/lib/utils";
 
 /** Carte stylisée du Bénin avec pins animés et tooltips interactifs. */
-export function BeninMap({ className, actifs, sites = [] }: { className?: string; actifs?: string[]; sites?: Site[] }) {
+export function BeninMap({
+  className,
+  actifs,
+  sites = [],
+}: {
+  className?: string;
+  actifs?: string[];
+  sites?: Site[];
+}) {
   const visibles = actifs ? sites.filter((s) => actifs.includes(s.type)) : sites;
   const [hovered, setHovered] = useState<string | null>(null);
 

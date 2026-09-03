@@ -22,7 +22,13 @@ import { Reveal } from "@/components/site/Reveal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOeuvres, formatFcfa, useFavoris, useCommandesClient, statutLabel } from "@/hooks/use-data";
+import {
+  useOeuvres,
+  formatFcfa,
+  useFavoris,
+  useCommandesClient,
+  statutLabel,
+} from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
 
 export const Route = createFileRoute("/profil/")({
@@ -56,7 +62,10 @@ function getGreeting(): string {
   return "Bonsoir";
 }
 
-const badgeVariant: Record<string, "default" | "gold" | "forest" | "secondary" | "quiet" | "destructive"> = {
+const badgeVariant: Record<
+  string,
+  "default" | "gold" | "forest" | "secondary" | "quiet" | "destructive"
+> = {
   recue: "default",
   validee: "gold",
   en_cours: "forest",
@@ -192,10 +201,12 @@ function Profil() {
                   <AlertCircle className="size-4 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-amber-800">Compte en attente de validation</p>
+                  <p className="text-sm font-semibold text-amber-800">
+                    Compte en attente de validation
+                  </p>
                   <p className="mt-0.5 text-xs text-amber-700">
-                    Votre compte {profile.profil} sera examiné par un administrateur. Vous recevrez une
-                    notification une fois votre profil validé.
+                    Votre compte {profile.profil} sera examiné par un administrateur. Vous recevrez
+                    une notification une fois votre profil validé.
                   </p>
                 </div>
               </div>
@@ -255,7 +266,10 @@ function Profil() {
               {achatsLoading ? (
                 <div className="mt-5 space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
+                    <div
+                      key={i}
+                      className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"
+                    >
                       <Skeleton className="size-14 rounded-lg" />
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-32" />
@@ -288,7 +302,9 @@ function Profil() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="truncate font-semibold text-forest-deep">{a.oeuvre_titre}</p>
+                          <p className="truncate font-semibold text-forest-deep">
+                            {a.oeuvre_titre}
+                          </p>
                           <Badge variant={badgeVariant[a.statut] ?? "default"} className="shrink-0">
                             {statutLabel(a.statut)}
                           </Badge>
@@ -298,7 +314,9 @@ function Profil() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-display text-lg text-forest-deep">{formatFcfa(a.montant)}</p>
+                        <p className="font-display text-lg text-forest-deep">
+                          {formatFcfa(a.montant)}
+                        </p>
                       </div>
                     </li>
                   ))}
@@ -433,16 +451,11 @@ function Profil() {
                 <Shield className="mr-1 inline size-3" /> Sécurité
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Protégez votre compte avec un mot de passe fort et la validation en deux étapes.
+                Protégez votre compte avec un mot de passe fort.
               </p>
-              <div className="mt-4 space-y-2">
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link to="/profil/mot-de-passe">Changer le mot de passe</Link>
-                </Button>
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link to="/auth/mfa-setup">Gérer la 2FA</Link>
-                </Button>
-              </div>
+              <Button asChild variant="outline" size="sm" className="mt-4">
+                <Link to="/profil/mot-de-passe">Changer le mot de passe</Link>
+              </Button>
             </div>
           </Reveal>
         </aside>

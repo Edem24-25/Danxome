@@ -225,10 +225,14 @@ function Boutique() {
                           asChild={!peutCommander}
                           variant="outline"
                           className="mt-4 w-full"
-                          onClick={peutCommander ? () => {
-                            addToCart.mutate({ oeuvreId: o.id });
-                            toast.success("Ajouté au panier");
-                          } : undefined}
+                          onClick={
+                            peutCommander
+                              ? () => {
+                                  addToCart.mutate({ oeuvreId: o.id });
+                                  toast.success("Ajouté au panier");
+                                }
+                              : undefined
+                          }
                         >
                           {peutCommander ? (
                             <>

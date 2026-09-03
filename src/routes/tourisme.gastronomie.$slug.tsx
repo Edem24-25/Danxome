@@ -52,9 +52,7 @@ function PlatDetail() {
   const toggleFav = useCallback(() => {
     if (!plat) return;
     setFavoris((prev) => {
-      const next = isFav
-        ? prev.filter((s) => s !== plat.slug)
-        : [...prev, plat.slug];
+      const next = isFav ? prev.filter((s) => s !== plat.slug) : [...prev, plat.slug];
       try {
         localStorage.setItem(FAV_KEY, JSON.stringify(next));
       } catch {
@@ -120,35 +118,18 @@ function PlatDetail() {
             <h1 className="mt-5 font-display text-4xl leading-[1.05] text-ivory sm:text-5xl lg:text-6xl">
               {plat.nom}
             </h1>
-            <p className="mt-5 text-base leading-relaxed text-ivory/80">
-              {plat.resume}
-            </p>
+            <p className="mt-5 text-base leading-relaxed text-ivory/80">{plat.resume}</p>
             <div className="mt-7 flex flex-wrap items-center gap-5 text-sm text-ivory/80">
               <span className="flex items-center gap-1.5">
                 <MapPin className="size-4 text-accent" /> {plat.origine}
               </span>
             </div>
             <div className="mt-6 flex gap-3">
-              <Button
-                variant="onDark"
-                size="sm"
-                className="rounded-full"
-                onClick={toggleFav}
-              >
-                <Heart
-                  className={cn(
-                    "size-4",
-                    isFav && "fill-rose-400 text-rose-400",
-                  )}
-                />{" "}
+              <Button variant="onDark" size="sm" className="rounded-full" onClick={toggleFav}>
+                <Heart className={cn("size-4", isFav && "fill-rose-400 text-rose-400")} />{" "}
                 {isFav ? "Favori" : "Ajouter aux favoris"}
               </Button>
-              <Button
-                variant="onDark"
-                size="sm"
-                className="rounded-full"
-                onClick={partager}
-              >
+              <Button variant="onDark" size="sm" className="rounded-full" onClick={partager}>
                 <Share2 className="size-4" /> Partager
               </Button>
             </div>
@@ -183,35 +164,25 @@ function PlatDetail() {
             {/* Où goûter */}
             <div>
               <p className="eyebrow">Où goûter</p>
-              <p className="mt-5 text-base leading-relaxed text-foreground/85">
-                {plat.ou}
-              </p>
+              <p className="mt-5 text-base leading-relaxed text-foreground/85">{plat.ou}</p>
             </div>
 
             {/* Histoire du plat */}
             <div className="rounded-xl border border-border bg-card p-6">
               <div className="flex items-center gap-2 text-forest-deep">
                 <BookOpen className="size-5" />
-                <p className="eyebrow !text-forest-deep !tracking-[0.16em]">
-                  Histoire du plat
-                </p>
+                <p className="eyebrow !text-forest-deep !tracking-[0.16em]">Histoire du plat</p>
               </div>
-              <p className="mt-4 text-base leading-relaxed text-foreground/85">
-                {plat.histoire}
-              </p>
+              <p className="mt-4 text-base leading-relaxed text-foreground/85">{plat.histoire}</p>
             </div>
 
             {/* Curiosité */}
             <div className="rounded-xl border border-accent/30 bg-accent/5 p-6">
               <div className="flex items-center gap-2 text-accent">
                 <Sparkles className="size-5" />
-                <p className="eyebrow !text-accent !tracking-[0.16em]">
-                  Le saviez-vous ?
-                </p>
+                <p className="eyebrow !text-accent !tracking-[0.16em]">Le saviez-vous ?</p>
               </div>
-              <p className="mt-4 text-base leading-relaxed text-foreground/85">
-                {plat.curiosite}
-              </p>
+              <p className="mt-4 text-base leading-relaxed text-foreground/85">{plat.curiosite}</p>
             </div>
 
             {/* Avis */}
@@ -223,17 +194,11 @@ function PlatDetail() {
               <div className="pattern-fon absolute inset-0 opacity-20" aria-hidden />
               <div className="relative">
                 <p className="eyebrow text-accent">Découvrir plus</p>
-                <h3 className="mt-3 font-display text-2xl">
-                  Autres spécialités
-                </h3>
+                <h3 className="mt-3 font-display text-2xl">Autres spécialités</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ivory/75">
                   Explorez d'autres plats de la gastronomie béninoise.
                 </p>
-                <Button
-                  asChild
-                  variant="onDark"
-                  className="mt-5 w-full"
-                >
+                <Button asChild variant="onDark" className="mt-5 w-full">
                   <Link to="/tourisme/gastronomie">
                     <UtensilsCrossed className="mr-1 size-4" /> Tous les plats
                   </Link>
@@ -274,8 +239,7 @@ function PlatDetail() {
         <div className="flex justify-center">
           <Button asChild variant="ghost">
             <Link to="/tourisme">
-              <ArrowLeft className="mr-1 size-4" /> Retour aux sites
-              touristiques
+              <ArrowLeft className="mr-1 size-4" /> Retour aux sites touristiques
             </Link>
           </Button>
         </div>

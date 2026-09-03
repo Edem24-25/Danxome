@@ -1,22 +1,21 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   CalendarDays,
+  Eye,
   LayoutDashboard,
+  Mail,
+  MessageSquare,
   Palette,
-  ShieldCheck,
-  UserRound,
+  ShoppingCart,
   Users,
 } from "lucide-react";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { SectionTitle, StatCard } from "@/components/site/Bits";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useEvenements, useSites } from "@/hooks/use-data";
+import { useAdminStats, formatFcfa } from "@/hooks/use-data";
 import { useAuth } from "@/contexts/auth";
-import { createClient } from "@/lib/supabase/client";
 import { requireRole } from "@/lib/auth-guard";
-import type { Profile } from "@/lib/types/user";
 
 export const Route = createFileRoute("/admin/")({
   beforeLoad: () => requireRole(["admin"]),
@@ -39,20 +38,18 @@ export const Route = createFileRoute("/admin/")({
 
 const items = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard },
-  { to: "/admin/moderation", label: "Modération", icon: ShieldCheck },
-  { to: "/culture", label: "Contenus", icon: Palette },
-  { to: "/evenements", label: "Événements", icon: CalendarDays },
-  { to: "/art", label: "Partenaires", icon: Users },
-  { to: "/profil", label: "Mon profil", icon: UserRound },
+  { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
+  { to: "/admin/oeuvres", label: "Œuvres", icon: Palette },
+  { to: "/admin/sites", label: "Sites", icon: Eye },
+  { to: "/admin/evenements", label: "Événements", icon: CalendarDays },
+  { to: "/admin/newsletter", label: "Newsletter", icon: Mail },
+  { to: "/admin/stats", label: "Statistiques", icon: MessageSquare },
 ];
 
 function Admin() {
   const { profile, loading, user } = useAuth();
   const navigate = useNavigate();
-  const { data: evenements = [], isLoading: evenementsLoading } = useEvenements();
-  const { data: sites = [], isLoading: sitesLoading } = useSites();
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const { data: stats, isLoading: statsLoading } = useAdminStats();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -63,20 +60,6 @@ function Admin() {
     }
   }, [loading, user, profile, navigate]);
 
-  useEffect(() => {
-    if (profile?.profil === "admin") {
-      const supabase = createClient();
-      supabase
-        .from("profiles")
-        .select("id, email, prenom, nom, profil, created_at")
-        .order("created_at", { ascending: false })
-        .then(({ data }) => {
-          setProfiles((data as Profile[]) ?? []);
-          setLoadingProfiles(false);
-        });
-    }
-  }, [profile]);
-
   if (loading || !profile || profile.profil !== "admin") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -85,11 +68,6 @@ function Admin() {
     );
   }
 
-  const totalUsers = profiles.length;
-  const artistCount = profiles.filter((p) => p.profil === "artiste").length;
-  const artisanCount = profiles.filter((p) => p.profil === "artisan").length;
-  const visitorCount = profiles.filter((p) => p.profil === "visiteur").length;
-
   return (
     <DashboardShell
       space="Administration"
@@ -97,144 +75,104 @@ function Admin() {
       title="Pilotage de la plateforme"
       crumbs={[{ label: "Administration" }]}
       actions={
-        <Button asChild variant="gold" size="sm">
-          <Link to="/admin/moderation">
-            <ShieldCheck /> File de modération
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/stats">
+              <MessageSquare className="mr-1 size-4" /> Statistiques
+            </Link>
+          </Button>
+          <Button asChild variant="gold" size="sm">
+            <Link to="/admin/utilisateurs">
+              <Users className="mr-1 size-4" /> Utilisateurs
+            </Link>
+          </Button>
+        </div>
       }
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Utilisateurs"
-          value={loadingProfiles ? "…" : String(totalUsers)}
-          delta={`${visitorCount} visiteurs`}
+          value={statsLoading ? "…" : String(stats?.totalUsers ?? 0)}
+          delta={`${stats?.totalVisiteurs ?? 0} visiteurs`}
           icon={<Users className="size-4" />}
         />
         <StatCard
-          label="Artistes"
-          value={loadingProfiles ? "…" : String(artistCount)}
+          label="Œuvres publiées"
+          value={statsLoading ? "…" : String(stats?.totalOeuvres ?? 0)}
           icon={<Palette className="size-4" />}
         />
         <StatCard
-          label="Artisans"
-          value={loadingProfiles ? "…" : String(artisanCount)}
-          delta="+2 ce trimestre"
-          icon={<Users className="size-4" />}
+          label="Commandes"
+          value={statsLoading ? "…" : String(stats?.totalCommandes ?? 0)}
+          delta={formatFcfa(stats?.revenueTotal ?? 0)}
+          icon={<ShoppingCart className="size-4" />}
         />
         <StatCard
-          label="Événements planifiés"
-          value={evenementsLoading ? "…" : String(evenements.length)}
-          icon={<CalendarDays className="size-4" />}
+          label="Sites touristiques"
+          value={statsLoading ? "…" : String(stats?.totalSites ?? 0)}
+          delta={`${stats?.totalEvenements ?? 0} événements`}
+          icon={<Eye className="size-4" />}
         />
       </div>
 
       <div className="mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div>
-          <SectionTitle eyebrow="Modération" title="En attente de validation" />
-          <div className="mt-5 overflow-x-auto rounded-lg border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary/60 text-left text-xs tracking-wider text-muted-foreground uppercase">
-                <tr>
-                  <th className="px-4 py-3">Demande</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Ville</th>
-                  <th className="px-4 py-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-forest-deep">Atelier Hounkpatin</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="quiet">Artisan</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">Bohicon</td>
-                  <td className="px-4 py-3 text-right">
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/admin/moderation">Examiner</Link>
-                    </Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-forest-deep">
-                    Musée de la Fondation Vallée
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant="quiet">Contenu</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">Cotonou</td>
-                  <td className="px-4 py-3 text-right">
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/culture/musees/$slug" params={{ slug: "fondation-vallee" }}>
-                        Examiner
-                      </Link>
-                    </Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-forest-deep">Festival Zangbéto</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="quiet">Événement</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">Porto-Novo</td>
-                  <td className="px-4 py-3 text-right">
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/evenements/$slug" params={{ slug: "zangbeto" }}>
-                        Examiner
-                      </Link>
-                    </Button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <SectionTitle eyebrow="Fréquentation" title="Visites par site (30 jours)" />
-          <div className="mt-5 space-y-4 rounded-lg border border-border bg-card p-6">
-            {sitesLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <div className="size-6 animate-spin rounded-full border-2 border-forest border-t-transparent" />
-              </div>
-            ) : (
-              sites.map((s, i) => {
-                const part = 100 - i * 18;
-                return (
-                  <div key={s.slug}>
-                    <div className="flex items-baseline justify-between text-sm">
-                      <span className="font-semibold text-forest-deep">{s.nom}</span>
-                      <span className="text-muted-foreground">{s.avis_count * 4} visiteurs</span>
-                    </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary">
-                      <div
-                        className="h-full rounded-full bg-forest"
-                        style={{ width: `${part}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            )}
+          <SectionTitle eyebrow="Accès rapides" title="Gestion de la plateforme" />
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {[
+              { to: "/admin/utilisateurs", label: "Utilisateurs", desc: "Gérer les comptes, rôles et validations", icon: Users, color: "bg-forest/10 text-forest" },
+              { to: "/admin/oeuvres", label: "Œuvres", desc: "Modérer les œuvres d'art", icon: Palette, color: "bg-amber-100 text-amber-600" },
+              { to: "/admin/sites", label: "Sites touristiques", desc: "Gérer les sites et visites virtuelles", icon: Eye, color: "bg-blue-100 text-blue-600" },
+              { to: "/admin/evenements", label: "Événements", desc: "Planifier les événements culturels", icon: CalendarDays, color: "bg-purple-100 text-purple-600" },
+              { to: "/admin/newsletter", label: "Newsletter", desc: "Gérer les abonnés email", icon: Mail, color: "bg-green-100 text-green-600" },
+              { to: "/admin/stats", label: "Statistiques", desc: "Tableaux de bord et métriques", icon: MessageSquare, color: "bg-rose-100 text-rose-600" },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="group flex items-start gap-4 rounded-lg border border-border bg-card p-5 transition-colors hover:border-accent/50 hover:bg-accent/5"
+              >
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${item.color}`}>
+                  <item.icon className="size-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-forest-deep group-hover:text-accent">
+                    {item.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{item.desc}</p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
 
         <aside className="space-y-6">
           <div className="rounded-lg border border-border bg-secondary/50 p-6">
-            <p className="eyebrow">Derniers inscrits</p>
-            <ul className="mt-4 space-y-4 text-sm text-muted-foreground">
-              {loadingProfiles ? (
-                <li>Chargement…</li>
-              ) : (
-                profiles.slice(0, 5).map((p) => (
-                  <li key={p.id}>
-                    <span className="font-semibold text-forest-deep">
-                      {p.prenom} {p.nom}
-                    </span>{" "}
-                    · {p.profil}
-                  </li>
-                ))
-              )}
+            <p className="eyebrow">Vue rapide</p>
+            <ul className="mt-4 space-y-3 text-sm">
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Artistes</span>
+                <span className="font-semibold text-forest-deep">{stats?.totalArtistes ?? 0}</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Artisans</span>
+                <span className="font-semibold text-forest-deep">{stats?.totalArtisans ?? 0}</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Avis publiés</span>
+                <span className="font-semibold text-forest-deep">{stats?.totalAvis ?? 0}</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Abonnés newsletter</span>
+                <span className="font-semibold text-forest-deep">{stats?.totalNewsletter ?? 0}</span>
+              </li>
+              <li className="border-t border-border pt-3 flex items-center justify-between">
+                <span className="text-muted-foreground">Revenu total</span>
+                <span className="font-bold text-forest-deep">{formatFcfa(stats?.revenueTotal ?? 0)}</span>
+              </li>
             </ul>
           </div>
+
           <div className="rounded-lg border border-border bg-forest-deep p-6 text-ivory">
             <p className="eyebrow text-accent">Conformité</p>
             <p className="mt-3 text-sm leading-relaxed text-ivory/75">

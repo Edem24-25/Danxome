@@ -151,12 +151,26 @@ function EspaceArtiste() {
     }
     const prix = Number(form.get("prix")) || 0;
 
+    // Récupérer l'ID artiste depuis la table artistes (≠ profile.id qui est auth.users UUID)
+    const supabase = createClient();
+    const { data: artisteRow, error: artisteErr } = await supabase
+      .from("artistes")
+      .select("id")
+      .eq("user_id", user?.id ?? "")
+      .single();
+
+    if (artisteErr || !artisteRow) {
+      setAjoutEnCours(false);
+      toast.error("Profil artiste introuvable", {
+        description: "Votre profil artiste n'est pas encore activé. Contactez l'administrateur.",
+      });
+      return;
+    }
+
     let imageUrl = IMAGE_PAR_DEFAUT;
     if (imageFile) {
       const ext = imageFile.name.split(".").pop() ?? "jpg";
-      const userId = user?.id ?? profile.id;
-      const path = `${userId}/${Date.now()}.${ext}`;
-      const supabase = createClient();
+      const path = `${user?.id ?? profile.id}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from("oeuvres")
         .upload(path, imageFile, { contentType: imageFile.type, upsert: true });
@@ -173,7 +187,7 @@ function EspaceArtiste() {
       {
         slug: `oeuvre-${Date.now()}`,
         titre,
-        artiste_id: profile.id,
+        artiste_id: artisteRow.id, // ✅ ID de la table artistes, pas auth.users
         categorie,
         region: (form.get("region") as string)?.trim() || "Zou",
         prix,
@@ -361,9 +375,7 @@ function EspaceArtiste() {
                 ) : (
                   <>
                     <Image className="size-8 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      Cliquez pour ajouter une photo
-                    </p>
+                    <p className="text-sm text-muted-foreground">Cliquez pour ajouter une photo</p>
                     <p className="text-xs text-muted-foreground/70">JPG, PNG — max 5 Mo</p>
                   </>
                 )}

@@ -1,6 +1,7 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, CalendarDays, Compass, Play, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { ContentCard } from "@/components/site/ContentCard";
 import { Reveal } from "@/components/site/Reveal";
 import { Rule, SectionTitle } from "@/components/site/Bits";
 import { BeninMap } from "@/components/site/BeninMap";
-import { useSites, useArtistes, useEvenements, useMusees, useRoyaumes, usePlats, useOeuvres } from "@/hooks/use-data";
+import { useSites, useArtistes, useEvenements, useMusees } from "@/hooks/use-data";
 import heroAbomey from "@/assets/hero-abomey.jpg";
 import artBronze from "@/assets/art-bronze.jpg";
 import sitePendjari from "@/assets/site-pendjari.jpg";
@@ -38,13 +39,62 @@ export const Route = createFileRoute("/")({
 function Accueil() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { data: sites = [], isLoading: loadingSites } = useSites();
   const { data: artistes = [], isLoading: loadingArtistes } = useArtistes();
   const { data: evenements = [], isLoading: loadingEvents } = useEvenements();
   const { data: musees = [], isLoading: loadingMusees } = useMusees();
-  const { data: royaumes = [] } = useRoyaumes();
-  const { data: plats = [] } = usePlats();
-  const { data: oeuvres = [] } = useOeuvres();
+
+  // Deferred search data — loaded only when user starts typing
+  const [searchEnabled, setSearchEnabled] = useState(false);
+
+  const { data: royaumes = [] } = useQuery({
+    queryKey: ["royaumes"],
+    queryFn: async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data, error } = await supabase.from("royaumes").select("id, slug, nom, resume");
+      if (error) throw error;
+      return (data ?? []) as { id: string; slug: string; nom: string; resume: string }[];
+    },
+    staleTime: 10 * 60 * 1000,
+    enabled: searchEnabled,
+  });
+
+  const { data: plats = [] } = useQuery({
+    queryKey: ["plats", "search"],
+    queryFn: async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data, error } = await supabase.from("plats").select("id, slug, nom, region, resume");
+      if (error) throw error;
+      return data as { id: string; slug: string; nom: string; region: string; resume: string }[];
+    },
+    staleTime: 10 * 60 * 1000,
+    enabled: searchEnabled,
+  });
+
+  const { data: oeuvres = [] } = useQuery({
+    queryKey: ["oeuvres", "search"],
+    queryFn: async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("oeuvres")
+        .select("id, slug, titre, categorie, description, statut")
+        .eq("statut", "publiee");
+      if (error) throw error;
+      return data as {
+        id: string;
+        slug: string;
+        titre: string;
+        categorie: string;
+        description: string;
+      }[];
+    },
+    staleTime: 10 * 60 * 1000,
+    enabled: searchEnabled,
+  });
 
   const heroSlides = [
     { src: heroAbomey, alt: "Palais royaux d'Abomey, patrimoine mondial UNESCO" },
@@ -52,18 +102,40 @@ function Accueil() {
     { src: sitePendjari, alt: "Parc national de la Pendjari" },
   ];
 
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setQuery(e.target.value);
+      if (e.target.value.trim().length > 0 && !searchEnabled) {
+        setSearchEnabled(true);
+      }
+    },
+    [searchEnabled],
+  );
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = query.trim().toLowerCase();
     if (!q) return;
 
-    const matchSite = sites.find((s) => `${s.nom} ${s.region} ${s.type} ${s.resume}`.toLowerCase().includes(q));
-    const matchArtiste = artistes.find((a) => `${a.nom} ${a.metier} ${a.ville} ${a.bio}`.toLowerCase().includes(q));
-    const matchEvenement = evenements.find((ev) => `${ev.titre} ${ev.lieu} ${ev.categorie} ${ev.resume}`.toLowerCase().includes(q));
-    const matchMusee = musees.find((m) => `${m.nom} ${m.ville} ${m.resume}`.toLowerCase().includes(q));
+    const matchSite = sites.find((s) =>
+      `${s.nom} ${s.region} ${s.type} ${s.resume}`.toLowerCase().includes(q),
+    );
+    const matchArtiste = artistes.find((a) =>
+      `${a.nom} ${a.metier} ${a.ville} ${a.bio}`.toLowerCase().includes(q),
+    );
+    const matchEvenement = evenements.find((ev) =>
+      `${ev.titre} ${ev.lieu} ${ev.categorie} ${ev.resume}`.toLowerCase().includes(q),
+    );
+    const matchMusee = musees.find((m) =>
+      `${m.nom} ${m.ville} ${m.resume}`.toLowerCase().includes(q),
+    );
     const matchRoyaume = royaumes.find((r) => `${r.nom} ${r.resume}`.toLowerCase().includes(q));
-    const matchPlat = plats.find((p) => `${p.nom} ${p.region} ${p.resume}`.toLowerCase().includes(q));
-    const matchOeuvre = oeuvres.find((o) => `${o.titre} ${o.categorie} ${o.description}`.toLowerCase().includes(q));
+    const matchPlat = plats.find((p) =>
+      `${p.nom} ${p.region} ${p.resume}`.toLowerCase().includes(q),
+    );
+    const matchOeuvre = oeuvres.find((o) =>
+      `${o.titre} ${o.categorie} ${o.description}`.toLowerCase().includes(q),
+    );
 
     if (matchSite) {
       navigate({ to: "/tourisme/sites/$slug", params: { slug: matchSite.slug } });
@@ -102,6 +174,8 @@ function Accueil() {
             alt={slide.alt}
             width={1920}
             height={1280}
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
             className={`media-warm absolute inset-0 size-full object-cover transition-opacity duration-1000 ${
               i === current ? "opacity-100" : "opacity-0"
             }`}
@@ -110,7 +184,10 @@ function Accueil() {
 
         {/* Overlay multi-couche (par-dessus le carrousel) */}
         <div className="absolute inset-0 z-[1] hero-overlay" />
-        <div className="pattern-fon absolute inset-0 z-[1] opacity-[0.12] mix-blend-overlay" aria-hidden />
+        <div
+          className="pattern-fon absolute inset-0 z-[1] opacity-[0.12] mix-blend-overlay"
+          aria-hidden
+        />
         <div className="absolute inset-0 z-[1] texture-grain" aria-hidden />
 
         {/* Contenu */}
@@ -145,8 +222,9 @@ function Accueil() {
               <div className="flex min-w-0 flex-1 items-center gap-2 px-3 sm:px-4">
                 <Search className="size-4 shrink-0 text-accent" />
                 <Input
+                  ref={searchInputRef}
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={handleSearchChange}
                   placeholder="Un site, un royaume, un artisan, une fête…"
                   className="h-8 border-0 bg-transparent text-sm text-ivory shadow-none placeholder:text-ivory/50 focus-visible:ring-0 sm:h-9 sm:text-base"
                   aria-label="Rechercher sur DanXomè"
@@ -179,8 +257,6 @@ function Accueil() {
             </div>
           </Reveal>
         </div>
-
-
       </section>
 
       {/* ═══ CARTE INTERACTIVE ═══ */}
@@ -205,20 +281,25 @@ function Accueil() {
             <div className="grid gap-4 sm:grid-cols-2">
               {loadingSites
                 ? Array.from({ length: 4 }).map((_, i) => (
-                    <div key={`skel-site-${i}`} className="skeleton-cultural aspect-square rounded-xl" />
-                  ))
-                : sites.slice(0, 4).map((s) => (
-                    <ContentCard
-                      key={s.slug}
-                      to="/tourisme/sites/$slug"
-                      params={{ slug: s.slug }}
-                      image={s.image_url}
-                      titre={s.nom}
-                      meta={`${s.region} · ${s.type}`}
-                      note={s.note}
-                      ratio="carre"
+                    <div
+                      key={`skel-site-${i}`}
+                      className="skeleton-cultural aspect-square rounded-xl"
                     />
-                  ))}
+                  ))
+                : sites
+                    .slice(0, 4)
+                    .map((s) => (
+                      <ContentCard
+                        key={s.slug}
+                        to="/tourisme/sites/$slug"
+                        params={{ slug: s.slug }}
+                        image={s.image_url}
+                        titre={s.nom}
+                        meta={`${s.region} · ${s.type}`}
+                        note={s.note}
+                        ratio="carre"
+                      />
+                    ))}
             </div>
           </div>
         </Reveal>
@@ -238,38 +319,41 @@ function Accueil() {
         <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {loadingSites
             ? Array.from({ length: 3 }).map((_, i) => (
-                <div key={`skel-visite-${i}`} className="skeleton-cultural aspect-[4/3] rounded-xl" />
+                <div
+                  key={`skel-visite-${i}`}
+                  className="skeleton-cultural aspect-[4/3] rounded-xl"
+                />
               ))
             : sites
-            .filter((s) => s.virtuel)
-            .slice(0, 3)
-            .map((s, i) => (
-              <Reveal key={s.slug + i} variant="up" delay={i * 100}>
-                <Link
-                  to="/visite/$slug"
-                  params={{ slug: s.slug }}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]"
-                >
-                  <img
-                    src={s.image_url}
-                    alt={s.nom}
-                    loading="lazy"
-                    className="media-warm size-full object-cover transition-all duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/80 via-forest-deep/20 to-transparent" />
-                  <div className="absolute inset-0 pattern-dots opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
-                    <div>
-                      <p className="eyebrow-gold">{s.region}</p>
-                      <h3 className="mt-1 font-display text-2xl text-ivory">{s.nom}</h3>
-                    </div>
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-gold transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-                      <Play className="size-5" />
-                    </span>
-                  </div>
-                </Link>
-              </Reveal>
-            ))}
+                .filter((s) => s.virtuel)
+                .slice(0, 3)
+                .map((s, i) => (
+                  <Reveal key={s.slug + i} variant="up" delay={i * 100}>
+                    <Link
+                      to="/visite/$slug"
+                      params={{ slug: s.slug }}
+                      className="group relative aspect-[4/3] overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]"
+                    >
+                      <img
+                        src={s.image_url}
+                        alt={s.nom}
+                        loading="lazy"
+                        className="media-warm size-full object-cover transition-all duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/80 via-forest-deep/20 to-transparent" />
+                      <div className="absolute inset-0 pattern-dots opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
+                        <div>
+                          <p className="eyebrow-gold">{s.region}</p>
+                          <h3 className="mt-1 font-display text-2xl text-ivory">{s.nom}</h3>
+                        </div>
+                        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-gold transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
+                          <Play className="size-5" />
+                        </span>
+                      </div>
+                    </Link>
+                  </Reveal>
+                ))}
         </div>
       </section>
 
@@ -293,21 +377,24 @@ function Accueil() {
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {loadingArtistes
               ? Array.from({ length: 3 }).map((_, i) => (
-                  <div key={`skel-artiste-${i}`} className="skeleton-cultural aspect-[3/4] rounded-xl" />
+                  <div
+                    key={`skel-artiste-${i}`}
+                    className="skeleton-cultural aspect-[3/4] rounded-xl"
+                  />
                 ))
               : artistes.map((a, i) => (
-              <Reveal key={a.slug} variant="up" delay={i * 100}>
-                <ContentCard
-                  to="/art/artistes/$slug"
-                  params={{ slug: a.slug }}
-                  image={a.image_url}
-                  titre={a.nom}
-                  meta={`${a.metier} · ${a.ville}`}
-                  resume={a.bio}
-                  ratio="portrait"
-                />
-              </Reveal>
-            ))}
+                  <Reveal key={a.slug} variant="up" delay={i * 100}>
+                    <ContentCard
+                      to="/art/artistes/$slug"
+                      params={{ slug: a.slug }}
+                      image={a.image_url}
+                      titre={a.nom}
+                      meta={`${a.metier} · ${a.ville}`}
+                      resume={a.bio}
+                      ratio="portrait"
+                    />
+                  </Reveal>
+                ))}
           </div>
         </div>
       </section>
@@ -330,7 +417,10 @@ function Accueil() {
         <ol className="mt-12 border-l-2 border-border/60">
           {loadingEvents
             ? Array.from({ length: 4 }).map((_, i) => (
-                <li key={`skel-event-${i}`} className="relative grid gap-4 py-7 pl-10 sm:grid-cols-[120px_1fr_auto] sm:items-center">
+                <li
+                  key={`skel-event-${i}`}
+                  className="relative grid gap-4 py-7 pl-10 sm:grid-cols-[120px_1fr_auto] sm:items-center"
+                >
                   <span className="absolute top-1/2 -left-[9px] size-4 -translate-y-1/2 rounded-full border-[3px] border-background bg-muted" />
                   <div className="skeleton-cultural h-10 w-20 rounded-lg" />
                   <div className="space-y-2">
@@ -340,27 +430,27 @@ function Accueil() {
                 </li>
               ))
             : evenements.map((e, i) => (
-            <Reveal key={e.slug} variant="left" delay={i * 80}>
-              <li className="relative grid gap-4 py-7 pl-10 sm:grid-cols-[120px_1fr_auto] sm:items-center">
-                <span className="absolute top-1/2 -left-[9px] size-4 -translate-y-1/2 rounded-full border-[3px] border-background bg-accent shadow-gold" />
-                <div className="font-display text-2xl text-terracotta">
-                  {e.jour}
-                  <span className="ml-1 text-xs tracking-widest">{e.mois}</span>
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-display text-xl text-forest-deep">{e.titre}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {e.lieu} · {e.categorie} · {e.resume}
-                  </p>
-                </div>
-                <Button asChild variant="ghost" size="sm" className="rounded-full">
-                  <Link to="/evenements/$slug" params={{ slug: e.slug }}>
-                    Détails <ArrowRight />
-                  </Link>
-                </Button>
-              </li>
-            </Reveal>
-          ))}
+                <Reveal key={e.slug} variant="left" delay={i * 80}>
+                  <li className="relative grid gap-4 py-7 pl-10 sm:grid-cols-[120px_1fr_auto] sm:items-center">
+                    <span className="absolute top-1/2 -left-[9px] size-4 -translate-y-1/2 rounded-full border-[3px] border-background bg-accent shadow-gold" />
+                    <div className="font-display text-2xl text-terracotta">
+                      {e.jour}
+                      <span className="ml-1 text-xs tracking-widest">{e.mois}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-display text-xl text-forest-deep">{e.titre}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {e.lieu} · {e.categorie} · {e.resume}
+                      </p>
+                    </div>
+                    <Button asChild variant="ghost" size="sm" className="rounded-full">
+                      <Link to="/evenements/$slug" params={{ slug: e.slug }}>
+                        Détails <ArrowRight />
+                      </Link>
+                    </Button>
+                  </li>
+                </Reveal>
+              ))}
         </ol>
       </section>
 
@@ -387,30 +477,45 @@ function Accueil() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {loadingMusees
               ? Array.from({ length: 3 }).map((_, i) => (
-                  <div key={`skel-musee-${i}`} className="rounded-xl border border-ivory/10 bg-ivory/5 p-6 backdrop-blur-sm">
-                    <div className="skeleton-cultural h-4 w-16 rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
-                    <div className="skeleton-cultural mt-3 h-6 w-32 rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
-                    <div className="skeleton-cultural mt-3 h-4 w-full rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
-                    <div className="skeleton-cultural mt-2 h-4 w-2/3 rounded" style={{ background: "oklch(1 0 0 / 0.08)" }} />
+                  <div
+                    key={`skel-musee-${i}`}
+                    className="rounded-xl border border-ivory/10 bg-ivory/5 p-6 backdrop-blur-sm"
+                  >
+                    <div
+                      className="skeleton-cultural h-4 w-16 rounded"
+                      style={{ background: "oklch(1 0 0 / 0.08)" }}
+                    />
+                    <div
+                      className="skeleton-cultural mt-3 h-6 w-32 rounded"
+                      style={{ background: "oklch(1 0 0 / 0.08)" }}
+                    />
+                    <div
+                      className="skeleton-cultural mt-3 h-4 w-full rounded"
+                      style={{ background: "oklch(1 0 0 / 0.08)" }}
+                    />
+                    <div
+                      className="skeleton-cultural mt-2 h-4 w-2/3 rounded"
+                      style={{ background: "oklch(1 0 0 / 0.08)" }}
+                    />
                   </div>
                 ))
               : musees.map((m, i) => (
-              <Reveal key={m.slug} variant="up" delay={i * 110}>
-                <Link
-                  to="/culture/musees/$slug"
-                  params={{ slug: m.slug }}
-                  className="group block rounded-xl border border-ivory/10 bg-ivory/5 p-6 backdrop-blur-sm transition-all duration-400 hover:border-accent/40 hover:bg-ivory/8 hover:shadow-gold"
-                >
-                  <p className="eyebrow-gold">{m.ville}</p>
-                  <h3 className="mt-2 font-display text-2xl text-ivory">{m.nom}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-ivory/60">{m.resume}</p>
-                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-accent">
-                    Infos pratiques{" "}
-                    <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </span>
-                </Link>
-              </Reveal>
-            ))}
+                  <Reveal key={m.slug} variant="up" delay={i * 110}>
+                    <Link
+                      to="/culture/musees/$slug"
+                      params={{ slug: m.slug }}
+                      className="group block rounded-xl border border-ivory/10 bg-ivory/5 p-6 backdrop-blur-sm transition-all duration-400 hover:border-accent/40 hover:bg-ivory/8 hover:shadow-gold"
+                    >
+                      <p className="eyebrow-gold">{m.ville}</p>
+                      <h3 className="mt-2 font-display text-2xl text-ivory">{m.nom}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-ivory/60">{m.resume}</p>
+                      <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-accent">
+                        Infos pratiques{" "}
+                        <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+                      </span>
+                    </Link>
+                  </Reveal>
+                ))}
           </div>
         </div>
       </section>

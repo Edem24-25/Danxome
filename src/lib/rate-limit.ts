@@ -20,14 +20,24 @@ function getEntry(key: string): RateLimitEntry {
  * Hook de rate limiting côté client.
  * Bloque après `maxAttempts` essais avec backoff exponentiel.
  */
-export function useRateLimit(key: string, maxAttempts = 5, baseDelayMs = 30000) {
+export function useRateLimit(key: string, maxAttempts = 10, baseDelayMs = 15000) {
   const check = useCallback(() => {
+    // En développement, pas de blocage strict pour faciliter les tests
+    if (import.meta.env.DEV) {
+      return { allowed: true, remaining: 0 };
+    }
+
     const entry = getEntry(key);
     const now = Date.now();
+    const elapsed = now - entry.lastAttempt;
+
+    // Si le délai de base est écoulé depuis la dernière tentative, on réinitialise le compteur
+    if (elapsed > baseDelayMs && entry.attempts < maxAttempts) {
+      entry.attempts = 0;
+    }
 
     if (entry.attempts >= maxAttempts) {
-      const elapsed = now - entry.lastAttempt;
-      const delay = baseDelayMs * Math.pow(2, Math.min(entry.attempts - maxAttempts, 5));
+      const delay = baseDelayMs * Math.pow(2, Math.min(entry.attempts - maxAttempts, 4));
       if (elapsed < delay) {
         const remaining = Math.ceil((delay - elapsed) / 1000);
         return { allowed: false, remaining };

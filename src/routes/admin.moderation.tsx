@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   Star,
   Trash2,
-  UserRound,
   Users,
   XCircle,
 } from "lucide-react";
@@ -61,11 +60,12 @@ export const Route = createFileRoute("/admin/moderation")({
 
 const navItems = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard },
-  { to: "/admin/moderation", label: "Modération", icon: Eye },
-  { to: "/culture", label: "Contenus", icon: PaletteIcon },
-  { to: "/evenements", label: "Événements", icon: CalendarDays },
-  { to: "/art", label: "Partenaires", icon: Users },
-  { to: "/profil", label: "Mon profil", icon: UserRound },
+  { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
+  { to: "/admin/oeuvres", label: "Œuvres", icon: PaletteIcon },
+  { to: "/admin/sites", label: "Sites", icon: Eye },
+  { to: "/admin/evenements", label: "Événements", icon: CalendarDays },
+  { to: "/admin/newsletter", label: "Newsletter", icon: MessageSquare },
+  { to: "/admin/stats", label: "Statistiques", icon: ShieldCheck },
 ];
 
 const roles: { value: ProfilType; label: string }[] = [

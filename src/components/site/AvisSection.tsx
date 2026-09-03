@@ -167,11 +167,7 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
             {monAvis && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-destructive"
-                  >
+                  <Button size="sm" variant="ghost" className="text-destructive">
                     <Trash2 className="size-4" />
                   </Button>
                 </AlertDialogTrigger>
@@ -228,9 +224,7 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
                   V
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">
-                    Visiteur
-                  </p>
+                  <p className="text-sm font-semibold">Visiteur</p>
                   <p className="text-xs text-muted-foreground">
                     {new Date(a.created_at).toLocaleDateString("fr-FR", {
                       day: "numeric",
@@ -259,9 +253,7 @@ export function AvisSection({ platSlug }: { platSlug: string }) {
               {user?.id === a.user_id && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <button
-                      className="mt-2 text-xs text-destructive hover:underline"
-                    >
+                    <button className="mt-2 text-xs text-destructive hover:underline">
                       Supprimer
                     </button>
                   </AlertDialogTrigger>

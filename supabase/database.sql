@@ -42,8 +42,14 @@ DECLARE
   final_statut TEXT;
   nom_complet TEXT;
   slug_base TEXT;
+  meta JSONB;
+  g_prenom TEXT;
+  g_nom TEXT;
+  g_full TEXT;
 BEGIN
-  requested_profil := NEW.raw_user_meta_data->>'profil';
+  meta := COALESCE(NEW.raw_user_meta_data, '{}'::jsonb);
+
+  requested_profil := meta->>'profil';
   IF requested_profil IN ('artiste', 'artisan') THEN
     final_profil := requested_profil;
     final_statut := 'en_attente';
@@ -52,21 +58,34 @@ BEGIN
     final_statut := 'valide';
   END IF;
 
-  nom_complet := TRIM(
-    COALESCE(NEW.raw_user_meta_data->>'prenom', '') || ' ' ||
-    COALESCE(NEW.raw_user_meta_data->>'nom', '')
-  );
+  -- Extraire prenom/nom depuis les métadonnées Google ou les métadonnées custom
+  g_prenom := COALESCE(meta->>'prenom', meta->>'given_name', '');
+  g_nom    := COALESCE(meta->>'nom', meta->>'family_name', '');
+
+  -- Si les deux sont vides, essayer de splitter full_name / name
+  IF g_prenom = '' AND g_nom = '' THEN
+    g_full := TRIM(COALESCE(meta->>'full_name', meta->>'name', ''));
+    IF g_full != '' THEN
+      g_prenom := split_part(g_full, ' ', 1);
+      g_nom    := TRIM(BOTH ' ' FROM regexp_replace(g_full, '^\S+\s*', ''));
+      IF g_nom = '' THEN
+        g_nom := g_prenom;
+      END IF;
+    END IF;
+  END IF;
+
+  nom_complet := TRIM(g_prenom || ' ' || g_nom);
 
   INSERT INTO public.profiles (id, email, prenom, nom, profil, statut, telephone, ville)
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'prenom', ''),
-    COALESCE(NEW.raw_user_meta_data->>'nom', ''),
+    NULLIF(g_prenom, ''),
+    NULLIF(g_nom, ''),
     final_profil,
     final_statut,
-    NULLIF(NEW.raw_user_meta_data->>'telephone', ''),
-    NULLIF(NEW.raw_user_meta_data->>'ville', '')
+    NULLIF(meta->>'telephone', ''),
+    NULLIF(meta->>'ville', '')
   );
 
   IF final_profil IN ('artiste', 'artisan') AND nom_complet != '' THEN
@@ -78,9 +97,9 @@ BEGIN
     VALUES (
       slug_base || '-' || floor(extract(epoch from now()))::text,
       nom_complet,
-      NULLIF(NEW.raw_user_meta_data->>'categorie', ''),
-      NULLIF(NEW.raw_user_meta_data->>'ville', ''),
-      NULLIF(NEW.raw_user_meta_data->>'description', ''),
+      NULLIF(meta->>'categorie', ''),
+      NULLIF(meta->>'ville', ''),
+      NULLIF(meta->>'description', ''),
       NEW.id
     );
   END IF;
@@ -206,6 +225,8 @@ DROP POLICY IF EXISTS "Sites publics" ON sites;
 CREATE POLICY "Sites publics" ON sites FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Admins gèrent les sites" ON sites;
 CREATE POLICY "Admins gèrent les sites" ON sites FOR ALL USING (public.is_admin());
+CREATE INDEX IF NOT EXISTS idx_sites_slug ON sites(slug);
+CREATE INDEX IF NOT EXISTS idx_sites_region ON sites(region);
 
 -- ============================================================
 -- Table musees
@@ -226,6 +247,7 @@ DROP POLICY IF EXISTS "Musées publics" ON musees;
 CREATE POLICY "Musées publics" ON musees FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Admins gèrent les musées" ON musees;
 CREATE POLICY "Admins gèrent les musées" ON musees FOR ALL USING (public.is_admin());
+CREATE INDEX IF NOT EXISTS idx_musees_slug ON musees(slug);
 
 -- ============================================================
 -- Table royaumes
@@ -248,6 +270,7 @@ DROP POLICY IF EXISTS "Royaumes publics" ON royaumes;
 CREATE POLICY "Royaumes publics" ON royaumes FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Admins gèrent les royaumes" ON royaumes;
 CREATE POLICY "Admins gèrent les royaumes" ON royaumes FOR ALL USING (public.is_admin());
+CREATE INDEX IF NOT EXISTS idx_royaumes_slug ON royaumes(slug);
 
 -- ============================================================
 -- Table langues
@@ -292,6 +315,8 @@ DROP POLICY IF EXISTS "Artiste gère son profil" ON artistes;
 CREATE POLICY "Artiste gère son profil" ON artistes FOR ALL USING (user_id = auth.uid());
 DROP POLICY IF EXISTS "Admins gèrent les artistes" ON artistes;
 CREATE POLICY "Admins gèrent les artistes" ON artistes FOR ALL USING (public.is_admin());
+CREATE INDEX IF NOT EXISTS idx_artistes_slug ON artistes(slug);
+CREATE INDEX IF NOT EXISTS idx_artistes_user_id ON artistes(user_id);
 
 -- ============================================================
 -- Table oeuvres
@@ -312,6 +337,8 @@ CREATE TABLE IF NOT EXISTS oeuvres (
 
 CREATE INDEX IF NOT EXISTS idx_oeuvres_artiste ON oeuvres(artiste_id);
 CREATE INDEX IF NOT EXISTS idx_oeuvres_categorie ON oeuvres(categorie);
+CREATE INDEX IF NOT EXISTS idx_oeuvres_slug ON oeuvres(slug);
+CREATE INDEX IF NOT EXISTS idx_oeuvres_statut ON oeuvres(statut);
 
 ALTER TABLE oeuvres ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Œuvres publiées publiques" ON oeuvres;
@@ -349,6 +376,8 @@ DROP POLICY IF EXISTS "Événements publics" ON evenements;
 CREATE POLICY "Événements publics" ON evenements FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Admins gèrent les événements" ON evenements;
 CREATE POLICY "Admins gèrent les événements" ON evenements FOR ALL USING (public.is_admin());
+CREATE INDEX IF NOT EXISTS idx_evenements_slug ON evenements(slug);
+CREATE INDEX IF NOT EXISTS idx_evenements_date ON evenements(date);
 
 -- ============================================================
 -- Table plats (gastronomie)

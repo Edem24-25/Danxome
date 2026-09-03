@@ -19,11 +19,13 @@ Bienvenue dans la documentation officielle et exhaustive de la plateforme **DanX
 ## 1. Présentation & Vision du Projet
 
 ### 1.1 Le Concept
+
 **DanXomè** est une plateforme web full-stack moderne dédiée à la numérisation, la valorisation et la promotion du patrimoine culturel, historique, touristique et artistique du Bénin.
 
-Le nom **DanXomè** (ou Dahomey) rend hommage au royaume historique fondé au XVIIe siècle sur le plateau d'Abomey, célèbre pour sa puissance militaire, son corps armé des Amazones (*Agodjié*), son architecture cérémonielle et son artisanat de cour.
+Le nom **DanXomè** (ou Dahomey) rend hommage au royaume historique fondé au XVIIe siècle sur le plateau d'Abomey, célèbre pour sa puissance militaire, son corps armé des Amazones (_Agodjié_), son architecture cérémonielle et son artisanat de cour.
 
 ### 1.2 Public Cible
+
 - **Touristes & Voyageurs (Nationaux et Internationaux)** : Découverte des sites classés UNESCO, réservation de visites guidées, parcours de visites virtuelles 360°, découverte culinaire.
 - **Artistes & Artisans Béninois** : Vitrine numérique personnelle, vente d'œuvres d'art authentiques (sculptures, bronzes, tentures appliquées, poteries) sans intermédiaire spéculatif.
 - **Passionnés de Culture & Chercheurs** : Accès aux contenus patrimoniaux (royaumes, musées, atlas linguistique, dossiers d'histoire).
@@ -34,6 +36,7 @@ Le nom **DanXomè** (ou Dahomey) rend hommage au royaume historique fondé au XV
 ## 2. Stack Technique & Architecture
 
 ### 2.1 Front-End & Rendu (SSR)
+
 - **Framework Principal** : [TanStack Start](https://tanstack.com/start) (Full-stack React SSR).
 - **Routage** : [TanStack Router](https://tanstack.com/router) (Routage basé sur le système de fichiers, typé de bout en bout).
 - **Bibliothèque UI** : React 19, TypeScript.
@@ -41,6 +44,7 @@ Le nom **DanXomè** (ou Dahomey) rend hommage au royaume historique fondé au XV
 - **Composants d'Interaction** : Embla Carousel (carrousels réactifs), Recharts (tableaux de bord statistiques), Pannellum JS (visionneuse panoramique 360°).
 
 ### 2.2 Back-End & Base de Données
+
 - **Fournisseur de Services** : [Supabase](https://supabase.com) (PostgreSQL managé).
 - **Authentification** : Supabase Auth (Email/Password, Google OAuth, Apple OAuth).
 - **Sécurité Base de Données** : Row Level Security (RLS) sur l'ensemble des tables SQL.
@@ -52,6 +56,7 @@ Le nom **DanXomè** (ou Dahomey) rend hommage au royaume historique fondé au XV
 ## 3. Guide de Démarrage Pas à Pas
 
 ### 3.1 Prérequis Système
+
 - **Node.js** >= 18.x
 - **Gestionnaire de paquets** : `npm` ou `bun` (recommandé)
 - **Instance Supabase** : Un projet Supabase gratuit ou auto-hébergé
@@ -59,6 +64,7 @@ Le nom **DanXomè** (ou Dahomey) rend hommage au royaume historique fondé au XV
 ### 3.2 Installation du Projet
 
 1. **Cloner le dépôt et accéder au dossier** :
+
    ```bash
    git clone <URL_DU_DEPOT>
    cd Danxome
@@ -74,12 +80,14 @@ Le nom **DanXomè** (ou Dahomey) rend hommage au royaume historique fondé au XV
 ### 3.3 Configuration des Variables d'Environnement
 
 Créez un fichier `.env` à la racine du projet :
+
 ```env
 VITE_SUPABASE_URL=https://votre-projet.supabase.co
 VITE_SUPABASE_ANON_KEY=votre-cle-anon-supabase
 ```
 
 Créez un fichier `.env.server` pour le côté serveur :
+
 ```env
 SUPABASE_SERVICE_ROLE_KEY=votre-cle-service-role-supabase
 RESET_ARTIST_PASSWORD=VotreMotDePasseSecurise123!
@@ -94,11 +102,13 @@ RESET_ARTIST_PASSWORD=VotreMotDePasseSecurise123!
 ### 3.5 Lancement de l'Application
 
 Lancer le serveur de développement :
+
 ```bash
 npm run dev
 # ou
 bun run dev
 ```
+
 L'application est disponible à l'adresse `http://localhost:5173`.
 
 ---
@@ -106,6 +116,7 @@ L'application est disponible à l'adresse `http://localhost:5173`.
 ## 4. Fonctionnalités Implémentées (Du début à la fin)
 
 ### 4.1 Authentification & Rôles Utilisateurs
+
 - **Inscription Dynamique** : Inscription multi-étapes. Un utilisateur peut s'inscrire en tant que `visiteur` (accès immédiat) ou en tant qu'`artiste` / `artisan` (profil créé avec statut `en_attente` soumis à modération administrative).
 - **Connexion & SSO** : Authentification par email/mot de passe ainsi que support Google et Apple OAuth.
 - **Réinitialisation de mot de passe** : Envoi d'email de réinitialisation et page dédiée de mise à jour du mot de passe.
@@ -116,6 +127,7 @@ L'application est disponible à l'adresse `http://localhost:5173`.
   4. **Admin** : Modération des artistes, gestion des utilisateurs, validation des rôles, statistiques globales.
 
 ### 4.2 Module Tourisme & Découverte
+
 - **Sites Touristiques** : Catalogue des grands sites (Palais d'Abomey, Cité lacustre de Ganvié, Parc national de la Pendjari, Porte du Non-Retour à Ouidah).
 - **Carte Interactive du Bénin** : Visualisation cartographique dynamique des sites par région (Zou, Atlantique, Atacora, Ouémé...).
 - **Visite Virtuelle 360°** : Intégration de panoramas immersifs avec Pannellum.js, hotspots explicatifs et navigation interactive.
@@ -123,12 +135,14 @@ L'application est disponible à l'adresse `http://localhost:5173`.
 - **Gastronomie Béninoise** : Fiches recettes détaillées (Pâte rouge, Ablo, Wagashi, Igname pilée), histoire des plats, origine géographique et système d'avis certifiés.
 
 ### 4.3 Module Culture & Patrimoine
+
 - **Royaumes Historiques** : Fiches synthétiques sur les grands royaumes (DanXomè/Abomey, Hogbonu/Porto-Novo, Baatonu de Nikki) accompagnées de frises chronologiques interactives et de récits mémoriels.
 - **Musées & Collections** : Présentation du Musée historique d'Abomey, de la Fondation Zinsou et du Musée da Silva.
 - **Événements Culturels** : Calendrier des grands événements du Bénin (Vodun Days, Fête de la Gaani, festivals d'art).
 - **Dossiers Éditoriaux** : Articles de fond illustrés sur le patrimoine immatériel et l'histoire.
 
 ### 4.4 Module Art & Artisanat (E-Commerce)
+
 - **Boutique d'Art** : Filtrage multicritère des œuvres (par catégorie, région, tranche de prix, artiste).
 - **Panier d'Achat Synchronisé** : Gestion du panier en temps réel stocké dans la table `panier_items` Supabase.
 - **Système de Favoris** : Sauvegarde des œuvres préférées dans l'espace utilisateur.
@@ -136,6 +150,7 @@ L'application est disponible à l'adresse `http://localhost:5173`.
 - **Espace Artiste** : Tableau de bord de l'artisan incluant ses statistiques de ventes, la publication de nouvelles œuvres (avec upload sur Supabase Storage) et le suivi des commandes reçues.
 
 ### 4.5 Module Administration & Modération
+
 - **Tableau de Bord Administrateur** : Vue d'ensemble des métriques clés (chiffre d'affaires, nombre d'œuvres, profils en attente).
 - **Modération des Artistes** : Interface d'approbation ou de rejet des demandes d'inscription d'artisans.
 - **Gestion des Commandes & Avis** : Suivi des statuts des commandes (`recue`, `validee`, `en_cours`, `expediee`, `livree`) et modération des avis soumis.
@@ -164,14 +179,17 @@ Le projet a fait l'objet d'un audit de sécurité rigoureux pour éliminer les f
 Bien que l'application soit pleinement fonctionnelle, voici les évolutions prévues pour les prochaines versions :
 
 ### 6.1 Intégrations de Paiement Réel
+
 - [ ] **Passerelle Mobile Money** : Intégration de l'API [Kkiapay](https://kkiapay.me) ou [FedaPay](https://fedapay.com) pour le traitement en direct des paiements MTN Mobile Money et Moov Money.
 - [ ] **Webhook de Paiement** : Écouteur de notifications IPN/Webhook pour valider automatiquement le statut des commandes dès confirmation bancaire.
 
 ### 6.2 Notifications & Communications
+
 - [ ] **Emails Transactionnels** : Intégration de Resend ou SendGrid pour l'envoi d'emails de confirmation de commande, de reçu de réservation et de notification de modération.
 - [ ] **Génération de Billets PDF** : Exportation de billets de réservation pour les sites touristiques avec QR Code unique.
 
 ### 6.3 Expérience Utilisateur & PWA
+
 - [ ] **Application Web Progressive (PWA)** : Support du mode hors-ligne pour la consultation des fiches touristiques et de la carte sur le terrain.
 - [ ] **Internationalisation (i18n)** : Traduction complète de l'interface en Anglais et initiation aux langues locales (Fon, Yoruba).
 - [ ] **Modération IA des Images** : Scan automatique des visuels téléversés par les artistes pour filtrer le contenu inappropriate.
@@ -226,4 +244,4 @@ Danxòmè/
 
 ---
 
-*Documentation générée pour le projet DanXomè — Tous droits réservés.*
+_Documentation générée pour le projet DanXomè — Tous droits réservés._

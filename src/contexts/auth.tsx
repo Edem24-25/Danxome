@@ -54,8 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   const profileAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchProfile = useCallback(
     async (userId: string) => {
@@ -72,18 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
         if (!controller.signal.aborted) {
           if (error) {
+            console.warn("Erreur chargement profil:", error.message);
             setProfile(null);
-            setSession(null);
-            await supabase.auth.signOut();
           } else {
             setProfile(data as Profile | null);
           }
         }
       } catch {
         if (!controller.signal.aborted) {
+          console.warn("Erreur réseau lors du chargement du profil");
           setProfile(null);
-          setSession(null);
-          await supabase.auth.signOut();
         }
       }
     },
@@ -97,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session?.user, fetchProfile]);
 
   useEffect(() => {
+    if (!mounted) return;
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       if (s?.user) fetchProfile(s.user.id);
@@ -115,22 +119,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, fetchProfile]);
+  }, [supabase, fetchProfile, mounted]);
 
   useEffect(() => {
-    const interval = setInterval(
-      async () => {
+    const handleVisibility = async () => {
+      if (document.visibilityState === "visible") {
         const {
           data: { session: s },
         } = await supabase.auth.getSession();
         if (s) {
           setSession(s);
-          await supabase.auth.refreshSession();
         }
-      },
-      10 * 60 * 1000,
-    );
-    return () => clearInterval(interval);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [supabase]);
 
   const signUp = useCallback(
@@ -212,6 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     await supabase.auth.signOut();
+    window.location.href = "/";
   }, [supabase]);
 
   const resetPassword = useCallback(

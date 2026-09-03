@@ -65,15 +65,16 @@ function RoyaumeDetail() {
       </section>
 
       <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-        <p className="font-display text-2xl leading-snug text-forest-deep">
-          {royaume.conte[0]}
-        </p>
+        <p className="font-display text-2xl leading-snug text-forest-deep">{royaume.conte[0]}</p>
 
         <div className="mt-8 space-y-6 text-[15px] leading-[1.8] text-foreground/85">
           {royaume.conte.slice(1).map((paragraphe, i) => {
             if (paragraphe.startsWith("«") || paragraphe.startsWith('"')) {
               return (
-                <blockquote key={i} className="border-l-2 border-accent pl-5 font-display text-xl text-forest-deep italic">
+                <blockquote
+                  key={i}
+                  className="border-l-2 border-accent pl-5 font-display text-xl text-forest-deep italic"
+                >
                   {paragraphe}
                 </blockquote>
               );

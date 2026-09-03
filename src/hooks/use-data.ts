@@ -144,8 +144,14 @@ export const PAGE_SIZE = 20;
 export function useSites() {
   return useQuery({
     queryKey: ["sites"],
+    staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("sites").select("*").order("nom");
+      const { data, error } = await supabase
+        .from("sites")
+        .select(
+          "id, slug, nom, region, type, note, avis_count, prix, image_url, resume, coords_x, coords_y, virtuel",
+        )
+        .order("nom");
       if (error) throw error;
       return data as Site[];
     },
@@ -157,10 +163,14 @@ export function useSitesPaginated(page = 1) {
   const to = from + PAGE_SIZE - 1;
   return useQuery({
     queryKey: ["sites", "paginated", page],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error, count } = await supabase
         .from("sites")
-        .select("*", { count: "exact" })
+        .select(
+          "id, slug, nom, region, type, note, avis_count, prix, image_url, resume, coords_x, coords_y, virtuel",
+          { count: "exact" },
+        )
         .order("nom")
         .range(from, to);
       if (error) throw error;
@@ -178,7 +188,11 @@ export function useSite(slug: string) {
   return useQuery({
     queryKey: ["sites", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("sites").select("*").eq("slug", safeSlug).single();
+      const { data, error } = await supabase
+        .from("sites")
+        .select("*")
+        .eq("slug", safeSlug)
+        .single();
       if (error) throw error;
       return data as Site;
     },
@@ -193,8 +207,12 @@ export function useSite(slug: string) {
 export function useMusees() {
   return useQuery({
     queryKey: ["musees"],
+    staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("musees").select("*").order("nom");
+      const { data, error } = await supabase
+        .from("musees")
+        .select("id, slug, nom, ville, image_url, resume, horaires")
+        .order("nom");
       if (error) throw error;
       return data as Musee[];
     },
@@ -206,7 +224,11 @@ export function useMusee(slug: string) {
   return useQuery({
     queryKey: ["musees", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("musees").select("*").eq("slug", safeSlug).single();
+      const { data, error } = await supabase
+        .from("musees")
+        .select("*")
+        .eq("slug", safeSlug)
+        .single();
       if (error) throw error;
       return data as Musee;
     },
@@ -221,8 +243,12 @@ export function useMusee(slug: string) {
 export function useRoyaumes() {
   return useQuery({
     queryKey: ["royaumes"],
+    staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("royaumes").select("*").order("nom");
+      const { data, error } = await supabase
+        .from("royaumes")
+        .select("id, slug, nom, periode, image_url, resume")
+        .order("nom");
       if (error) throw error;
       return data as Royaume[];
     },
@@ -234,7 +260,11 @@ export function useRoyaume(slug: string) {
   return useQuery({
     queryKey: ["royaumes", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("royaumes").select("*").eq("slug", safeSlug).single();
+      const { data, error } = await supabase
+        .from("royaumes")
+        .select("*")
+        .eq("slug", safeSlug)
+        .single();
       if (error) throw error;
       return data as Royaume;
     },
@@ -251,8 +281,12 @@ export function useRoyaume(slug: string) {
 export function useArtistes() {
   return useQuery({
     queryKey: ["artistes"],
+    staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("artistes").select("*").order("nom");
+      const { data, error } = await supabase
+        .from("artistes")
+        .select("id, slug, nom, metier, ville, image_url, bio, user_id")
+        .order("nom");
       if (error) throw error;
       return data as Artiste[];
     },
@@ -264,10 +298,11 @@ export function useArtistesPaginated(page = 1) {
   const to = from + PAGE_SIZE - 1;
   return useQuery({
     queryKey: ["artistes", "paginated", page],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error, count } = await supabase
         .from("artistes")
-        .select("*", { count: "exact" })
+        .select("id, slug, nom, metier, ville, image_url, bio, user_id", { count: "exact" })
         .order("nom")
         .range(from, to);
       if (error) throw error;
@@ -285,7 +320,11 @@ export function useArtiste(slug: string) {
   return useQuery({
     queryKey: ["artistes", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("artistes").select("*").eq("slug", safeSlug).single();
+      const { data, error } = await supabase
+        .from("artistes")
+        .select("*")
+        .eq("slug", safeSlug)
+        .single();
       if (error) throw error;
       return data as Artiste;
     },
@@ -409,8 +448,12 @@ export function useDeleteOeuvre() {
 export function useEvenements() {
   return useQuery({
     queryKey: ["evenements"],
+    staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("evenements").select("*").order("jour");
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("id, slug, titre, date, jour, mois, lieu, categorie, image_url, resume")
+        .order("jour");
       if (error) throw error;
       return data as Evenement[];
     },
@@ -441,8 +484,12 @@ export function useEvenement(slug: string) {
 export function usePlats(options?: { categorie?: string; region?: string }) {
   return useQuery({
     queryKey: ["plats", options],
+    staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      let query = supabase.from("plats").select("*").order("nom");
+      let query = supabase
+        .from("plats")
+        .select("id, slug, nom, region, categorie, image_url, resume")
+        .order("nom");
 
       if (options?.categorie) {
         query = query.eq("categorie", options.categorie);
@@ -463,7 +510,11 @@ export function usePlat(slug: string) {
   return useQuery({
     queryKey: ["plats", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("plats").select("*").eq("slug", safeSlug).single();
+      const { data, error } = await supabase
+        .from("plats")
+        .select("*")
+        .eq("slug", safeSlug)
+        .single();
       if (error) throw error;
       return data as Plat;
     },
@@ -828,10 +879,13 @@ export function useCreateReservation() {
 export function useDossiers() {
   return useQuery({
     queryKey: ["dossiers"],
+    staleTime: 10 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("dossiers")
-        .select("*")
+        .select(
+          "id, slug, titre, sous_titre, image_url, resume, categorie, auteur, date_publication",
+        )
         .order("date_publication", { ascending: false });
       if (error) throw error;
       return data as Dossier[];
@@ -844,7 +898,11 @@ export function useDossier(slug: string) {
   return useQuery({
     queryKey: ["dossiers", safeSlug],
     queryFn: async () => {
-      const { data, error } = await supabase.from("dossiers").select("*").eq("slug", safeSlug).single();
+      const { data, error } = await supabase
+        .from("dossiers")
+        .select("*")
+        .eq("slug", safeSlug)
+        .single();
       if (error) throw error;
       return data as Dossier;
     },
@@ -1028,6 +1086,391 @@ export function useAdminUpdateRole() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
+    },
+  });
+}
+
+// ============================================================
+// Admin – Œuvres
+// ============================================================
+
+export function useAdminOeuvres() {
+  return useQuery({
+    queryKey: ["admin", "oeuvres"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("oeuvres")
+        .select("*, artiste:artistes(nom, slug)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as (Oeuvre & { artiste?: { nom: string; slug: string } })[];
+    },
+  });
+}
+
+export function useAdminUpdateOeuvreStatut() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, statut }: { id: string; statut: "publiee" | "brouillon" }) => {
+      const { error } = await supabase.from("oeuvres").update({ statut }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "oeuvres"] });
+      queryClient.invalidateQueries({ queryKey: ["oeuvres"] });
+    },
+  });
+}
+
+export function useAdminDeleteOeuvre() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("oeuvres").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "oeuvres"] });
+      queryClient.invalidateQueries({ queryKey: ["oeuvres"] });
+    },
+  });
+}
+
+export function useAdminCreateOeuvre() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (oeuvre: {
+      slug: string;
+      titre: string;
+      artiste_id: string;
+      categorie: string;
+      region: string;
+      prix: number;
+      image_url: string;
+      description: string;
+      statut?: "publiee" | "brouillon";
+    }) => {
+      const { data, error } = await supabase
+        .from("oeuvres")
+        .insert({ ...oeuvre, statut: oeuvre.statut ?? "brouillon" })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "oeuvres"] });
+      queryClient.invalidateQueries({ queryKey: ["oeuvres"] });
+    },
+  });
+}
+
+export function useAdminUpdateOeuvre() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...fields
+    }: {
+      id: string;
+      slug?: string;
+      titre?: string;
+      categorie?: string;
+      region?: string;
+      prix?: number;
+      image_url?: string;
+      description?: string;
+      statut?: "publiee" | "brouillon";
+    }) => {
+      const { error } = await supabase.from("oeuvres").update(fields).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "oeuvres"] });
+      queryClient.invalidateQueries({ queryKey: ["oeuvres"] });
+    },
+  });
+}
+
+// ============================================================
+// Admin – Sites
+// ============================================================
+
+export function useAdminSites() {
+  return useQuery({
+    queryKey: ["admin", "sites"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sites")
+        .select("*")
+        .order("nom");
+      if (error) throw error;
+      return data as Site[];
+    },
+  });
+}
+
+export function useAdminDeleteSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("sites").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "sites"] });
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+    },
+  });
+}
+
+export function useAdminCreateSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (site: {
+      slug: string;
+      nom: string;
+      region: string;
+      type: string;
+      prix: number;
+      image_url: string;
+      resume: string;
+      coords_x?: number;
+      coords_y?: number;
+      virtuel?: boolean;
+    }) => {
+      const { data, error } = await supabase
+        .from("sites")
+        .insert({
+          ...site,
+          note: 0,
+          avis_count: 0,
+          coords_x: site.coords_x ?? 0,
+          coords_y: site.coords_y ?? 0,
+          virtuel: site.virtuel ?? false,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "sites"] });
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+    },
+  });
+}
+
+export function useAdminUpdateSite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...fields
+    }: {
+      id: string;
+      slug?: string;
+      nom?: string;
+      region?: string;
+      type?: string;
+      prix?: number;
+      image_url?: string;
+      resume?: string;
+      coords_x?: number;
+      coords_y?: number;
+      virtuel?: boolean;
+    }) => {
+      const { error } = await supabase.from("sites").update(fields).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "sites"] });
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+    },
+  });
+}
+
+// ============================================================
+// Admin – Événements
+// ============================================================
+
+export function useAdminEvenements() {
+  return useQuery({
+    queryKey: ["admin", "evenements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("evenements")
+        .select("*")
+        .order("jour");
+      if (error) throw error;
+      return data as Evenement[];
+    },
+  });
+}
+
+export function useAdminDeleteEvenement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("evenements").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "evenements"] });
+      queryClient.invalidateQueries({ queryKey: ["evenements"] });
+    },
+  });
+}
+
+export function useAdminCreateEvenement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (evenement: {
+      slug: string;
+      titre: string;
+      date: string;
+      jour: number;
+      mois: string;
+      lieu: string;
+      categorie: string;
+      image_url: string;
+      resume: string;
+    }) => {
+      const { data, error } = await supabase
+        .from("evenements")
+        .insert(evenement)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "evenements"] });
+      queryClient.invalidateQueries({ queryKey: ["evenements"] });
+    },
+  });
+}
+
+export function useAdminUpdateEvenement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...fields
+    }: {
+      id: string;
+      slug?: string;
+      titre?: string;
+      date?: string;
+      jour?: number;
+      mois?: string;
+      lieu?: string;
+      categorie?: string;
+      image_url?: string;
+      resume?: string;
+    }) => {
+      const { error } = await supabase.from("evenements").update(fields).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "evenements"] });
+      queryClient.invalidateQueries({ queryKey: ["evenements"] });
+    },
+  });
+}
+
+// ============================================================
+// Admin – Newsletter
+// ============================================================
+
+export type NewsletterSubscriber = {
+  id: string;
+  email: string;
+  created_at: string;
+};
+
+export function useAdminNewsletter() {
+  return useQuery({
+    queryKey: ["admin", "newsletter"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("newsletter")
+        .select("id, email, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as NewsletterSubscriber[];
+    },
+  });
+}
+
+export function useAdminDeleteNewsletter() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("newsletter").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "newsletter"] });
+    },
+  });
+}
+
+// ============================================================
+// Admin – Statistiques
+// ============================================================
+
+export type AdminStats = {
+  totalUsers: number;
+  totalArtistes: number;
+  totalArtisans: number;
+  totalVisiteurs: number;
+  totalOeuvres: number;
+  totalSites: number;
+  totalEvenements: number;
+  totalCommandes: number;
+  totalAvis: number;
+  totalNewsletter: number;
+  revenueTotal: number;
+  commandesParStatut: Record<string, number>;
+};
+
+export function useAdminStats() {
+  return useQuery({
+    queryKey: ["admin", "stats"],
+    queryFn: async () => {
+      const [profiles, oeuvres, sites, evenements, commandes, avis, newsletter] = await Promise.all([
+        supabase.from("profiles").select("profil, statut"),
+        supabase.from("oeuvres").select("id, statut"),
+        supabase.from("sites").select("id"),
+        supabase.from("evenements").select("id"),
+        supabase.from("commandes").select("id, statut, montant"),
+        supabase.from("avis_plats").select("id"),
+        supabase.from("newsletter").select("id"),
+      ]);
+
+      const profilesData = profiles.data ?? [];
+      const commandesData = commandes.data ?? [];
+
+      const commandesParStatut: Record<string, number> = {};
+      for (const c of commandesData) {
+        commandesParStatut[c.statut] = (commandesParStatut[c.statut] ?? 0) + 1;
+      }
+
+      return {
+        totalUsers: profilesData.length,
+        totalArtistes: profilesData.filter((p) => p.profil === "artiste").length,
+        totalArtisans: profilesData.filter((p) => p.profil === "artisan").length,
+        totalVisiteurs: profilesData.filter((p) => p.profil === "visiteur").length,
+        totalOeuvres: (oeuvres.data ?? []).length,
+        totalSites: (sites.data ?? []).length,
+        totalEvenements: (evenements.data ?? []).length,
+        totalCommandes: commandesData.length,
+        totalAvis: (avis.data ?? []).length,
+        totalNewsletter: (newsletter.data ?? []).length,
+        revenueTotal: commandesData.reduce((sum, c) => sum + (c.montant ?? 0), 0),
+        commandesParStatut,
+      } satisfies AdminStats;
     },
   });
 }

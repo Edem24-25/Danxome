@@ -35,8 +35,14 @@ function GastronomieIndex() {
   const [categorie, setCategorie] = useState("Tous");
   const [region, setRegion] = useState("Toutes");
 
-  const categories = useMemo(() => ["Tous", ...Array.from(new Set(plats.map((p) => p.categorie)))], [plats]);
-  const regions = useMemo(() => ["Toutes", ...Array.from(new Set(plats.map((p) => p.region)))], [plats]);
+  const categories = useMemo(
+    () => ["Tous", ...Array.from(new Set(plats.map((p) => p.categorie)))],
+    [plats],
+  );
+  const regions = useMemo(
+    () => ["Toutes", ...Array.from(new Set(plats.map((p) => p.region)))],
+    [plats],
+  );
 
   const resultats = useMemo(
     () =>

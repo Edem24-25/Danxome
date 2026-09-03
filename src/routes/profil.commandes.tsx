@@ -35,7 +35,10 @@ const dateFr = (iso: string) =>
     year: "numeric",
   }).format(new Date(iso));
 
-const badgeVariant: Record<string, "default" | "gold" | "forest" | "secondary" | "quiet" | "destructive"> = {
+const badgeVariant: Record<
+  string,
+  "default" | "gold" | "forest" | "secondary" | "quiet" | "destructive"
+> = {
   recue: "default",
   validee: "gold",
   en_cours: "forest",
@@ -128,7 +131,10 @@ function ProfilCommandes() {
       {isLoading ? (
         <div className="space-y-4 py-6">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
+            <div
+              key={i}
+              className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"
+            >
               <Skeleton className="size-14 rounded-lg" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-40" />
@@ -142,7 +148,9 @@ function ProfilCommandes() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={<ShoppingBag className="size-5" />}
-          title={filtre === "tous" ? "Aucune commande pour l'instant" : "Aucune commande avec ce statut"}
+          title={
+            filtre === "tous" ? "Aucune commande pour l'instant" : "Aucune commande avec ce statut"
+          }
           description={
             filtre === "tous"
               ? "Votre historique apparaîtra ici dès votre premier achat dans la boutique."
@@ -163,7 +171,8 @@ function ProfilCommandes() {
       ) : (
         <>
           <p className="mb-4 text-sm text-muted-foreground">
-            {filtered.length} commande{filtered.length !== 1 ? "s" : ""} trouvée{filtered.length !== 1 ? "s" : ""}
+            {filtered.length} commande{filtered.length !== 1 ? "s" : ""} trouvée
+            {filtered.length !== 1 ? "s" : ""}
           </p>
           <div className="space-y-3">
             {filtered.map((c, i) => {
@@ -180,7 +189,9 @@ function ProfilCommandes() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="truncate font-semibold text-forest-deep">{c.oeuvre_titre}</p>
+                          <p className="truncate font-semibold text-forest-deep">
+                            {c.oeuvre_titre}
+                          </p>
                           <Badge variant={badgeVariant[c.statut] ?? "default"} className="shrink-0">
                             {statutLabel(c.statut)}
                           </Badge>
@@ -190,18 +201,26 @@ function ProfilCommandes() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-display text-lg text-forest-deep">{formatFcfa(c.montant)}</p>
+                        <p className="font-display text-lg text-forest-deep">
+                          {formatFcfa(c.montant)}
+                        </p>
                         <p className="text-xs text-muted-foreground">Réf. {c.ref}</p>
                       </div>
                       <button className="ml-2 shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-secondary">
-                        {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                        {isExpanded ? (
+                          <ChevronUp className="size-4" />
+                        ) : (
+                          <ChevronDown className="size-4" />
+                        )}
                       </button>
                     </div>
                     {isExpanded && (
                       <div className="border-t border-border bg-secondary/20 px-4 py-4">
                         <dl className="grid gap-3 sm:grid-cols-2">
                           <div>
-                            <dt className="text-xs font-semibold text-muted-foreground">Référence</dt>
+                            <dt className="text-xs font-semibold text-muted-foreground">
+                              Référence
+                            </dt>
                             <dd className="mt-0.5 text-sm text-forest-deep">{c.ref}</dd>
                           </div>
                           <div>

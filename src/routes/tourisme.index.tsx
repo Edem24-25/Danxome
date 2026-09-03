@@ -40,7 +40,10 @@ function Tourisme() {
   const [virtuelOnly, setVirtuelOnly] = useState(false);
 
   const types = useMemo(() => ["Tous", ...Array.from(new Set(sites.map((s) => s.type)))], [sites]);
-  const regions = useMemo(() => ["Toutes", ...Array.from(new Set(sites.map((s) => s.region)))], [sites]);
+  const regions = useMemo(
+    () => ["Toutes", ...Array.from(new Set(sites.map((s) => s.region)))],
+    [sites],
+  );
 
   const resultats = useMemo(
     () =>

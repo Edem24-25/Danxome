@@ -2,102 +2,64 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 
 function getServerSupabase() {
-  const url = process.env["VITE_SUPABASE_URL"];
-  const key = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+  const url = import.meta.env["VITE_SUPABASE_URL"];
+  const key = import.meta.env["VITE_SUPABASE_SERVICE_ROLE_KEY"];
   if (!url || !key) throw new Error("Variables Supabase manquantes côté serveur");
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 }
 
-type KkiapayWebhookPayload = {
-  transactionId: string;
-  isPaymentSucces: boolean;
-  account: string | null;
-  failureCode?: string;
-  failureMessage?: string;
-  label?: string;
-  method: "MOBILE_MONEY" | "CARD" | "WALLET";
-  amount: number;
-  fees: number;
-  partnerId: string | null;
-  performedAt: string;
-  stateData?: Record<string, unknown>;
-  event: "transaction.success" | "transaction.failed";
-};
-
 export const handleKkiapayWebhook = createServerFn({ method: "POST" })
-  .validator((input: { payload: KkiapayWebhookPayload; signature: string | null }) => {
-    if (!input.payload || !input.payload.transactionId) {
-      throw new Error("Payload webhook invalide");
+  .validator((input: { payload: unknown }) => {
+    if (!input.payload) {
+      throw new Error("Payload invalide");
     }
     return input;
   })
   .handler(async ({ data }) => {
-    const webhookSecret = process.env["KKIAPAY_WEBHOOK_SECRET"];
-    if (!webhookSecret) {
-      throw new Error("Secret webhook Kkiapay manquant côté serveur");
-    }
-
-    // Verify webhook signature
-    if (data.signature !== webhookSecret) {
-      throw new Error("Signature webhook invalide");
-    }
-
     const supabase = getServerSupabase();
-    const { payload } = data;
+    const payload = data.payload as Record<string, unknown>;
 
-    // Update payment record
-    const { error: paymentError } = await supabase
-      .from("payments")
-      .update({
-        is_success: payload.isPaymentSucces,
-        method: payload.method,
-        account: payload.account,
-        performed_at: payload.performedAt,
-        raw_json: payload,
-      })
-      .eq("transaction_id", payload.transactionId);
-
-    if (paymentError) {
-      console.error("Erreur mise à jour payment:", paymentError);
+    const secretKey = import.meta.env["VITE_KKIAPAY_SECRET_KEY"];
+    if (!secretKey) {
+      throw new Error("KKIAPAY_SECRET_KEY manquante");
     }
 
-    // Update related commande(s) payment status
-    const newPaymentStatut = payload.isPaymentSucces ? "reussi" : "echoue";
+    const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
+    const k = kkiapay({
+      privatekey: import.meta.env["VITE_KKIAPAY_PRIVATE_KEY"] ?? "",
+      publickey: import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"] ?? "",
+      secretkey: secretKey,
+      sandbox: import.meta.env["VITE_KKIAPAY_SANDBOX"] !== "false",
+    });
 
-    // Find commandes linked to this transaction via payment_id
-    const { data: payment } = await supabase
-      .from("payments")
-      .select("commande_id")
-      .eq("transaction_id", payload.transactionId)
-      .single();
+    const transactionId = payload["transactionId"] as string;
+    if (!transactionId) {
+      throw new Error("transactionId manquant dans le webhook");
+    }
 
-    if (payment?.commande_id) {
-      const { error: commandeError } = await supabase
+    const transaction = await k.verify(transactionId);
+
+    if (transaction.status === "SUCCESS") {
+      await supabase
         .from("commandes")
-        .update({ payment_statut: newPaymentStatut })
-        .eq("id", payment.commande_id);
+        .update({ payment_statut: "reussi" })
+        .eq("payment_id", transactionId);
 
-      if (commandeError) {
-        console.error("Erreur mise à jour commande:", commandeError);
-      }
-
-      // If payment failed, revert oeuvre status back to published
-      if (!payload.isPaymentSucces) {
-        const { data: commandes } = await supabase
-          .from("commandes")
-          .select("oeuvre_id")
-          .eq("id", payment.commande_id);
-
-        if (commandes) {
-          for (const cmd of commandes) {
-            await supabase.from("oeuvres").update({ statut: "publiee" }).eq("id", cmd.oeuvre_id);
-          }
-        }
-      }
+      await supabase.from("payments").upsert(
+        {
+          transaction_id: transactionId,
+          amount: transaction.amount,
+          fees: transaction.fees,
+          method: transaction.source,
+          is_success: true,
+          performed_at: transaction.performedAt,
+          raw_json: transaction,
+        },
+        { onConflict: "transaction_id" },
+      );
     }
 
-    // Return 200 to acknowledge receipt
     return { status: "ok" };
   });

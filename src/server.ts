@@ -54,16 +54,16 @@ function addSecurityHeaders(response: Response): Response {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.kkiapay.me",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.kkiapay.me",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://*.supabase.co",
-      "connect-src 'self' https://*.supabase.co https://api.kkiapay.me",
-      "frame-src 'self' https://widget-v3.kkiapay.me",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.kkiapay.me https://widget-v3.kkiapay.me",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.kkiapay.me https://widget-v3.kkiapay.me",
+      "font-src 'self' https://fonts.gstatic.com https://widget-v3.kkiapay.me",
+      "img-src 'self' data: blob: https://*.supabase.co https://*.kkiapay.me https://widget-v3.kkiapay.me",
+      "connect-src 'self' https://*.supabase.co https://*.kkiapay.me https://api.kkiapay.me https://api-sandbox.kkiapay.me https://inspector.kkiapay.me https://widget-v3.kkiapay.me https://accounts.google.com",
+      "frame-src 'self' https://*.kkiapay.me https://widget-v3.kkiapay.me",
       "worker-src 'self' blob:",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://*.supabase.co",
     ].join("; "),
   );
   return new Response(response.body, {

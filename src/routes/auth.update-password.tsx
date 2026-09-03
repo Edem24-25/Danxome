@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Lock, ArrowRight, Check } from "lucide-react";
@@ -103,7 +103,11 @@ function UpdatePassword() {
       titre="Choisissez votre mot de passe"
       intro="Entrez un nouveau mot de passe sécurisé pour votre compte."
       footer={
-        <Link to="/auth/login" search={{ from: undefined }} className="font-semibold text-forest hover:text-terracotta">
+        <Link
+          to="/auth/login"
+          search={{ from: undefined }}
+          className="font-semibold text-forest hover:text-terracotta"
+        >
           ← Retour à la connexion
         </Link>
       }
@@ -115,7 +119,7 @@ function UpdatePassword() {
           <p className="mt-2 text-sm text-muted-foreground">Redirection vers la connexion…</p>
         </div>
       ) : (
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form method="post" action="#" className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="password">Nouveau mot de passe</Label>
             <div className="relative group">

@@ -67,7 +67,11 @@ function DossierPage() {
     );
   }
 
-  const sections = (dossier.sections ?? []) as { titre: string; contenu: string; image_url?: string }[];
+  const sections = (dossier.sections ?? []) as {
+    titre: string;
+    contenu: string;
+    image_url?: string;
+  }[];
 
   return (
     <SiteShell>

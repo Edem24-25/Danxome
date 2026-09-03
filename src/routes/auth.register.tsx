@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   User,
   Mail,
@@ -94,7 +94,7 @@ function Register() {
   const [selectedProfil, setSelectedProfil] = useState<ProfilType>("visiteur");
   const { signUp } = useAuth();
   const navigate = useNavigate();
-  const registerRL = useRateLimit("register", 3, 60000);
+  const registerRL = useRateLimit("register", 10, 15000);
 
   // Step 1 form data (saved in state to preserve on back navigation)
   const [prenom, setPrenom] = useState("");
@@ -148,9 +148,9 @@ function Register() {
       }
 
       toast.success("Compte créé avec succès", {
-        description: "Vous allez être redirigé vers la configuration de la sécurité.",
+        description: "Vérifiez votre boîte mail pour confirmer votre compte.",
       });
-      navigate({ to: "/auth/mfa-setup" as never });
+      navigate({ to: "/auth/login", search: { from: undefined } });
       return;
     }
 
@@ -203,11 +203,8 @@ function Register() {
 
     setStep("success");
     toast.success("Demande d'inscription envoyée", {
-      description: "Vous allez être redirigé vers la configuration de la sécurité.",
+      description: "Votre profil sera examiné par notre équipe.",
     });
-    setTimeout(() => {
-      navigate({ to: "/auth/mfa-setup" as never });
-    }, 2000);
   };
 
   const profilChoisi =
@@ -290,7 +287,7 @@ function Register() {
 
       {/* ═══ STEP 1 — Informations personnelles ═══ */}
       {step === 1 && (
-        <form className="space-y-6" onSubmit={handleStep1}>
+        <form method="post" action="#" className="space-y-6" onSubmit={handleStep1}>
           {/* Sélection du profil */}
           <div className="space-y-3">
             <Label className="text-sm font-medium text-forest-deep">Type de compte</Label>
@@ -480,7 +477,7 @@ function Register() {
 
       {/* ═══ STEP 2 — Profil professionnel ═══ */}
       {step === 2 && (
-        <form className="space-y-5" onSubmit={handleStep2}>
+        <form method="post" action="#" className="space-y-5" onSubmit={handleStep2}>
           {/* Badge du profil choisi (read-only) */}
           <div className="flex items-center gap-3 rounded-lg border-2 border-terracotta bg-terracotta/5 p-3">
             <div className="flex size-9 items-center justify-center rounded-full bg-terracotta/10">

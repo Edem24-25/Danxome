@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MailCheck } from "lucide-react";
@@ -28,7 +28,7 @@ function Reset() {
   const [envoye, setEnvoye] = useState(false);
   const [loading, setLoading] = useState(false);
   const { resetPassword } = useAuth();
-  const resetRL = useRateLimit("reset", 3, 60000);
+  const resetRL = useRateLimit("reset", 10, 15000);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,7 +65,11 @@ function Reset() {
       titre="Retrouver l'accès"
       intro="Indiquez l'adresse associée à votre compte : nous vous envoyons un lien valable une heure."
       footer={
-        <Link to="/auth/login" search={{ from: undefined }} className="font-semibold text-forest hover:text-terracotta">
+        <Link
+          to="/auth/login"
+          search={{ from: undefined }}
+          className="font-semibold text-forest hover:text-terracotta"
+        >
           ← Retour à la connexion
         </Link>
       }
@@ -83,7 +87,7 @@ function Reset() {
           </Button>
         </div>
       ) : (
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form method="post" action="#" className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="mail">Adresse e-mail</Label>
             <Input

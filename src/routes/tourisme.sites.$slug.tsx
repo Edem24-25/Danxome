@@ -87,7 +87,8 @@ function SiteDetail() {
               </span>
               <span className="flex items-center gap-1.5">
                 <Star className="size-4 fill-accent text-accent" />
-                <strong className="text-ivory">{site.note.toFixed(1)}</strong> · {site.avis_count} avis
+                <strong className="text-ivory">{site.note.toFixed(1)}</strong> · {site.avis_count}{" "}
+                avis
               </span>
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">

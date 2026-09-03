@@ -12,23 +12,32 @@ function AuthCallback() {
 
   useEffect(() => {
     const supabase = createClient();
+    const url = new URL(window.location.href);
+    const next = url.searchParams.get("next");
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
         const { data: prof } = await supabase
           .from("profiles")
-          .select("profil")
+          .select("profil, prenom, nom")
           .eq("id", session.user.id)
           .single();
 
-        const { data: mfaData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-
-        if (mfaData?.nextLevel === "aal2" && mfaData?.currentLevel !== "aal2") {
-          navigate({ to: "/auth/login", search: { from: undefined } });
-        } else if (mfaData?.nextLevel === "aal1" && mfaData?.currentLevel === "aal1") {
-          navigate({ to: "/auth/mfa-setup" as never });
-        } else {
-          navigate({ to: accueilProfil(prof?.profil) });
+        if (prof && (!prof.prenom || !prof.nom)) {
+          const meta = session.user.user_metadata ?? {};
+          const prenom =
+            prof.prenom || meta["given_name"] || meta["full_name"]?.split(" ")[0] || "";
+          const nom =
+            prof.nom ||
+            meta["family_name"] ||
+            (meta["full_name"] ?? "").split(" ").slice(1).join(" ") ||
+            "";
+          if (prenom || nom) {
+            await supabase.from("profiles").update({ prenom, nom }).eq("id", session.user.id);
+          }
         }
+
+        navigate({ to: next || accueilProfil(prof?.profil) });
       } else {
         navigate({ to: "/auth/login", search: { from: undefined } });
       }
