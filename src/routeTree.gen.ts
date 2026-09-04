@@ -23,12 +23,14 @@ import { Route as AdminOeuvresRouteImport } from './routes/admin.oeuvres'
 import { Route as AdminSitesRouteImport } from './routes/admin.sites'
 import { Route as AdminStatsRouteImport } from './routes/admin.stats'
 import { Route as AdminUtilisateursRouteImport } from './routes/admin.utilisateurs'
+import { Route as AdminVerificationsRouteImport } from './routes/admin.verifications'
 import { Route as ArtIndexRouteImport } from './routes/art.index'
 import { Route as ArtBoutiqueRouteImport } from './routes/art.boutique'
 import { Route as ArtCheckoutRouteImport } from './routes/art.checkout'
 import { Route as ArtPanierRouteImport } from './routes/art.panier'
 import { Route as ArtisteIndexRouteImport } from './routes/artiste.index'
 import { Route as ArtisteCommandesRouteImport } from './routes/artiste.commandes'
+import { Route as ArtisteJustificatifsRouteImport } from './routes/artiste.justificatifs'
 import { Route as ArtisteVitrineRouteImport } from './routes/artiste.vitrine'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
@@ -129,6 +131,11 @@ const AdminUtilisateursRoute = AdminUtilisateursRouteImport.update({
   path: '/admin/utilisateurs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVerificationsRoute = AdminVerificationsRouteImport.update({
+  id: '/admin/verifications',
+  path: '/admin/verifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArtIndexRoute = ArtIndexRouteImport.update({
   id: '/art/',
   path: '/art/',
@@ -157,6 +164,11 @@ const ArtisteIndexRoute = ArtisteIndexRouteImport.update({
 const ArtisteCommandesRoute = ArtisteCommandesRouteImport.update({
   id: '/artiste/commandes',
   path: '/artiste/commandes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtisteJustificatifsRoute = ArtisteJustificatifsRouteImport.update({
+  id: '/artiste/justificatifs',
+  path: '/artiste/justificatifs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtisteVitrineRoute = ArtisteVitrineRouteImport.update({
@@ -320,10 +332,12 @@ export interface FileRoutesByFullPath {
   '/admin/sites': typeof AdminSitesRoute
   '/admin/stats': typeof AdminStatsRoute
   '/admin/utilisateurs': typeof AdminUtilisateursRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
   '/artiste/commandes': typeof ArtisteCommandesRoute
+  '/artiste/justificatifs': typeof ArtisteJustificatifsRoute
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
@@ -371,10 +385,12 @@ export interface FileRoutesByTo {
   '/admin/sites': typeof AdminSitesRoute
   '/admin/stats': typeof AdminStatsRoute
   '/admin/utilisateurs': typeof AdminUtilisateursRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
   '/artiste/commandes': typeof ArtisteCommandesRoute
+  '/artiste/justificatifs': typeof ArtisteJustificatifsRoute
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
@@ -422,10 +438,12 @@ export interface FileRoutesById {
   '/admin/sites': typeof AdminSitesRoute
   '/admin/stats': typeof AdminStatsRoute
   '/admin/utilisateurs': typeof AdminUtilisateursRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/art/boutique': typeof ArtBoutiqueRoute
   '/art/checkout': typeof ArtCheckoutRoute
   '/art/panier': typeof ArtPanierRoute
   '/artiste/commandes': typeof ArtisteCommandesRoute
+  '/artiste/justificatifs': typeof ArtisteJustificatifsRoute
   '/artiste/vitrine': typeof ArtisteVitrineRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
@@ -475,10 +493,12 @@ export interface FileRouteTypes {
     | '/admin/sites'
     | '/admin/stats'
     | '/admin/utilisateurs'
+    | '/admin/verifications'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
     | '/artiste/commandes'
+    | '/artiste/justificatifs'
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
@@ -526,10 +546,12 @@ export interface FileRouteTypes {
     | '/admin/sites'
     | '/admin/stats'
     | '/admin/utilisateurs'
+    | '/admin/verifications'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
     | '/artiste/commandes'
+    | '/artiste/justificatifs'
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
@@ -576,10 +598,12 @@ export interface FileRouteTypes {
     | '/admin/sites'
     | '/admin/stats'
     | '/admin/utilisateurs'
+    | '/admin/verifications'
     | '/art/boutique'
     | '/art/checkout'
     | '/art/panier'
     | '/artiste/commandes'
+    | '/artiste/justificatifs'
     | '/artiste/vitrine'
     | '/auth/callback'
     | '/auth/login'
@@ -628,10 +652,12 @@ export interface RootRouteChildren {
   AdminSitesRoute: typeof AdminSitesRoute
   AdminStatsRoute: typeof AdminStatsRoute
   AdminUtilisateursRoute: typeof AdminUtilisateursRoute
+  AdminVerificationsRoute: typeof AdminVerificationsRoute
   ArtBoutiqueRoute: typeof ArtBoutiqueRoute
   ArtCheckoutRoute: typeof ArtCheckoutRoute
   ArtPanierRoute: typeof ArtPanierRoute
   ArtisteCommandesRoute: typeof ArtisteCommandesRoute
+  ArtisteJustificatifsRoute: typeof ArtisteJustificatifsRoute
   ArtisteVitrineRoute: typeof ArtisteVitrineRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -764,6 +790,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUtilisateursRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/verifications': {
+      id: '/admin/verifications'
+      path: '/admin/verifications'
+      fullPath: '/admin/verifications'
+      preLoaderRoute: typeof AdminVerificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/art/': {
       id: '/art/'
       path: '/art'
@@ -804,6 +837,13 @@ declare module '@tanstack/react-router' {
       path: '/artiste/commandes'
       fullPath: '/artiste/commandes'
       preLoaderRoute: typeof ArtisteCommandesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artiste/justificatifs': {
+      id: '/artiste/justificatifs'
+      path: '/artiste/justificatifs'
+      fullPath: '/artiste/justificatifs'
+      preLoaderRoute: typeof ArtisteJustificatifsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/artiste/vitrine': {
@@ -1039,10 +1079,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSitesRoute: AdminSitesRoute,
   AdminStatsRoute: AdminStatsRoute,
   AdminUtilisateursRoute: AdminUtilisateursRoute,
+  AdminVerificationsRoute: AdminVerificationsRoute,
   ArtBoutiqueRoute: ArtBoutiqueRoute,
   ArtCheckoutRoute: ArtCheckoutRoute,
   ArtPanierRoute: ArtPanierRoute,
   ArtisteCommandesRoute: ArtisteCommandesRoute,
+  ArtisteJustificatifsRoute: ArtisteJustificatifsRoute,
   ArtisteVitrineRoute: ArtisteVitrineRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,

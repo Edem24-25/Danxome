@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -38,7 +38,6 @@ export const Route = createFileRoute("/profil/details")({
 
 function ProfilDetails() {
   const { profile, loading, user, updateProfile } = useAuth();
-  const navigate = useNavigate();
   const [enCours, setEnCours] = useState(false);
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
@@ -129,7 +128,6 @@ function ProfilDetails() {
     toast.success("Informations mises à jour", {
       description: "Votre profil a été modifié avec succès.",
     });
-    navigate({ to: "/profil" });
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,7 +256,7 @@ function ProfilDetails() {
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">{profile.email}</p>
                 <div className="mt-2">
-                  <ProfilBadge profil={profile.profil} />
+                   <ProfilBadge profil={profile.profil} statut={profile.statut} />
                 </div>
 
                 {/* Actions avatar */}

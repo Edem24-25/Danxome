@@ -58,6 +58,16 @@ export type Artiste = {
   image_url: string;
   bio: string;
   user_id: string | null;
+  categorie: string | null;
+  portfolio_url: string | null;
+  nom_artiste: string | null;
+  annees_experience: number | null;
+  social_links: Record<string, string>;
+  website_url: string | null;
+  photos_atelier: string[];
+  justificatif_url: string | null;
+  carte_pro_url: string | null;
+  registre_metiers_url: string | null;
 };
 
 export type Oeuvre = {
@@ -1002,13 +1012,20 @@ export function useAdminProfiles() {
 export function useAdminUpdateProfilStatut() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, statut }: { id: string; statut: "valide" | "rejete" }) => {
-      const { error } = await supabase.from("profiles").update({ statut }).eq("id", id);
+    mutationFn: async ({ id, statut, rejection_reason }: {
+      id: string;
+      statut: "valide" | "rejete" | "suspendu";
+      rejection_reason?: string;
+    }) => {
+      const update: Record<string, unknown> = { statut };
+      if (rejection_reason) update["rejection_reason"] = rejection_reason;
+      const { error } = await supabase.from("profiles").update(update).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "artistes-en-attente"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "verifications"] });
     },
   });
 }
@@ -1086,6 +1103,217 @@ export function useAdminUpdateRole() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "profiles"] });
+    },
+  });
+}
+
+// ============================================================
+// Admin – Vérifications professionnelles
+// ============================================================
+
+export type VerificationRequest = {
+  id: string;
+  email: string;
+  prenom: string;
+  nom: string;
+  profil: ProfilType;
+  statut: string;
+  telephone: string | null;
+  ville: string | null;
+  created_at: string;
+  // Joined artiste data
+  metier: string | null;
+  bio: string | null;
+  categorie: string | null;
+  portfolio_url: string | null;
+  nom_artiste: string | null;
+  annees_experience: number | null;
+  social_links: Record<string, string>;
+  website_url: string | null;
+};
+
+export function useAdminVerifications() {
+  return useQuery({
+    queryKey: ["admin", "verifications"],
+    queryFn: async () => {
+      // Fetch all artiste/artisan profiles
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, email, prenom, nom, profil, statut, telephone, ville, created_at")
+        .in("profil", ["artiste", "artisan"])
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+
+      // Fetch linked artiste records
+      const profileIds = (profiles as Profile[]).map((p) => p.id);
+      if (profileIds.length === 0) return [];
+
+      const { data: artistesData } = await supabase
+        .from("artistes")
+        .select("user_id, metier, bio, categorie, portfolio_url, ville, nom_artiste, annees_experience, social_links, website_url")
+        .in("user_id", profileIds);
+
+      type ArtisteRow = {
+        user_id: string | null;
+        metier: string | null;
+        bio: string | null;
+        categorie: string | null;
+        portfolio_url: string | null;
+        ville: string | null;
+        nom_artiste: string | null;
+        annees_experience: number | null;
+        social_links: Record<string, string> | null;
+        website_url: string | null;
+      };
+
+      const artistesMap: Record<string, ArtisteRow> = {};
+      for (const a of (artistesData as ArtisteRow[]) ?? []) {
+        if (a.user_id) {
+          artistesMap[a.user_id] = a;
+        }
+      }
+
+      return (profiles as Profile[]).map((p) => {
+        const artiste = artistesMap[p.id];
+        return {
+          id: p.id,
+          email: p.email,
+          prenom: p.prenom,
+          nom: p.nom,
+          profil: p.profil,
+          statut: p.statut,
+          telephone: p.telephone,
+          ville: p.ville,
+          created_at: p.created_at,
+          metier: artiste?.metier ?? null,
+          bio: artiste?.bio ?? null,
+          categorie: artiste?.categorie ?? null,
+          portfolio_url: artiste?.portfolio_url ?? null,
+          nom_artiste: artiste?.nom_artiste ?? null,
+          annees_experience: artiste?.annees_experience ?? null,
+          social_links: (artiste?.social_links as Record<string, string>) ?? {},
+          website_url: artiste?.website_url ?? null,
+        } as VerificationRequest;
+      });
+    },
+  });
+}
+
+export function useAdminDocuments(userId: string) {
+  return useQuery({
+    queryKey: ["admin", "documents", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("professional_documents")
+        .select("*")
+        .eq("user_id", userId)
+        .order("uploaded_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
+}
+
+// ============================================================
+// Documents professionnels (utilisateur)
+// ============================================================
+
+export type ProfessionalDocumentRecord = {
+  id: string;
+  user_id: string;
+  document_type: string;
+  file_url: string;
+  file_name: string | null;
+  uploaded_at: string;
+};
+
+/**
+ * Génère une URL signée temporaire (1h) pour un fichier du bucket professional_docs.
+ * file_url stocké en base = chemin storage (ex: "uuid/timestamp.pdf")
+ */
+export async function getSignedDocumentUrl(storagePath: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from("professional_docs")
+    .createSignedUrl(storagePath, 3600);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+export function useMesDocuments() {
+  return useQuery({
+    queryKey: ["documents", "mes"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return [];
+      const { data, error } = await supabase
+        .from("professional_documents")
+        .select("*")
+        .eq("user_id", user.user.id)
+        .order("uploaded_at", { ascending: false });
+      if (error) throw error;
+      return data as ProfessionalDocumentRecord[];
+    },
+  });
+}
+
+export function useUploadDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      file,
+      documentType,
+      fileName,
+    }: {
+      file: File;
+      documentType: string;
+      fileName: string;
+    }) => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Non connecté");
+
+      const ext = file.name.split(".").pop() ?? "pdf";
+      const path = `${user.user.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("professional_docs")
+        .upload(path, file, { contentType: file.type, upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { error: insertError } = await supabase.from("professional_documents").insert({
+        user_id: user.user.id,
+        document_type: documentType,
+        file_url: path,
+        file_name: fileName,
+      });
+      if (insertError) throw insertError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents", "mes"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "verifications"] });
+    },
+  });
+}
+
+export function useDeleteDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (docId: string) => {
+      const { data: doc, error: fetchError } = await supabase
+        .from("professional_documents")
+        .select("file_url")
+        .eq("id", docId)
+        .single();
+      if (fetchError) throw fetchError;
+
+      // file_url contient le chemin storage directement
+      await supabase.storage.from("professional_docs").remove([doc.file_url]);
+      const { error } = await supabase.from("professional_documents").delete().eq("id", docId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents", "mes"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "verifications"] });
     },
   });
 }

@@ -46,6 +46,12 @@ export const registerStep2Schema = z.object({
   categorie: z.string().min(1, "Catégorie requise").max(100),
   description: z.string().min(10, "La description doit contenir au moins 10 caractères").max(2000),
   portfolio_url: z.string().url("URL invalide").optional().or(z.literal("")),
+  nom_artiste: z.string().min(1, "Nom artistique requis").max(100).optional().or(z.literal("")),
+  annees_experience: z.number().int().min(0).max(80).optional().or(z.nan()),
+  website_url: z.string().url("URL invalide").optional().or(z.literal("")),
+  instagram: z.string().max(100).optional().or(z.literal("")),
+  facebook: z.string().max(100).optional().or(z.literal("")),
+  twitter: z.string().max(100).optional().or(z.literal("")),
 });
 
 export const addOeuvreSchema = z.object({

@@ -9,6 +9,7 @@ import {
   Palette,
   ShoppingCart,
   Users,
+  FileText,
 } from "lucide-react";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { SectionTitle, StatCard } from "@/components/site/Bits";
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/admin/")({
 const items = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard },
   { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
+  { to: "/admin/verifications", label: "Vérifications", icon: FileText },
   { to: "/admin/oeuvres", label: "Œuvres", icon: Palette },
   { to: "/admin/sites", label: "Sites", icon: Eye },
   { to: "/admin/evenements", label: "Événements", icon: CalendarDays },

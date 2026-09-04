@@ -146,7 +146,7 @@ function Profil() {
                 <h2 className="font-display text-2xl text-forest-deep">
                   {profile.prenom} {profile.nom}
                 </h2>
-                <ProfilBadge profil={profile.profil} />
+                <ProfilBadge profil={profile.profil} statut={profile.statut} />
               </div>
               <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Mail className="size-3.5" /> {profile.email}
@@ -202,11 +202,59 @@ function Profil() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-amber-800">
-                    Compte en attente de validation
+                    Compte en attente de vérification ⏳
                   </p>
                   <p className="mt-0.5 text-xs text-amber-700">
-                    Votre compte {profile.profil} sera examiné par un administrateur. Vous recevrez
-                    une notification une fois votre profil validé.
+                    Votre profil professionnel est en cours de vérification. Vous pouvez continuer à
+                    explorer Dãhomè. Les fonctionnalités professionnelles seront automatiquement
+                    disponibles après validation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+      {/* ═══ ALERTE COMPTE SUSPENDU ═══ */}
+      {(profile.profil === "artiste" || profile.profil === "artisan") &&
+        profile.statut === "suspendu" && (
+          <Reveal variant="up" delay={50}>
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-red-100">
+                  <AlertCircle className="size-4 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-red-800">
+                    Profil professionnel suspendu
+                  </p>
+                  <p className="mt-0.5 text-xs text-red-700">
+                    Les fonctionnalités professionnelles sont temporairement désactivées. Contactez
+                    l'administrateur pour plus d'informations.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+      {/* ═══ ALERTE COMPTE REJETÉ ═══ */}
+      {(profile.profil === "artiste" || profile.profil === "artisan") &&
+        profile.statut === "rejete" && (
+          <Reveal variant="up" delay={50}>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-orange-100">
+                  <AlertCircle className="size-4 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-orange-800">
+                    Profil professionnel non validé
+                  </p>
+                  <p className="mt-0.5 text-xs text-orange-700">
+                    Votre demande de vérification n'a pas été acceptée. Vous pouvez contacter
+                    l'administrateur pour plus d'informations ou modifier votre profil pour soumettre
+                    une nouvelle demande.
                   </p>
                 </div>
               </div>

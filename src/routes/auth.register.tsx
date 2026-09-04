@@ -13,6 +13,11 @@ import {
   FileText,
   LinkIcon,
   CheckCircle,
+  Award,
+  Globe,
+  Instagram,
+  Facebook,
+  Twitter,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -168,6 +173,12 @@ function Register() {
       categorie: (formData.get("categorie") as string)?.trim(),
       description: (formData.get("description") as string)?.trim(),
       portfolio_url: (formData.get("portfolio") as string)?.trim(),
+      nom_artiste: (formData.get("nom_artiste") as string)?.trim(),
+      annees_experience: Number(formData.get("annees_experience")) || undefined,
+      website_url: (formData.get("website_url") as string)?.trim(),
+      instagram: (formData.get("instagram") as string)?.trim(),
+      facebook: (formData.get("facebook") as string)?.trim(),
+      twitter: (formData.get("twitter") as string)?.trim(),
     });
 
     if (!parsed.success) {
@@ -180,7 +191,11 @@ function Register() {
 
     setLoading(true);
 
-    // Single signUp call with all data — the trigger handles profile + artiste creation
+    const socialLinks: Record<string, string> = {};
+    if (parsed.data.instagram) socialLinks["instagram"] = parsed.data.instagram;
+    if (parsed.data.facebook) socialLinks["facebook"] = parsed.data.facebook;
+    if (parsed.data.twitter) socialLinks["twitter"] = parsed.data.twitter;
+
     const { error: signUpError } = await signUp({
       email,
       password,
@@ -192,6 +207,10 @@ function Register() {
       categorie: parsed.data.categorie,
       description: parsed.data.description,
       ...(parsed.data.portfolio_url ? { portfolio_url: parsed.data.portfolio_url } : {}),
+      ...(parsed.data.nom_artiste ? { nom_artiste: parsed.data.nom_artiste } : {}),
+      ...(parsed.data.annees_experience ? { annees_experience: parsed.data.annees_experience } : {}),
+      ...(Object.keys(socialLinks).length > 0 ? { social_links: socialLinks } : {}),
+      ...(parsed.data.website_url ? { website_url: parsed.data.website_url } : {}),
     });
 
     setLoading(false);
@@ -592,6 +611,93 @@ function Register() {
             <p className="text-xs text-muted-foreground">
               Lien vers votre portfolio en ligne, Instagram, Behance…
             </p>
+          </div>
+
+          {/* Nom artistique / Nom commercial */}
+          <div className="space-y-2">
+            <Label htmlFor="nom_artiste" className="text-sm font-medium text-forest-deep">
+              {selectedProfil === "artiste" ? "Nom artistique" : "Nom commercial"}{" "}
+              <span className="text-xs text-muted-foreground">(optionnel)</span>
+            </Label>
+            <div className="relative group">
+              <Award className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-terracotta" />
+              <Input
+                id="nom_artiste"
+                name="nom_artiste"
+                maxLength={100}
+                placeholder={selectedProfil === "artiste" ? "Votre nom de scène" : "Nom de votre atelier"}
+                className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta"
+              />
+            </div>
+          </div>
+
+          {/* Années d'expérience */}
+          <div className="space-y-2">
+            <Label htmlFor="annees_experience" className="text-sm font-medium text-forest-deep">
+              Années d'expérience{" "}
+              <span className="text-xs text-muted-foreground">(optionnel)</span>
+            </Label>
+            <Input
+              id="annees_experience"
+              name="annees_experience"
+              type="number"
+              min={0}
+              max={80}
+              placeholder="Ex: 5"
+              className="transition-all duration-300 focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta"
+            />
+          </div>
+
+          {/* Réseaux sociaux */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-forest-deep">
+              Réseaux sociaux{" "}
+              <span className="text-xs text-muted-foreground">(optionnel)</span>
+            </Label>
+            <div className="space-y-3">
+              <div className="relative group">
+                <Instagram className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-terracotta" />
+                <Input
+                  name="instagram"
+                  placeholder="Instagram (pseudo ou lien)"
+                  className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta"
+                />
+              </div>
+              <div className="relative group">
+                <Facebook className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-terracotta" />
+                <Input
+                  name="facebook"
+                  placeholder="Facebook (lien vers votre page)"
+                  className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta"
+                />
+              </div>
+              <div className="relative group">
+                <Twitter className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-terracotta" />
+                <Input
+                  name="twitter"
+                  placeholder="Twitter / X (pseudo ou lien)"
+                  className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Site web personnel */}
+          <div className="space-y-2">
+            <Label htmlFor="website_url" className="text-sm font-medium text-forest-deep">
+              Site web personnel{" "}
+              <span className="text-xs text-muted-foreground">(optionnel)</span>
+            </Label>
+            <div className="relative group">
+              <Globe className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-terracotta" />
+              <Input
+                id="website_url"
+                name="website_url"
+                type="url"
+                placeholder="https://votre-site-personnel.com"
+                className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta"
+              />
+            </div>
           </div>
 
           {/* Note */}

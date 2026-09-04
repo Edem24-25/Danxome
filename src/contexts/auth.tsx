@@ -17,6 +17,11 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   peutCommander: boolean;
+  estVerifie: boolean;
+  estEnAttente: boolean;
+  estSuspendu: boolean;
+  estPro: boolean;
+  peutPublier: boolean;
   signUp: (params: {
     email: string;
     password: string;
@@ -28,6 +33,10 @@ interface AuthContextType {
     categorie?: string;
     description?: string;
     portfolio_url?: string;
+    nom_artiste?: string;
+    annees_experience?: number;
+    social_links?: Record<string, string>;
+    website_url?: string;
   }) => Promise<{ error?: string }>;
   signIn: (params: {
     email: string;
@@ -54,13 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
 
   const profileAbortRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const initializedRef = useRef(false);
 
   const fetchProfile = useCallback(
     async (userId: string) => {
@@ -100,16 +105,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session?.user, fetchProfile]);
 
   useEffect(() => {
-    if (!mounted) return;
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       if (s?.user) fetchProfile(s.user.id);
       setLoading(false);
+      initializedRef.current = true;
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, s) => {
+      if (!initializedRef.current) return;
       setSession(s);
       if (s?.user) {
         fetchProfile(s.user.id);
@@ -119,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, fetchProfile, mounted]);
+  }, [supabase, fetchProfile]);
 
   useEffect(() => {
     const handleVisibility = async () => {
@@ -148,6 +154,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       categorie,
       description,
       portfolio_url,
+      nom_artiste,
+      annees_experience,
+      social_links,
+      website_url,
     }: {
       email: string;
       password: string;
@@ -159,6 +169,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       categorie?: string;
       description?: string;
       portfolio_url?: string;
+      nom_artiste?: string;
+      annees_experience?: number;
+      social_links?: Record<string, string>;
+      website_url?: string;
     }) => {
       const metadata: Record<string, string> = { prenom, nom, profil };
       if (telephone) metadata["telephone"] = telephone;
@@ -166,6 +180,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (categorie) metadata["categorie"] = categorie;
       if (description) metadata["description"] = description;
       if (portfolio_url) metadata["portfolio_url"] = portfolio_url;
+      if (nom_artiste) metadata["nom_artiste"] = nom_artiste;
+      if (annees_experience) metadata["annees_experience"] = String(annees_experience);
+      if (social_links) metadata["social_links"] = JSON.stringify(social_links);
+      if (website_url) metadata["website_url"] = website_url;
 
       const { error } = await supabase.auth.signUp({
         email,
@@ -238,10 +256,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!session?.user) return { error: "Non connecté" };
       const { error } = await supabase.from("profiles").update(params).eq("id", session.user.id);
       if (error) return { error: error.message };
-      await fetchProfile(session.user.id);
+      // Mise à jour optimiste : applique les changements localement sans re-fetch
+      setProfile((prev) => (prev ? { ...prev, ...params } : prev));
       return {};
     },
-    [supabase, session?.user, fetchProfile],
+    [supabase, session?.user],
   );
 
   const changePassword = useCallback(
@@ -265,6 +284,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   }, [supabase, session?.user]);
 
+  const estPro = profile?.profil === "artiste" || profile?.profil === "artisan";
+  const estVerifie = estPro && profile?.statut === "valide";
+  const estEnAttente = estPro && profile?.statut === "en_attente";
+  const estSuspendu = estPro && profile?.statut === "suspendu";
+  const peutPublier = estVerifie;
+
   return (
     <AuthContext.Provider
       value={{
@@ -273,6 +298,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile,
         loading,
         peutCommander: loading ? false : !session?.user || profile?.profil === "visiteur",
+        estVerifie,
+        estEnAttente,
+        estSuspendu,
+        estPro,
+        peutPublier,
         signUp,
         signIn,
         signInWithGoogle,

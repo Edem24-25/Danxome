@@ -348,9 +348,12 @@ CREATE POLICY "Œuvres publiées publiques" ON oeuvres
   ));
 DROP POLICY IF EXISTS "Artiste gère ses œuvres" ON oeuvres;
 CREATE POLICY "Artiste gère ses œuvres" ON oeuvres
-  FOR ALL USING (artiste_id IN (
-    SELECT id FROM artistes WHERE user_id = auth.uid()
-  ));
+  FOR ALL USING (
+    artiste_id IN (
+      SELECT id FROM artistes WHERE user_id = auth.uid()
+    )
+    AND public.can_publish_pro()
+  );
 DROP POLICY IF EXISTS "Admins gèrent les œuvres" ON oeuvres;
 CREATE POLICY "Admins gèrent les œuvres" ON oeuvres FOR ALL USING (public.is_admin());
 
@@ -1099,3 +1102,208 @@ UPDATE artistes SET user_id = (SELECT id FROM profiles WHERE email = 'raphael.to
 UPDATE profiles
 SET profil = 'admin'
 WHERE email = 'danxome229@gmail.com';
+
+-- ============================================================
+-- PARTIE 7 : VÉRIFICATION PROFESSIONNELLE — Système complet
+-- ============================================================
+
+-- ============================================================
+-- 7.1 Étendre le statut avec 'suspendu'
+-- ============================================================
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_statut_check;
+ALTER TABLE profiles ADD CONSTRAINT profiles_statut_check
+  CHECK (statut IN ('en_attente', 'valide', 'rejete', 'suspendu'));
+
+-- ============================================================
+-- 7.2 Étendre la table artistes avec champs professionnels
+-- ============================================================
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS annees_experience INTEGER;
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS nom_artiste TEXT;
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS social_links JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS website_url TEXT;
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS photos_atelier TEXT[] DEFAULT '{}';
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS justificatif_url TEXT;
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS carte_pro_url TEXT;
+ALTER TABLE artistes ADD COLUMN IF NOT EXISTS registre_metiers_url TEXT;
+
+-- ============================================================
+-- 7.3 Table professional_documents (justificatifs uploadés)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS professional_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  document_type TEXT NOT NULL CHECK (document_type IN (
+    'carte_professionnelle',
+    'justificatif_activite',
+    'registre_metiers',
+    'photo_atelier',
+    'photo_creation',
+    'autre'
+  )),
+  file_url TEXT NOT NULL,
+  file_name TEXT,
+  uploaded_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_professional_documents_user ON professional_documents(user_id);
+
+ALTER TABLE professional_documents ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Utilisateurs lisent leurs documents" ON professional_documents;
+CREATE POLICY "Utilisateurs lisent leurs documents"
+  ON professional_documents FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Utilisateurs uploadent leurs documents" ON professional_documents;
+CREATE POLICY "Utilisateurs uploadent leurs documents"
+  ON professional_documents FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Utilisateurs suppriment leurs documents" ON professional_documents;
+CREATE POLICY "Utilisateurs suppriment leurs documents"
+  ON professional_documents FOR DELETE USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Admins lisent tous les documents" ON professional_documents;
+CREATE POLICY "Admins lisent tous les documents"
+  ON professional_documents FOR SELECT USING (public.is_admin());
+
+-- ============================================================
+-- 7.4 Storage bucket pour documents professionnels
+-- ============================================================
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('professional_docs', 'professional_docs', false, 10485760,
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
+ON CONFLICT (id) DO UPDATE SET
+  public = false,
+  file_size_limit = 10485760,
+  allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+
+DROP POLICY IF EXISTS "Users uploadent documents pro" ON storage.objects;
+CREATE POLICY "Users uploadent documents pro" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'professional_docs'
+    AND auth.role() = 'authenticated'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+DROP POLICY IF EXISTS "Users lisent leurs documents pro" ON storage.objects;
+CREATE POLICY "Users lisent leurs documents pro" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'professional_docs'
+    AND (
+      (storage.foldername(name))[1] = auth.uid()::text
+      OR public.is_admin()
+    )
+  );
+
+DROP POLICY IF EXISTS "Users suppriment leurs documents pro" ON storage.objects;
+CREATE POLICY "Users suppriment leurs documents pro" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'professional_docs'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+DROP POLICY IF EXISTS "Admins suppriment documents pro" ON storage.objects;
+CREATE POLICY "Admins suppriment documents pro" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'professional_docs'
+    AND public.is_admin()
+  );
+
+-- ============================================================
+-- 7.5 Fonction : vérifier si un utilisateur peut publier
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.can_publish_pro()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM profiles
+    WHERE id = auth.uid()
+    AND profil IN ('artiste', 'artisan')
+    AND statut = 'valide'
+  );
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+-- ============================================================
+-- 7.6 Mettre à jour le trigger pour inclure les nouveaux champs
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  requested_profil TEXT;
+  final_profil TEXT;
+  final_statut TEXT;
+  nom_complet TEXT;
+  slug_base TEXT;
+  meta JSONB;
+  g_prenom TEXT;
+  g_nom TEXT;
+  g_full TEXT;
+BEGIN
+  meta := COALESCE(NEW.raw_user_meta_data, '{}'::jsonb);
+
+  requested_profil := meta->>'profil';
+  IF requested_profil IN ('artiste', 'artisan') THEN
+    final_profil := requested_profil;
+    final_statut := 'en_attente';
+  ELSE
+    final_profil := 'visiteur';
+    final_statut := 'valide';
+  END IF;
+
+  g_prenom := COALESCE(meta->>'prenom', meta->>'given_name', '');
+  g_nom    := COALESCE(meta->>'nom', meta->>'family_name', '');
+
+  IF g_prenom = '' AND g_nom = '' THEN
+    g_full := TRIM(COALESCE(meta->>'full_name', meta->>'name', ''));
+    IF g_full != '' THEN
+      g_prenom := split_part(g_full, ' ', 1);
+      g_nom    := TRIM(BOTH ' ' FROM regexp_replace(g_full, '^\S+\s*', ''));
+      IF g_nom = '' THEN
+        g_nom := g_prenom;
+      END IF;
+    END IF;
+  END IF;
+
+  nom_complet := TRIM(g_prenom || ' ' || g_nom);
+
+  INSERT INTO public.profiles (id, email, prenom, nom, profil, statut, telephone, ville)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    NULLIF(g_prenom, ''),
+    NULLIF(g_nom, ''),
+    final_profil,
+    final_statut,
+    NULLIF(meta->>'telephone', ''),
+    NULLIF(meta->>'ville', '')
+  );
+
+  IF final_profil IN ('artiste', 'artisan') AND nom_complet != '' THEN
+    slug_base := lower(nom_complet);
+    slug_base := regexp_replace(slug_base, '[^a-z0-9]+', '-', 'g');
+    slug_base := regexp_replace(slug_base, '(^-|-$)', '', 'g');
+
+    INSERT INTO public.artistes (slug, nom, metier, ville, bio, user_id, categorie,
+      nom_artiste, annees_experience, social_links, website_url)
+    VALUES (
+      slug_base || '-' || floor(extract(epoch from now()))::text,
+      nom_complet,
+      NULLIF(meta->>'categorie', ''),
+      NULLIF(meta->>'ville', ''),
+      NULLIF(meta->>'description', ''),
+      NEW.id,
+      NULLIF(meta->>'categorie', ''),
+      NULLIF(meta->>'nom_artiste', ''),
+      NULLIF((meta->>'annees_experience')::int, 0),
+      COALESCE(meta->>'social_links', '{}'::text)::jsonb,
+      NULLIF(meta->>'website_url', '')
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();

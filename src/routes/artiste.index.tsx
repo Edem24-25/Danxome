@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Image, LayoutDashboard, Package, Plus, TrendingUp, UserRound, Wallet } from "lucide-react";
+import { Image, LayoutDashboard, Package, Plus, TrendingUp, UserRound, Wallet, Lock, CheckCircle, Clock, AlertCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { SectionTitle, StatCard } from "@/components/site/Bits";
@@ -62,6 +62,7 @@ const items = [
   { to: "/artiste", label: "Tableau de bord", icon: LayoutDashboard },
   { to: "/artiste/vitrine", label: "Ma vitrine", icon: Image },
   { to: "/artiste/commandes", label: "Commandes", icon: Package },
+  { to: "/artiste/justificatifs", label: "Justificatifs", icon: FileText },
   { to: "/contact", label: "Support", icon: Wallet },
   { to: "/profil", label: "Mon profil", icon: UserRound },
 ];
@@ -78,7 +79,7 @@ const versements = [
 const IMAGE_PAR_DEFAUT = "/art-bronze.jpg";
 
 function EspaceArtiste() {
-  const { profile, loading, user } = useAuth();
+  const { profile, loading, user, estVerifie, estEnAttente, estSuspendu, peutPublier } = useAuth();
   const navigate = useNavigate();
   const [ajoutOuvert, setAjoutOuvert] = useState(false);
   const [detailOuvert, setDetailOuvert] = useState(false);
@@ -141,6 +142,14 @@ function EspaceArtiste() {
 
   const ajouterOeuvre = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!peutPublier) {
+      toast.error("Fonctionnalité verrouillée", {
+        description: "Vous devez être vérifié pour publier des œuvres.",
+      });
+      return;
+    }
+
     setAjoutEnCours(true);
     const form = new FormData(e.currentTarget);
     const titre = (form.get("titre") as string)?.trim();
@@ -220,11 +229,74 @@ function EspaceArtiste() {
       title={nomAtelier}
       crumbs={[{ label: "Espace artiste" }]}
       actions={
-        <Button variant="gold" size="sm" onClick={() => setAjoutOuvert(true)}>
-          <Plus /> Ajouter une œuvre
-        </Button>
+        peutPublier ? (
+          <Button variant="gold" size="sm" onClick={() => setAjoutOuvert(true)}>
+            <Plus /> Ajouter une œuvre
+          </Button>
+        ) : (
+          <Button variant="gold" size="sm" disabled className="opacity-60 cursor-not-allowed">
+            <Lock className="size-4" /> Ajouter une œuvre
+          </Button>
+        )
       }
     >
+      {/* ═══ BANNIÈRE VÉRIFICATION ═══ */}
+      {estEnAttente && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
+              <Clock className="size-4 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">
+                Votre profil professionnel est en cours de vérification ⏳
+              </p>
+              <p className="mt-0.5 text-xs text-amber-700">
+                Vous pouvez continuer à explorer Dãhomè. Les fonctionnalités professionnelles seront
+                automatiquement disponibles après validation de votre profil.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {estSuspendu && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="size-4 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-800">
+                Votre profil professionnel a été suspendu
+              </p>
+              <p className="mt-0.5 text-xs text-red-700">
+                Les fonctionnalités professionnelles sont temporairement désactivées. Contactez
+                l'administrateur pour plus d'informations.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {estVerifie && (
+        <div className="rounded-xl border border-green-200 bg-green-50 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="size-4 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-green-800">
+                ✓ Profil vérifié Dãhomè
+              </p>
+              <p className="mt-0.5 text-xs text-green-700">
+                Votre profil professionnel est validé. Vous pouvez publier des œuvres et gérer vos commandes.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Œuvres en ligne"

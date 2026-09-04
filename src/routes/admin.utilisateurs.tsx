@@ -10,6 +10,7 @@ import {
   Search,
   ShieldCheck,
   Users,
+  FileText,
 } from "lucide-react";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,7 @@ export const Route = createFileRoute("/admin/utilisateurs")({
 const navItems = [
   { to: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard },
   { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
+  { to: "/admin/verifications", label: "Vérifications", icon: FileText },
   { to: "/admin/oeuvres", label: "Œuvres", icon: PaletteIcon },
   { to: "/admin/sites", label: "Sites", icon: Eye },
   { to: "/admin/evenements", label: "Événements", icon: MessageSquare },
@@ -100,12 +102,17 @@ function Utilisateurs() {
     }
   };
 
-  const handleValidateProfil = async (id: string, statut: "valide" | "rejete") => {
+  const handleValidateProfil = async (id: string, statut: "valide" | "rejete" | "suspendu") => {
     try {
       await updateProfilStatut.mutateAsync({ id, statut });
-      showFeedback("success", statut === "valide" ? "Profil validé." : "Profil rejeté.");
+      const labels: Record<"valide" | "rejete" | "suspendu", string> = {
+        valide: "Profil validé.",
+        rejete: "Profil rejeté.",
+        suspendu: "Profil suspendu.",
+      };
+      showFeedback("success", labels[statut]);
     } catch {
-      showFeedback("error", "Erreur lors de la validation du profil.");
+      showFeedback("error", "Erreur lors de la mise à jour du profil.");
     }
   };
 
