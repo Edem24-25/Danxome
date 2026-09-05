@@ -208,7 +208,9 @@ function Register() {
       description: parsed.data.description,
       ...(parsed.data.portfolio_url ? { portfolio_url: parsed.data.portfolio_url } : {}),
       ...(parsed.data.nom_artiste ? { nom_artiste: parsed.data.nom_artiste } : {}),
-      ...(parsed.data.annees_experience ? { annees_experience: parsed.data.annees_experience } : {}),
+      ...(parsed.data.annees_experience
+        ? { annees_experience: parsed.data.annees_experience }
+        : {}),
       ...(Object.keys(socialLinks).length > 0 ? { social_links: socialLinks } : {}),
       ...(parsed.data.website_url ? { website_url: parsed.data.website_url } : {}),
     });
@@ -625,7 +627,9 @@ function Register() {
                 id="nom_artiste"
                 name="nom_artiste"
                 maxLength={100}
-                placeholder={selectedProfil === "artiste" ? "Votre nom de scène" : "Nom de votre atelier"}
+                placeholder={
+                  selectedProfil === "artiste" ? "Votre nom de scène" : "Nom de votre atelier"
+                }
                 className="pl-10 transition-all duration-300 focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta"
               />
             </div>
@@ -634,8 +638,7 @@ function Register() {
           {/* Années d'expérience */}
           <div className="space-y-2">
             <Label htmlFor="annees_experience" className="text-sm font-medium text-forest-deep">
-              Années d'expérience{" "}
-              <span className="text-xs text-muted-foreground">(optionnel)</span>
+              Années d'expérience <span className="text-xs text-muted-foreground">(optionnel)</span>
             </Label>
             <Input
               id="annees_experience"
@@ -651,8 +654,7 @@ function Register() {
           {/* Réseaux sociaux */}
           <div className="space-y-3">
             <Label className="text-sm font-medium text-forest-deep">
-              Réseaux sociaux{" "}
-              <span className="text-xs text-muted-foreground">(optionnel)</span>
+              Réseaux sociaux <span className="text-xs text-muted-foreground">(optionnel)</span>
             </Label>
             <div className="space-y-3">
               <div className="relative group">
@@ -685,8 +687,7 @@ function Register() {
           {/* Site web personnel */}
           <div className="space-y-2">
             <Label htmlFor="website_url" className="text-sm font-medium text-forest-deep">
-              Site web personnel{" "}
-              <span className="text-xs text-muted-foreground">(optionnel)</span>
+              Site web personnel <span className="text-xs text-muted-foreground">(optionnel)</span>
             </Label>
             <div className="relative group">
               <Globe className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-terracotta" />

@@ -41,7 +41,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth";
-import { useAdminVerifications, useAdminUpdateProfilStatut, useAdminDocuments, getSignedDocumentUrl } from "@/hooks/use-data";
+import {
+  useAdminVerifications,
+  useAdminUpdateProfilStatut,
+  useAdminDocuments,
+  getSignedDocumentUrl,
+} from "@/hooks/use-data";
 import { requireRole } from "@/lib/auth-guard";
 import type { VerificationRequest } from "@/hooks/use-data";
 
@@ -69,7 +74,10 @@ const navItems = [
   { to: "/admin/newsletter", label: "Newsletter", icon: Package },
 ];
 
-const statutBadge: Record<string, { label: string; variant: "default" | "quiet" | "destructive" | "outline" }> = {
+const statutBadge: Record<
+  string,
+  { label: string; variant: "default" | "quiet" | "destructive" | "outline" }
+> = {
   en_attente: { label: "En attente", variant: "outline" },
   valide: { label: "Vérifié", variant: "quiet" },
   rejete: { label: "Rejeté", variant: "destructive" },
@@ -84,7 +92,9 @@ function Verifications() {
   const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null,
+  );
 
   const { data: verifications = [], isLoading: loadingVerifications } = useAdminVerifications();
   const updateStatut = useAdminUpdateProfilStatut();
@@ -466,11 +476,16 @@ function Verifications() {
               <DocumentsSection userId={selectedRequest.id} />
 
               {/* Zone d'action */}
-              {(selectedRequest.statut === "en_attente" || selectedRequest.statut === "valide" || selectedRequest.statut === "suspendu") && (
+              {(selectedRequest.statut === "en_attente" ||
+                selectedRequest.statut === "valide" ||
+                selectedRequest.statut === "suspendu") && (
                 <div className="rounded-lg border border-border bg-secondary/30 p-4 space-y-4">
                   {selectedRequest.statut === "en_attente" && (
                     <div className="space-y-2">
-                      <Label htmlFor="reject-reason" className="text-sm font-medium text-forest-deep">
+                      <Label
+                        htmlFor="reject-reason"
+                        className="text-sm font-medium text-forest-deep"
+                      >
                         Raison du rejet{" "}
                         <span className="text-xs text-muted-foreground">(requis pour rejeter)</span>
                       </Label>
@@ -639,9 +654,7 @@ function DocumentsSection({ userId }: { userId: string }) {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Justificatifs
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Aucun justificatif transmis.
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">Aucun justificatif transmis.</p>
       </div>
     );
   }
@@ -673,7 +686,13 @@ function DocumentItem({
   doc,
   typeLabels,
 }: {
-  doc: { id: string; file_url: string; file_name: string | null; document_type: string; uploaded_at: string };
+  doc: {
+    id: string;
+    file_url: string;
+    file_name: string | null;
+    document_type: string;
+    uploaded_at: string;
+  };
   typeLabels: Record<string, string>;
 }) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);

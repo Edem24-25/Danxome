@@ -1012,7 +1012,11 @@ export function useAdminProfiles() {
 export function useAdminUpdateProfilStatut() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, statut, rejection_reason }: {
+    mutationFn: async ({
+      id,
+      statut,
+      rejection_reason,
+    }: {
       id: string;
       statut: "valide" | "rejete" | "suspendu";
       rejection_reason?: string;
@@ -1150,7 +1154,9 @@ export function useAdminVerifications() {
 
       const { data: artistesData } = await supabase
         .from("artistes")
-        .select("user_id, metier, bio, categorie, portfolio_url, ville, nom_artiste, annees_experience, social_links, website_url")
+        .select(
+          "user_id, metier, bio, categorie, portfolio_url, ville, nom_artiste, annees_experience, social_links, website_url",
+        )
         .in("user_id", profileIds);
 
       type ArtisteRow = {
@@ -1428,10 +1434,7 @@ export function useAdminSites() {
   return useQuery({
     queryKey: ["admin", "sites"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sites")
-        .select("*")
-        .order("nom");
+      const { data, error } = await supabase.from("sites").select("*").order("nom");
       if (error) throw error;
       return data as Site[];
     },
@@ -1526,10 +1529,7 @@ export function useAdminEvenements() {
   return useQuery({
     queryKey: ["admin", "evenements"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("evenements")
-        .select("*")
-        .order("jour");
+      const { data, error } = await supabase.from("evenements").select("*").order("jour");
       if (error) throw error;
       return data as Evenement[];
     },
@@ -1564,11 +1564,7 @@ export function useAdminCreateEvenement() {
       image_url: string;
       resume: string;
     }) => {
-      const { data, error } = await supabase
-        .from("evenements")
-        .insert(evenement)
-        .select()
-        .single();
+      const { data, error } = await supabase.from("evenements").insert(evenement).select().single();
       if (error) throw error;
       return data;
     },
@@ -1667,15 +1663,17 @@ export function useAdminStats() {
   return useQuery({
     queryKey: ["admin", "stats"],
     queryFn: async () => {
-      const [profiles, oeuvres, sites, evenements, commandes, avis, newsletter] = await Promise.all([
-        supabase.from("profiles").select("profil, statut"),
-        supabase.from("oeuvres").select("id, statut"),
-        supabase.from("sites").select("id"),
-        supabase.from("evenements").select("id"),
-        supabase.from("commandes").select("id, statut, montant"),
-        supabase.from("avis_plats").select("id"),
-        supabase.from("newsletter").select("id"),
-      ]);
+      const [profiles, oeuvres, sites, evenements, commandes, avis, newsletter] = await Promise.all(
+        [
+          supabase.from("profiles").select("profil, statut"),
+          supabase.from("oeuvres").select("id, statut"),
+          supabase.from("sites").select("id"),
+          supabase.from("evenements").select("id"),
+          supabase.from("commandes").select("id, statut, montant"),
+          supabase.from("avis_plats").select("id"),
+          supabase.from("newsletter").select("id"),
+        ],
+      );
 
       const profilesData = profiles.data ?? [];
       const commandesData = commandes.data ?? [];

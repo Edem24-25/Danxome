@@ -1,6 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Image, LayoutDashboard, Package, Plus, TrendingUp, UserRound, Wallet, Lock, CheckCircle, Clock, AlertCircle, FileText } from "lucide-react";
+import {
+  Image,
+  LayoutDashboard,
+  Package,
+  Plus,
+  TrendingUp,
+  UserRound,
+  Wallet,
+  Lock,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  FileText,
+} from "lucide-react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/site/DashboardShell";
 import { SectionTitle, StatCard } from "@/components/site/Bits";
@@ -286,11 +299,10 @@ function EspaceArtiste() {
               <CheckCircle className="size-4 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-green-800">
-                ✓ Profil vérifié Dãhomè
-              </p>
+              <p className="text-sm font-semibold text-green-800">✓ Profil vérifié Dãhomè</p>
               <p className="mt-0.5 text-xs text-green-700">
-                Votre profil professionnel est validé. Vous pouvez publier des œuvres et gérer vos commandes.
+                Votre profil professionnel est validé. Vous pouvez publier des œuvres et gérer vos
+                commandes.
               </p>
             </div>
           </div>

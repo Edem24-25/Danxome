@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 function getServerSupabase() {
   const url = import.meta.env["VITE_SUPABASE_URL"];
-  const key = import.meta.env["VITE_SUPABASE_SERVICE_ROLE_KEY"];
+  const key = process.env["SUPABASE_SERVICE_ROLE_KEY"];
   if (!url || !key) throw new Error("Variables Supabase manquantes côté serveur");
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -21,14 +21,14 @@ export const handleKkiapayWebhook = createServerFn({ method: "POST" })
     const supabase = getServerSupabase();
     const payload = data.payload as Record<string, unknown>;
 
-    const secretKey = import.meta.env["VITE_KKIAPAY_SECRET_KEY"];
+    const secretKey = process.env["KKIAPAY_SECRET_KEY"];
     if (!secretKey) {
       throw new Error("KKIAPAY_SECRET_KEY manquante");
     }
 
     const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
     const k = kkiapay({
-      privatekey: import.meta.env["VITE_KKIAPAY_PRIVATE_KEY"] ?? "",
+      privatekey: process.env["KKIAPAY_PRIVATE_KEY"] ?? "",
       publickey: import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"] ?? "",
       secretkey: secretKey,
       sandbox: import.meta.env["VITE_KKIAPAY_SANDBOX"] !== "false",

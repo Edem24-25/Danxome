@@ -46,7 +46,9 @@ export function Footer() {
     if (!email.trim()) return;
     try {
       await subscribe.mutateAsync(email.trim());
-      toast.success("Inscription réussie !", { description: "Vous recevrez bientôt nos actualités." });
+      toast.success("Inscription réussie !", {
+        description: "Vous recevrez bientôt nos actualités.",
+      });
       setEmail("");
     } catch {
       toast.error("Erreur", { description: "Cet email est peut-être déjà inscrit." });
@@ -101,7 +103,12 @@ export function Footer() {
                       className="flex-1 border-ivory/15 bg-ivory/8 text-ivory placeholder:text-ivory/40 focus-visible:ring-accent"
                       disabled={subscribe.isPending}
                     />
-                    <Button variant="gold" type="submit" className="rounded-full" disabled={subscribe.isPending || !email.trim()}>
+                    <Button
+                      variant="gold"
+                      type="submit"
+                      className="rounded-full"
+                      disabled={subscribe.isPending || !email.trim()}
+                    >
                       {subscribe.isPending ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : subscribe.isSuccess ? (

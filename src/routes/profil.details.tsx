@@ -256,7 +256,7 @@ function ProfilDetails() {
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">{profile.email}</p>
                 <div className="mt-2">
-                   <ProfilBadge profil={profile.profil} statut={profile.statut} />
+                  <ProfilBadge profil={profile.profil} statut={profile.statut} />
                 </div>
 
                 {/* Actions avatar */}

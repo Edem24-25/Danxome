@@ -6,13 +6,7 @@ import { DashboardShell } from "@/components/site/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth";
-import {
-  LayoutDashboard,
-  Image,
-  Package,
-  Wallet,
-  UserRound,
-} from "lucide-react";
+import { LayoutDashboard, Image, Package, Wallet, UserRound } from "lucide-react";
 import {
   useMesDocuments,
   useUploadDocument,
@@ -56,7 +50,7 @@ const DOCUMENT_TYPES = [
 ];
 
 const TYPE_LABELS: Record<string, string> = Object.fromEntries(
-  DOCUMENT_TYPES.map((d) => [d.value, d.label])
+  DOCUMENT_TYPES.map((d) => [d.value, d.label]),
 );
 
 function DocumentItem({
@@ -64,7 +58,13 @@ function DocumentItem({
   onDelete,
   isDeleting,
 }: {
-  doc: { id: string; file_url: string; file_name: string | null; document_type: string; uploaded_at: string };
+  doc: {
+    id: string;
+    file_url: string;
+    file_name: string | null;
+    document_type: string;
+    uploaded_at: string;
+  };
   onDelete: (id: string) => void;
   isDeleting: boolean;
 }) {
@@ -136,10 +136,7 @@ function JustificatifsPage() {
       space="Espace Artiste"
       items={navItems}
       title="Justificatifs"
-      crumbs={[
-        { label: "Artiste", to: "/artiste" },
-        { label: "Justificatifs" },
-      ]}
+      crumbs={[{ label: "Artiste", to: "/artiste" }, { label: "Justificatifs" }]}
     >
       {/* BANNIÈRE STATUT */}
       {estVerifie && (
@@ -159,7 +156,8 @@ function JustificatifsPage() {
           <div>
             <p className="font-semibold">Vérification en cours</p>
             <p className="text-amber-700">
-              Votre dossier est en cours d'examen par notre équipe. Vous serez notifié de la décision.
+              Votre dossier est en cours d'examen par notre équipe. Vous serez notifié de la
+              décision.
             </p>
           </div>
         </div>
@@ -170,7 +168,8 @@ function JustificatifsPage() {
           <div>
             <p className="font-semibold">Dossier rejeté</p>
             <p className="text-red-700">
-              Votre demande de vérification a été refusée. Veuillez modifier vos informations ou contacter le support.
+              Votre demande de vérification a été refusée. Veuillez modifier vos informations ou
+              contacter le support.
             </p>
           </div>
         </div>
@@ -181,7 +180,8 @@ function JustificatifsPage() {
           <div>
             <p className="font-semibold">Compte suspendu</p>
             <p className="text-orange-700">
-              Votre profil professionnel a été suspendu. Contactez le support pour plus d'informations.
+              Votre profil professionnel a été suspendu. Contactez le support pour plus
+              d'informations.
             </p>
           </div>
         </div>
@@ -189,28 +189,36 @@ function JustificatifsPage() {
 
       {/* INSTRUCTIONS */}
       <div className="mb-6 rounded-lg border border-border bg-secondary/30 p-6">
-        <h2 className="font-display text-lg font-semibold text-forest-deep">
-          Documents à fournir
-        </h2>
+        <h2 className="font-display text-lg font-semibold text-forest-deep">Documents à fournir</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Pour accélérer la vérification de votre profil, veuillez transmettre les documents suivants :
+          Pour accélérer la vérification de votre profil, veuillez transmettre les documents
+          suivants :
         </p>
         <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
             <span className="mt-0.5 size-1.5 shrink-0 rounded-full bg-terracotta" />
-            <span><strong>Carte professionnelle</strong> ou attestation d'inscription au Répertoire Métier</span>
+            <span>
+              <strong>Carte professionnelle</strong> ou attestation d'inscription au Répertoire
+              Métier
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 size-1.5 shrink-0 rounded-full bg-terracotta" />
-            <span><strong>Justificatif d'activité</strong> (Kbis, avis d'imposition, etc.)</span>
+            <span>
+              <strong>Justificatif d'activité</strong> (Kbis, avis d'imposition, etc.)
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 size-1.5 shrink-0 rounded-full bg-terracotta" />
-            <span><strong>Photo de l'atelier</strong> ou du lieu de production</span>
+            <span>
+              <strong>Photo de l'atelier</strong> ou du lieu de production
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 size-1.5 shrink-0 rounded-full bg-terracotta" />
-            <span><strong>Photos de créations</strong> attestant de votre savoir-faire</span>
+            <span>
+              <strong>Photos de créations</strong> attestant de votre savoir-faire
+            </span>
           </li>
         </ul>
         <p className="mt-3 text-xs text-muted-foreground">

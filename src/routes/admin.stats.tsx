@@ -140,7 +140,9 @@ function StatsAdmin() {
             {/* Détails utilisateurs */}
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="rounded-lg border border-border bg-card p-6">
-                <h3 className="font-display text-lg text-forest-deep">Répartition des utilisateurs</h3>
+                <h3 className="font-display text-lg text-forest-deep">
+                  Répartition des utilisateurs
+                </h3>
                 <div className="mt-4 space-y-4">
                   {[
                     { label: "Visiteurs", value: stats.totalVisiteurs, color: "bg-forest" },
@@ -211,7 +213,9 @@ function StatsAdmin() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Événements</p>
-                    <p className="text-lg font-semibold text-forest-deep">{stats.totalEvenements}</p>
+                    <p className="text-lg font-semibold text-forest-deep">
+                      {stats.totalEvenements}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -233,7 +237,9 @@ function StatsAdmin() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Newsletter</p>
-                    <p className="text-lg font-semibold text-forest-deep">{stats.totalNewsletter}</p>
+                    <p className="text-lg font-semibold text-forest-deep">
+                      {stats.totalNewsletter}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -122,19 +122,57 @@ function Admin() {
           <SectionTitle eyebrow="Accès rapides" title="Gestion de la plateforme" />
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {[
-              { to: "/admin/utilisateurs", label: "Utilisateurs", desc: "Gérer les comptes, rôles et validations", icon: Users, color: "bg-forest/10 text-forest" },
-              { to: "/admin/oeuvres", label: "Œuvres", desc: "Modérer les œuvres d'art", icon: Palette, color: "bg-amber-100 text-amber-600" },
-              { to: "/admin/sites", label: "Sites touristiques", desc: "Gérer les sites et visites virtuelles", icon: Eye, color: "bg-blue-100 text-blue-600" },
-              { to: "/admin/evenements", label: "Événements", desc: "Planifier les événements culturels", icon: CalendarDays, color: "bg-purple-100 text-purple-600" },
-              { to: "/admin/newsletter", label: "Newsletter", desc: "Gérer les abonnés email", icon: Mail, color: "bg-green-100 text-green-600" },
-              { to: "/admin/stats", label: "Statistiques", desc: "Tableaux de bord et métriques", icon: MessageSquare, color: "bg-rose-100 text-rose-600" },
+              {
+                to: "/admin/utilisateurs",
+                label: "Utilisateurs",
+                desc: "Gérer les comptes, rôles et validations",
+                icon: Users,
+                color: "bg-forest/10 text-forest",
+              },
+              {
+                to: "/admin/oeuvres",
+                label: "Œuvres",
+                desc: "Modérer les œuvres d'art",
+                icon: Palette,
+                color: "bg-amber-100 text-amber-600",
+              },
+              {
+                to: "/admin/sites",
+                label: "Sites touristiques",
+                desc: "Gérer les sites et visites virtuelles",
+                icon: Eye,
+                color: "bg-blue-100 text-blue-600",
+              },
+              {
+                to: "/admin/evenements",
+                label: "Événements",
+                desc: "Planifier les événements culturels",
+                icon: CalendarDays,
+                color: "bg-purple-100 text-purple-600",
+              },
+              {
+                to: "/admin/newsletter",
+                label: "Newsletter",
+                desc: "Gérer les abonnés email",
+                icon: Mail,
+                color: "bg-green-100 text-green-600",
+              },
+              {
+                to: "/admin/stats",
+                label: "Statistiques",
+                desc: "Tableaux de bord et métriques",
+                icon: MessageSquare,
+                color: "bg-rose-100 text-rose-600",
+              },
             ].map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 className="group flex items-start gap-4 rounded-lg border border-border bg-card p-5 transition-colors hover:border-accent/50 hover:bg-accent/5"
               >
-                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${item.color}`}>
+                <div
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${item.color}`}
+                >
                   <item.icon className="size-5" />
                 </div>
                 <div>
@@ -166,11 +204,15 @@ function Admin() {
               </li>
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Abonnés newsletter</span>
-                <span className="font-semibold text-forest-deep">{stats?.totalNewsletter ?? 0}</span>
+                <span className="font-semibold text-forest-deep">
+                  {stats?.totalNewsletter ?? 0}
+                </span>
               </li>
               <li className="border-t border-border pt-3 flex items-center justify-between">
                 <span className="text-muted-foreground">Revenu total</span>
-                <span className="font-bold text-forest-deep">{formatFcfa(stats?.revenueTotal ?? 0)}</span>
+                <span className="font-bold text-forest-deep">
+                  {formatFcfa(stats?.revenueTotal ?? 0)}
+                </span>
               </li>
             </ul>
           </div>

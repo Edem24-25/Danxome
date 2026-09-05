@@ -4,7 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit-server";
 
 function getServerSupabase() {
   const url = import.meta.env["VITE_SUPABASE_URL"];
-  const key = import.meta.env["VITE_SUPABASE_SERVICE_ROLE_KEY"];
+  const key = process.env["SUPABASE_SERVICE_ROLE_KEY"];
   if (!url || !key) throw new Error("Variables Supabase manquantes côté serveur");
   return createClient(url, key, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -97,9 +97,9 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
     if (data.transaction_id) {
       const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
 
-      const privateKey = import.meta.env["VITE_KKIAPAY_PRIVATE_KEY"];
+      const privateKey = process.env["KKIAPAY_PRIVATE_KEY"];
       const publicKey = import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"];
-      const secretKey = import.meta.env["VITE_KKIAPAY_SECRET_KEY"];
+      const secretKey = process.env["KKIAPAY_SECRET_KEY"];
 
       if (!privateKey || !publicKey || !secretKey) {
         throw new Error("Clés Kkiapay manquantes côté serveur");

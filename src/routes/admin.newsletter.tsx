@@ -79,9 +79,7 @@ function NewsletterAdmin() {
     }
   };
 
-  const filtered = subscribers.filter((s) =>
-    s.email?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = subscribers.filter((s) => s.email?.toLowerCase().includes(search.toLowerCase()));
 
   if (loading || !profile || profile.profil !== "admin") {
     return (
@@ -142,7 +140,9 @@ function NewsletterAdmin() {
                     subscribers.filter((s) => {
                       const d = new Date(s.created_at);
                       const now = new Date();
-                      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                      return (
+                        d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+                      );
                     }).length
                   }
                 </p>

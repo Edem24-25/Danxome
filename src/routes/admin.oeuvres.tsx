@@ -68,8 +68,28 @@ const navItems = [
   { to: "/admin/stats", label: "Statistiques", icon: ShieldCheck },
 ];
 
-const categories = ["Sculpture", "Peinture", "Bronze", "Tenture", "Poterie", "Textile", "Bijoux", "Autre"];
-const regions = ["Atlantique", "Borgou", "Collines", "Couffo", "Donga", "Littoral", "Mono", "Ouémé", "Plateau", "Zou"];
+const categories = [
+  "Sculpture",
+  "Peinture",
+  "Bronze",
+  "Tenture",
+  "Poterie",
+  "Textile",
+  "Bijoux",
+  "Autre",
+];
+const regions = [
+  "Atlantique",
+  "Borgou",
+  "Collines",
+  "Couffo",
+  "Donga",
+  "Littoral",
+  "Mono",
+  "Ouémé",
+  "Plateau",
+  "Zou",
+];
 
 const emptyOeuvre: {
   slug: string;
@@ -98,7 +118,9 @@ function OeuvresAdmin() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [filterStatut, setFilterStatut] = useState<string>("tous");
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(
+    null,
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Oeuvre | null>(null);
   const [form, setForm] = useState(emptyOeuvre);
@@ -200,7 +222,9 @@ function OeuvresAdmin() {
       actions={
         <div className="flex gap-2">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/admin"><ArrowLeft className="mr-1 size-4" /> Retour</Link>
+            <Link to="/admin">
+              <ArrowLeft className="mr-1 size-4" /> Retour
+            </Link>
           </Button>
           <Button variant="gold" size="sm" onClick={openCreate}>
             <Plus className="mr-1 size-4" /> Ajouter
@@ -210,7 +234,9 @@ function OeuvresAdmin() {
     >
       <div className="space-y-6">
         {feedback && (
-          <div className={`rounded-lg border px-4 py-3 text-sm ${feedback.type === "success" ? "border-green-200 bg-green-50 text-green-800" : "border-red-200 bg-red-50 text-red-800"}`}>
+          <div
+            className={`rounded-lg border px-4 py-3 text-sm ${feedback.type === "success" ? "border-green-200 bg-green-50 text-green-800" : "border-red-200 bg-red-50 text-red-800"}`}
+          >
             {feedback.message}
           </div>
         )}
@@ -222,11 +248,15 @@ function OeuvresAdmin() {
           </div>
           <div className="rounded-lg border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">Publiées</p>
-            <p className="text-2xl font-semibold text-green-600">{oeuvres.filter((o) => o.statut === "publiee").length}</p>
+            <p className="text-2xl font-semibold text-green-600">
+              {oeuvres.filter((o) => o.statut === "publiee").length}
+            </p>
           </div>
           <div className="rounded-lg border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">Brouillons</p>
-            <p className="text-2xl font-semibold text-amber-600">{oeuvres.filter((o) => o.statut === "brouillon").length}</p>
+            <p className="text-2xl font-semibold text-amber-600">
+              {oeuvres.filter((o) => o.statut === "brouillon").length}
+            </p>
           </div>
         </div>
 
@@ -236,10 +266,17 @@ function OeuvresAdmin() {
             <div className="flex gap-3">
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+                <Input
+                  placeholder="Rechercher..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
               </div>
               <Select value={filterStatut} onValueChange={setFilterStatut}>
-                <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="tous">Tous</SelectItem>
                   <SelectItem value="publiee">Publiées</SelectItem>
@@ -250,15 +287,24 @@ function OeuvresAdmin() {
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center py-12"><div className="size-6 animate-spin rounded-full border-2 border-forest border-t-transparent" /></div>
+            <div className="flex justify-center py-12">
+              <div className="size-6 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+            </div>
           ) : filtered.length === 0 ? (
             <p className="py-12 text-center text-sm text-muted-foreground">Aucune œuvre.</p>
           ) : (
             <div className="mt-6 space-y-3">
               {filtered.map((o) => (
-                <div key={o.id} className="flex flex-col gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                  key={o.id}
+                  className="flex flex-col gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div className="flex items-center gap-4">
-                    <img src={o.image_url} alt={o.titre} className="size-12 rounded-md object-cover" />
+                    <img
+                      src={o.image_url}
+                      alt={o.titre}
+                      className="size-12 rounded-md object-cover"
+                    />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-semibold text-forest-deep">{o.titre}</p>
@@ -266,19 +312,35 @@ function OeuvresAdmin() {
                           {o.statut === "publiee" ? "Publiée" : "Brouillon"}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">{o.artiste?.nom ?? "Inconnu"} · {formatFcfa(o.prix)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {o.artiste?.nom ?? "Inconnu"} · {formatFcfa(o.prix)}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Select value={o.statut} onValueChange={(v) => handleUpdateStatut(o.id, v as "publiee" | "brouillon")} disabled={updateOeuvre.isPending}>
-                      <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                    <Select
+                      value={o.statut}
+                      onValueChange={(v) => handleUpdateStatut(o.id, v as "publiee" | "brouillon")}
+                      disabled={updateOeuvre.isPending}
+                    >
+                      <SelectTrigger className="w-[130px]">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="publiee">Publiée</SelectItem>
                         <SelectItem value="brouillon">Brouillon</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button variant="outline" size="sm" onClick={() => openEdit(o)}><Pencil className="size-4" /></Button>
-                    <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(o.id, o.titre)} disabled={deleteOeuvre.isPending}>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(o)}>
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => handleDelete(o.id, o.titre)}
+                      disabled={deleteOeuvre.isPending}
+                    >
                       <Trash2 className="size-4" />
                     </Button>
                   </div>
@@ -295,57 +357,117 @@ function OeuvresAdmin() {
           <DialogHeader>
             <DialogTitle>{editingItem ? "Modifier l'œuvre" : "Nouvelle œuvre"}</DialogTitle>
             <DialogDescription>
-              {editingItem ? "Modifiez les champs puis enregistrez." : "Remplissez les champs pour créer une œuvre."}
+              {editingItem
+                ? "Modifiez les champs puis enregistrez."
+                : "Remplissez les champs pour créer une œuvre."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <Label>Titre</Label>
-              <Input className="mt-1.5" value={form.titre} onChange={(e) => setForm({ ...form, titre: e.target.value, slug: e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") })} />
+              <Input
+                className="mt-1.5"
+                value={form.titre}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    titre: e.target.value,
+                    slug: e.target.value
+                      .toLowerCase()
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .replace(/[^a-z0-9]+/g, "-")
+                      .replace(/(^-|-$)/g, ""),
+                  })
+                }
+              />
             </div>
             <div>
               <Label>Artiste</Label>
-              <Select value={form.artiste_id} onValueChange={(v) => setForm({ ...form, artiste_id: v })}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Choisir..." /></SelectTrigger>
+              <Select
+                value={form.artiste_id}
+                onValueChange={(v) => setForm({ ...form, artiste_id: v })}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Choisir..." />
+                </SelectTrigger>
                 <SelectContent>
-                  {artistes.map((a) => <SelectItem key={a.id} value={a.id}>{a.nom}</SelectItem>)}
+                  {artistes.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.nom}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Catégorie</Label>
-              <Select value={form.categorie} onValueChange={(v) => setForm({ ...form, categorie: v })}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Choisir..." /></SelectTrigger>
+              <Select
+                value={form.categorie}
+                onValueChange={(v) => setForm({ ...form, categorie: v })}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Choisir..." />
+                </SelectTrigger>
                 <SelectContent>
-                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {categories.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Région</Label>
               <Select value={form.region} onValueChange={(v) => setForm({ ...form, region: v })}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Choisir..." />
+                </SelectTrigger>
                 <SelectContent>
-                  {regions.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                  {regions.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {r}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Prix (FCFA)</Label>
-              <Input className="mt-1.5" type="number" value={form.prix || ""} onChange={(e) => setForm({ ...form, prix: Number(e.target.value) })} />
+              <Input
+                className="mt-1.5"
+                type="number"
+                value={form.prix || ""}
+                onChange={(e) => setForm({ ...form, prix: Number(e.target.value) })}
+              />
             </div>
             <div className="sm:col-span-2">
               <Label>URL image</Label>
-              <Input className="mt-1.5" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+              <Input
+                className="mt-1.5"
+                value={form.image_url}
+                onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              />
             </div>
             <div className="sm:col-span-2">
               <Label>Description</Label>
-              <Textarea className="mt-1.5" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <Textarea
+                className="mt-1.5"
+                rows={3}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
             </div>
             <div>
               <Label>Statut</Label>
-              <Select value={form.statut} onValueChange={(v) => setForm({ ...form, statut: v as "publiee" | "brouillon" })}>
-                <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+              <Select
+                value={form.statut}
+                onValueChange={(v) => setForm({ ...form, statut: v as "publiee" | "brouillon" })}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="publiee">Publiée</SelectItem>
                   <SelectItem value="brouillon">Brouillon</SelectItem>
@@ -354,9 +476,19 @@ function OeuvresAdmin() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
-            <Button variant="gold" onClick={handleSubmit} disabled={createOeuvre.isPending || updateOeuvre.isPending}>
-              {createOeuvre.isPending || updateOeuvre.isPending ? "Enregistrement..." : editingItem ? "Enregistrer" : "Créer"}
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button
+              variant="gold"
+              onClick={handleSubmit}
+              disabled={createOeuvre.isPending || updateOeuvre.isPending}
+            >
+              {createOeuvre.isPending || updateOeuvre.isPending
+                ? "Enregistrement..."
+                : editingItem
+                  ? "Enregistrer"
+                  : "Créer"}
             </Button>
           </DialogFooter>
         </DialogContent>

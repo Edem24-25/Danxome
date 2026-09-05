@@ -214,7 +214,9 @@ function Utilisateurs() {
                   <div className="size-6 animate-spin rounded-full border-2 border-forest border-t-transparent" />
                 </div>
               ) : filteredProfiles.length === 0 ? (
-                <p className="py-12 text-center text-sm text-muted-foreground">Aucun utilisateur.</p>
+                <p className="py-12 text-center text-sm text-muted-foreground">
+                  Aucun utilisateur.
+                </p>
               ) : (
                 <div className="mt-6 space-y-3">
                   {filteredProfiles.map((p) => (
@@ -306,7 +308,10 @@ function Utilisateurs() {
                   {enAttente.map((p) => {
                     const info = artistesMap[p.id];
                     return (
-                      <div key={p.id} className="rounded-lg border border-amber-200 bg-amber-50 p-5">
+                      <div
+                        key={p.id}
+                        className="rounded-lg border border-amber-200 bg-amber-50 p-5"
+                      >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">

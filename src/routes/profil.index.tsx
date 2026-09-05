@@ -253,8 +253,8 @@ function Profil() {
                   </p>
                   <p className="mt-0.5 text-xs text-orange-700">
                     Votre demande de vérification n'a pas été acceptée. Vous pouvez contacter
-                    l'administrateur pour plus d'informations ou modifier votre profil pour soumettre
-                    une nouvelle demande.
+                    l'administrateur pour plus d'informations ou modifier votre profil pour
+                    soumettre une nouvelle demande.
                   </p>
                 </div>
               </div>
