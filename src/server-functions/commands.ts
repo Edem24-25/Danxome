@@ -191,7 +191,7 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
             continue;
           }
 
-          throw err;
+          break;
         }
       }
 
