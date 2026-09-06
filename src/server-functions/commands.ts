@@ -125,15 +125,54 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
         sandbox: sandboxFlag,
       });
 
-      const result = await k.verify(data.transaction_id);
-      console.log("[Kkiapay] Verification result:", result);
+      const maxAttempts = sandboxFlag ? 5 : 1;
+      const delayMs = 3000;
+      let lastError: unknown = null;
 
-      if (result.status !== "SUCCESS") {
-        throw new Error(
-          `Paiement non confirmé par Kkiapay (statut: ${result.status ?? "inconnu"})`,
-        );
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const result = await k.verify(data.transaction_id);
+          console.log("[Kkiapay] Verification result:", result);
+
+          if (result.status === "SUCCESS") {
+            transaction = result;
+            break;
+          }
+
+          if (result.status === "FAILED") {
+            throw new Error("Paiement échoué côté Kkiapay");
+          }
+
+          if (attempt < maxAttempts) {
+            console.log(
+              `[Kkiapay] Status "${result.status}", retrying in ${delayMs}ms (${attempt}/${maxAttempts})`,
+            );
+            await new Promise((r) => setTimeout(r, delayMs));
+            continue;
+          }
+
+          throw new Error(
+            `Paiement non confirmé par Kkiapay (statut: ${result.status ?? "inconnu"})`,
+          );
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          lastError = err;
+
+          if (msg === "Transaction Not Found" && attempt < maxAttempts) {
+            console.log(
+              `[Kkiapay] Transaction not found yet, retrying in ${delayMs}ms (${attempt}/${maxAttempts})`,
+            );
+            await new Promise((r) => setTimeout(r, delayMs));
+            continue;
+          }
+
+          throw err;
+        }
       }
-      transaction = result;
+
+      if (!transaction) {
+        throw lastError ?? new Error("Vérification Kkiapay échouée");
+      }
     }
 
     const oeuvreIds = data.items.map((i) => i.oeuvre_id);
