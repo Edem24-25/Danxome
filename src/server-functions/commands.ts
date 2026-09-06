@@ -98,23 +98,40 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
       const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
 
       const privateKey = process.env["KKIAPAY_PRIVATE_KEY"];
-      const publicKey = import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"];
+      const publicKey =
+        process.env["KKIAPAY_PUBLIC_KEY"] || import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"];
       const secretKey = process.env["KKIAPAY_SECRET_KEY"];
+      const sandboxFlag =
+        (process.env["KKIAPAY_SANDBOX"] ?? import.meta.env["VITE_KKIAPAY_SANDBOX"]) !== "false";
 
       if (!privateKey || !publicKey || !secretKey) {
+        console.error("[Kkiapay] Missing keys:", {
+          hasPrivate: !!privateKey,
+          hasPublic: !!publicKey,
+          hasSecret: !!secretKey,
+        });
         throw new Error("Clés Kkiapay manquantes côté serveur");
       }
+
+      console.log("[Kkiapay] Verifying transaction", {
+        transactionId: data.transaction_id,
+        sandbox: sandboxFlag,
+      });
 
       const k = kkiapay({
         privatekey: privateKey,
         publickey: publicKey,
         secretkey: secretKey,
-        sandbox: import.meta.env["VITE_KKIAPAY_SANDBOX"] !== "false",
+        sandbox: sandboxFlag,
       });
 
       const result = await k.verify(data.transaction_id);
+      console.log("[Kkiapay] Verification result:", result);
+
       if (result.status !== "SUCCESS") {
-        throw new Error("Paiement non confirmé par Kkiapay");
+        throw new Error(
+          `Paiement non confirmé par Kkiapay (statut: ${result.status ?? "inconnu"})`,
+        );
       }
       transaction = result;
     }

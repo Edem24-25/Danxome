@@ -27,11 +27,14 @@ export const handleKkiapayWebhook = createServerFn({ method: "POST" })
     }
 
     const { kkiapay } = await import("@kkiapay-org/nodejs-sdk");
+    const sandboxFlag =
+      (process.env["KKIAPAY_SANDBOX"] ?? import.meta.env["VITE_KKIAPAY_SANDBOX"]) !== "false";
+
     const k = kkiapay({
       privatekey: process.env["KKIAPAY_PRIVATE_KEY"] ?? "",
-      publickey: import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"] ?? "",
+      publickey: process.env["KKIAPAY_PUBLIC_KEY"] || (import.meta.env["VITE_KKIAPAY_PUBLIC_KEY"] ?? ""),
       secretkey: secretKey,
-      sandbox: import.meta.env["VITE_KKIAPAY_SANDBOX"] !== "false",
+      sandbox: sandboxFlag,
     });
 
     const transactionId = payload["transactionId"] as string;
