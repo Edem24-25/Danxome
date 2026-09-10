@@ -632,11 +632,12 @@ export function useUpdateCommandeStatut() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ ref, statut }: { ref: string; statut: CommandeStatut }) => {
-      const { error } = await supabase.from("commandes").update({ statut }).eq("ref", ref);
-      if (error) throw error;
+      const { updateCommandeStatut } = await import("@/server-functions/commands");
+      await updateCommandeStatut({ data: { ref, statut } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["commandes"] });
+      queryClient.invalidateQueries({ queryKey: ["commandes", "client"] });
     },
   });
 }

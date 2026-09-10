@@ -304,3 +304,16 @@ export const createOrderFromCart = createServerFn({ method: "POST" })
 
     return { ref: orderRef, commandes } satisfies OrderResult;
   });
+
+export const updateCommandeStatut = createServerFn({ method: "POST" })
+  .validator((input: { ref: string; statut: string }) => input)
+  .handler(async ({ data }) => {
+    const supabase = getServerSupabase();
+
+    const { error } = await supabase
+      .from("commandes")
+      .update({ statut: data.statut })
+      .eq("ref", data.ref);
+
+    if (error) throw error;
+  });

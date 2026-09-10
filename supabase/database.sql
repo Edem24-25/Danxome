@@ -470,6 +470,16 @@ DROP POLICY IF EXISTS "Client lit ses commandes" ON commandes;
 CREATE POLICY "Client lit ses commandes" ON commandes FOR SELECT USING (auth.uid() = client_id);
 DROP POLICY IF EXISTS "Client crée une commande" ON commandes;
 CREATE POLICY "Client crée une commande" ON commandes FOR INSERT WITH CHECK (auth.uid() = client_id);
+DROP POLICY IF EXISTS "Artiste lit ses commandes reçues" ON commandes;
+CREATE POLICY "Artiste lit ses commandes reçues" ON commandes
+  FOR SELECT USING (
+    artiste_nom IN (SELECT nom FROM artistes WHERE user_id = auth.uid())
+  );
+DROP POLICY IF EXISTS "Artiste met à jour ses commandes" ON commandes;
+CREATE POLICY "Artiste met à jour ses commandes" ON commandes
+  FOR UPDATE USING (
+    artiste_nom IN (SELECT nom FROM artistes WHERE user_id = auth.uid())
+  );
 DROP POLICY IF EXISTS "Admins gèrent les commandes" ON commandes;
 CREATE POLICY "Admins gèrent les commandes" ON commandes FOR ALL USING (public.is_admin());
 
