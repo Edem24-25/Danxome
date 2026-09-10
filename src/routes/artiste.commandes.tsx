@@ -56,12 +56,12 @@ const filtreCommandes = [
   { id: "livree", label: "Livrées" },
 ] as const;
 
-const badgeVariant: Record<CommandeStatut, "default" | "gold" | "forest" | "secondary" | "quiet"> =
+const badgeVariant: Record<CommandeStatut, "default" | "gold" | "sky" | "teal" | "quiet" | "secondary"> =
   {
     recue: "default",
     validee: "gold",
-    en_cours: "forest",
-    expediee: "secondary",
+    en_cours: "sky",
+    expediee: "teal",
     livree: "quiet",
     annulee: "secondary",
   };

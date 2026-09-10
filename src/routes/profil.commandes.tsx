@@ -37,12 +37,12 @@ const dateFr = (iso: string) =>
 
 const badgeVariant: Record<
   string,
-  "default" | "gold" | "forest" | "secondary" | "quiet" | "destructive"
+  "default" | "gold" | "sky" | "teal" | "quiet" | "destructive"
 > = {
   recue: "default",
   validee: "gold",
-  en_cours: "forest",
-  expediee: "secondary",
+  en_cours: "sky",
+  expediee: "teal",
   livree: "quiet",
   annulee: "destructive",
 };
